@@ -4,3 +4,10 @@ __pycache__/
 checkpoints/
 *.png
 .venv/
+
+.qa/
+*.jpg
+*.pdf
+node_modules/
+data/raw/*
+!data/raw/.gitkeep
