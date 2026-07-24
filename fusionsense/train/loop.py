@@ -24,11 +24,17 @@ def _class_weights(windows, device):
 
 
 def train(train_windows, val_windows, epochs=15, batch_size=64, lr=1e-3,
-          device=None):
-    device = device or ("cuda" if torch.cuda.is_available() else "cpu")
-    model = FusionSense(CFG).to(device)
+          device=None, model=None):
+    """Train the fusion model. Pass a pre-built `model` (e.g. with pretrained
+    encoders loaded / frozen); otherwise a fresh FusionSense is created."""
+    from ..device import get_device
+    device = device or get_device()
+    if model is None:
+        model = FusionSense(CFG)
+    model = model.to(device)
     tr_loader, va_loader = make_loaders(train_windows, val_windows, batch_size)
-    opt = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=1e-4)
+    opt = torch.optim.AdamW([p for p in model.parameters() if p.requires_grad],
+                            lr=lr, weight_decay=1e-4)
     crit = nn.CrossEntropyLoss(weight=_class_weights(train_windows, device))
 
     for ep in range(1, epochs + 1):

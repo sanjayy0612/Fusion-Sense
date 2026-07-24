@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "author": "FusionSense",
+  "editor": "wokwi",
+  "parts": [
+    {
+      "type": "board-esp32-devkit-c-v4",
+      "id": "esp",
+      "top": 0,
+      "left": 0,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-mpu6050",
+      "id": "imu",
+      "top": -100,
+      "left": 200,
+      "attrs": {}
+    }
+  ],
+  "connections": [
+    [ "esp:TX0", "$serialMonitor:RX", "", [] ],
+    [ "esp:RX0", "$serialMonitor:TX", "", [] ],
+
+    [ "imu:VCC", "esp:3V3", "red",   [ "v0" ] ],
+    [ "imu:GND", "esp:GND.1", "black", [ "v0" ] ],
+    [ "imu:SDA", "esp:D21", "green", [ "v0" ] ],
+    [ "imu:SCL", "esp:D22", "blue",  [ "v0" ] ]
+  ],
+  "dependencies": {}
+}

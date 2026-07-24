@@ -1,5 +1,10 @@
-"""Central configuration. Change window/rate/dim here; everything reads from this."""
+"""Central configuration. Change window/rate/dim + dataset paths here."""
 from dataclasses import dataclass
+from pathlib import Path
+
+
+# repo-root/data/raw/<dataset>/  — where you unzip downloaded datasets
+DATA_ROOT = Path(__file__).resolve().parent.parent / "data" / "raw"
 
 
 @dataclass(frozen=True)
@@ -13,8 +18,10 @@ class Config:
 
     # --- per-modality channel dims ---
     imu_ch: int = 6          # ax ay az gx gy gz
-    radar_k: int = 8         # LD2410-style per-frame features (gates/energy/range...)
-    vision_dv: int = 32      # vision embedding dim (NOT raw pixels)
+    radar_k: int = 8         # radar per-frame features (voxel/energy summary)
+    vision_dv: int = 32      # vision embedding dim (NOT raw pixels).
+    #   NOTE: for real MediaPipe pose set vision_dv = 33*3 = 99 (see DATASETS.md).
+    #   The simulator scales to whatever vision_dv is, so smoke tests still work.
 
     # --- model dims ---
     d_model: int = 128
@@ -25,6 +32,11 @@ class Config:
     # --- training ---
     modality_dropout_p: float = 0.3   # prob. of zeroing a modality per sample
     use_health_conditioning: bool = True
+
+    # --- dataset directory names under DATA_ROOT ---
+    imu_dir: str = "sisfall"          # single-modality IMU (or "uci_har")
+    radar_dir: str = "radhar"         # single-modality mmWave
+    paired_dir: str = "up_fall"       # paired camera + IMU (fusion stage)
 
     @property
     def t_imu(self) -> int:

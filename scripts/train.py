@@ -19,7 +19,8 @@ def main():
     train_w = make_dataset(n_per_class=800, seed=0, degrade=True)
     val_w = make_dataset(n_per_class=200, seed=1, degrade=True)
 
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    from fusionsense.device import get_device
+    device = get_device()
     print("device:", device)
     model = train(train_w, val_w, epochs=15, device=device)
 
