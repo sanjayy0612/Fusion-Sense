@@ -2,13 +2,18 @@
 
 Run:  python tests/test_pipeline.py
 """
-import os, sys
+import os, sys, tempfile
 import numpy as np
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from fusionsense.config import CFG
 from fusionsense.contract import ACTIVITIES
-from fusionsense.data.simulator import sample_window, make_dataset
+from fusionsense.data.simulator import (
+    sample_window,
+    make_dataset,
+    record_simulation_output,
+    load_simulation_output,
+)
 
 
 def test_shapes():
@@ -56,10 +61,23 @@ def test_balanced_dataset():
     print("PASS test_balanced_dataset")
 
 
+def test_record_and_replay_roundtrip():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        out_path = os.path.join(tmpdir, "sim_output.npz")
+        windows = record_simulation_output(out_path, n_per_class=2, seed=7, degrade=False)
+        replayed = load_simulation_output(out_path)
+        assert len(replayed) == len(windows)
+        assert replayed[0].label == windows[0].label
+        assert replayed[0].imu.shape == windows[0].imu.shape
+        assert np.allclose(replayed[0].imu, windows[0].imu)
+        print("PASS test_record_and_replay_roundtrip")
+
+
 if __name__ == "__main__":
     test_shapes()
     test_no_nans()
     test_never_all_dropped()
     test_health_in_range()
     test_balanced_dataset()
+    test_record_and_replay_roundtrip()
     print("\nALL PIPELINE TESTS PASSED")

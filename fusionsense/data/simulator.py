@@ -10,6 +10,9 @@ so the pipeline and the model can be validated before real sensors exist.
 """
 from __future__ import annotations
 
+from pathlib import Path
+from typing import List
+
 import numpy as np
 
 from ..config import CFG
@@ -146,4 +149,81 @@ def make_dataset(n_per_class: int, seed: int = 0, degrade: bool = True):
         for _ in range(n_per_class):
             windows.append(sample_window(act, rng, degrade=degrade))
     rng.shuffle(windows)
+    return windows
+
+
+class MockRuntime:
+    """A lightweight mock runtime for generating and replaying synthetic windows."""
+
+    def __init__(self, seed: int = 0, degrade: bool = True):
+        self.seed = seed
+        self.degrade = degrade
+
+    def generate(self, n_per_class: int = 10) -> List[FusionWindow]:
+        return make_dataset(n_per_class=n_per_class, seed=self.seed, degrade=self.degrade)
+
+    def record(self, output_path, n_per_class: int = 10) -> List[FusionWindow]:
+        return record_simulation_output(
+            output_path,
+            n_per_class=n_per_class,
+            seed=self.seed,
+            degrade=self.degrade,
+        )
+
+    def replay(self, output_path) -> List[FusionWindow]:
+        return load_simulation_output(output_path)
+
+
+def _stack_or_empty(arrays, shape, dtype):
+    if not arrays:
+        return np.empty(shape, dtype=dtype)
+    return np.stack(arrays, axis=0)
+
+
+def record_simulation_output(output_path, n_per_class: int = 10, seed: int = 0,
+                             degrade: bool = True) -> List[FusionWindow]:
+    """Generate synthetic windows and persist them to disk as a replayable artifact."""
+    windows = make_dataset(n_per_class=n_per_class, seed=seed, degrade=degrade)
+    save_path = Path(output_path)
+    save_path.parent.mkdir(parents=True, exist_ok=True)
+
+    payload = {
+        "version": np.array([1], dtype=np.int32),
+        "n_windows": np.array([len(windows)], dtype=np.int32),
+        "t_start": np.array([w.t_start for w in windows], dtype=np.float32),
+        "imu": _stack_or_empty([w.imu for w in windows], (len(windows), CFG.t_imu, CFG.imu_ch), np.float32),
+        "radar": _stack_or_empty([w.radar for w in windows], (len(windows), CFG.t_radar, CFG.radar_k), np.float32),
+        "vision": _stack_or_empty([w.vision for w in windows], (len(windows), CFG.t_vis, CFG.vision_dv), np.float32),
+        "imu_valid": _stack_or_empty([np.array([w.imu_valid], dtype=bool) for w in windows], (len(windows), 1), bool),
+        "radar_valid": _stack_or_empty([np.array([w.radar_valid], dtype=bool) for w in windows], (len(windows), 1), bool),
+        "vision_valid": _stack_or_empty([np.array([w.vision_valid], dtype=bool) for w in windows], (len(windows), 1), bool),
+        "radar_energy": np.array([w.radar_energy for w in windows], dtype=np.float32),
+        "image_quality": np.array([w.image_quality for w in windows], dtype=np.float32),
+        "imu_health": np.array([w.imu_health for w in windows], dtype=np.float32),
+        "label": np.array([w.label if w.label is not None else -1 for w in windows], dtype=np.int32),
+    }
+    np.savez_compressed(save_path, **payload)
+    return windows
+
+
+def load_simulation_output(output_path) -> List[FusionWindow]:
+    """Reload previously recorded synthetic windows from disk."""
+    data = np.load(Path(output_path), allow_pickle=False)
+    windows = []
+    for idx in range(int(data["n_windows"][0])):
+        windows.append(
+            FusionWindow(
+                t_start=float(data["t_start"][idx]),
+                imu=data["imu"][idx].astype(np.float32),
+                radar=data["radar"][idx].astype(np.float32),
+                vision=data["vision"][idx].astype(np.float32),
+                imu_valid=bool(data["imu_valid"][idx, 0]),
+                radar_valid=bool(data["radar_valid"][idx, 0]),
+                vision_valid=bool(data["vision_valid"][idx, 0]),
+                radar_energy=float(data["radar_energy"][idx]),
+                image_quality=float(data["image_quality"][idx]),
+                imu_health=float(data["imu_health"][idx]),
+                label=int(data["label"][idx]),
+            )
+        )
     return windows

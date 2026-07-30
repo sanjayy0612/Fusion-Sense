@@ -26,7 +26,11 @@ Put downloaded/unzipped data under `data/raw/<name>/`. Nothing is committed
 ### IMU — SisFall (recommended) or UCI-HAR
 - **SisFall** — waist-worn IMU, 19 ADLs + 15 fall types, 38 subjects. Waist
   placement matches our physical design; includes real falls.
-  Download: https://sistemic.udea.edu.co/en/investigacion/proyectos/english-falls/
+  Size: ~200-230 MB zipped, ~500-600 MB unzipped (plain-text CSV, short trials).
+  Download (pick whichever mirror responds):
+    - Official: https://sistemic.udea.edu.co/en/investigacion/proyectos/english-falls/
+    - GitHub mirror: https://github.com/BIng2325/SisFall/releases
+    - Hugging Face mirror: https://huggingface.co/datasets/Trupal7/Sisfall_Dataset/tree/main
   Layout: `data/raw/sisfall/**/*.txt` (filename prefix `D##`=ADL, `F##`=fall).
 - **UCI-HAR** — smartphone accel+gyro, 6 activities, 30 subjects, 50 Hz.
   Download: https://archive.ics.uci.edu/dataset/240/human+activity+recognition+using+smartphones
