@@ -8,29 +8,31 @@ before the AI pipeline is understood.
 
 | Priority | Branch | What to train first | Why |
 |----------|--------|---------------------|-----|
-| 1 | IMU | `scripts/pretrain_imu.py` on SisFall or a small normalized UCI-HAR export | Smallest and easiest numeric signal. |
-| 2 | Vision | `scripts/pretrain_vision.py` on short clips converted to MediaPipe pose | Keeps the project AI-focused without huge raw-video storage. |
-| 3 | Radar | `scripts/pretrain_radar.py` on RadHAR or your own LD2410 captures | Radar data formats vary; train after IMU/vision flow is clear. |
-| 4 | Fusion | `scripts/train_fusion.py` after at least IMU + vision checkpoints exist | Fusion needs learned modality features and paired windows. |
+| 1 | Radar | `scripts/pretrain_radar.py` on RadHAR | You chose RadHAR as a trainable branch; do it before hardware radar integration. |
+| 2 | IMU | `scripts/pretrain_imu.py` on SisFall or UCI-HAR/local MPU-6050 export | Numeric signal is cheap to train and useful for falls. |
+| 3 | Camera | Open-source pose model: MediaPipe Pose or MoveNet | Skip camera-model training for v1; use pose/keypoints as features. |
+| 4 | Fusion | `scripts/train_fusion.py` after radar + IMU checkpoints exist | Fusion learns how to combine trainable sensors with camera pose features. |
 
 Do not wait for hardware before learning the model. Hardware should come after
 you can train/load checkpoints and explain what each branch is doing.
 
-## 2. Camera setup without turning this into only an embedding project
+## 2. Camera setup decision: use an open-source model for v1
 
-The camera branch is still AI, but it should be **pose-based AI**, not raw-pixel
-video classification:
+Current decision: **do not train the camera model in v1**. Use an open-source
+pose model and spend training effort on RadHAR + IMU + fusion. The camera branch
+is still AI, but it should be **pose-based AI**, not raw-pixel video
+classification:
 
 1. Capture short videos from laptop webcam or phone.
 2. Run MediaPipe Pose to extract 33 body landmarks per frame.
 3. Convert each frame to a 99-dimensional vector: `(x, y, z) * 33`.
 4. Segment those pose vectors into `FusionWindow` vision windows.
-5. Train the vision encoder on those windows.
+5. Feed those pose windows into FusionSense. If time allows later, train only a
+   tiny temporal head on top of pose features.
 
-This is still learning a model: the network learns posture/motion patterns from
-pose sequences. The difference is that a pretrained pose detector handles body
-landmark extraction so your project focuses on multimodal fusion, robustness,
-and fall/activity classification.
+This is still AI: the open-source camera model extracts human pose, while your
+project learns multimodal fusion, robustness, and fall/activity classification.
+The difference is that v1 does not spend time training a raw camera model.
 
 ## 3. How much data is enough for the first training pass?
 
@@ -40,7 +42,7 @@ These are practical targets, not final research limits:
 |-------|------------------|-------------------------------|-------|
 | Simulator smoke test | Built-in simulator | Built-in simulator | Only proves plumbing, not accuracy. |
 | IMU encoder | 200–500 windows | 2,000+ windows | Public IMU datasets can provide this easily. |
-| Vision encoder | 20–30 short clips total | 20–40 clips per class | Short 5–10 s clips are enough to start because pose features are compact. |
+| Camera pose features | 10–20 short clips total for API testing | 20–40 clips per class if training a tiny pose head later | Use MediaPipe/MoveNet; no v1 camera-model training required. |
 | Radar encoder | 100–300 windows | 1,000+ windows | Start with available radar dataset or collect repeated LD2410 motions. |
 | Fusion | 500 paired windows | 2,000+ paired windows | Start with camera+IMU; add radar later through local tri-modal collection. |
 
@@ -108,10 +110,10 @@ python scripts/pretrain_imu.py --sim
 python scripts/pretrain_vision.py --sim
 python scripts/train_fusion.py --sim
 
-# Then train individual branches as data becomes available
-python scripts/pretrain_imu.py
-python scripts/pretrain_vision.py
+# Then train the branches you chose for v1
 python scripts/pretrain_radar.py
+python scripts/pretrain_imu.py
+# Camera: use MediaPipe Pose or MoveNet features; skip pretrain_vision.py for v1
 
 # Then train fusion
 python scripts/train_fusion.py

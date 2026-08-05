@@ -32,10 +32,10 @@ two sources that both emit it:
 ## Training is two stages (modular pretraining)
 
 ```
-Stage 1  Pretrain each encoder SEPARATELY on real single-modality data
+Stage 1  Pretrain trainable sensor encoders on real single-modality data
               enc_imu   <- SisFall / UCI-HAR      (scripts/pretrain_imu.py)
               enc_radar <- RadHAR                 (scripts/pretrain_radar.py)
-              enc_vis   <- MediaPipe pose / video (scripts/pretrain_vision.py)
+              camera    <- Open-source pose model (MediaPipe/MoveNet; no v1 training)
 
 Stage 2  Train the CROSS-MODAL ATTENTION on PAIRED data (sensors time-aligned)
               UP-Fall (camera + IMU)              (scripts/train_fusion.py)
@@ -58,17 +58,15 @@ pip install -r requirements.txt          # CUDA torch build for your 4060
 python scripts/viz_windows.py
 python tests/test_pipeline.py
 
-# Smoke-test the WHOLE pretraining pipeline on the simulator (needs torch):
+# Smoke-test the WHOLE training pipeline on the simulator (needs torch):
 python scripts/pretrain_imu.py --sim
 python scripts/pretrain_radar.py --sim
-python scripts/pretrain_vision.py --sim
 python scripts/train_fusion.py --sim
 
-# Real training: download datasets (docs/DATASETS.md) into data/raw/, then:
-python scripts/pretrain_imu.py
+# Real v1 training priority: train radar + IMU, use open-source camera pose model:
 python scripts/pretrain_radar.py
-python scripts/pretrain_vision.py        # set CFG.vision_dv = 99 first
-python scripts/train_fusion.py
+python scripts/pretrain_imu.py
+python scripts/train_fusion.py           # fusion consumes pose features; skip vision pretrain for v1
 ```
 
 `scripts/baseline_numpy.py` gives a torch-free baseline + the robustness figure

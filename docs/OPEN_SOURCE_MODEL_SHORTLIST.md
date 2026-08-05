@@ -6,21 +6,27 @@ black-box activity model. Instead, use open-source pretrained models where they
 are strong, then train only the small FusionSense classifier/fusion head that is
 specific to our sensors and labels.
 
-## 1. Recommended approach
+## 1. Current project decision
+
+You chose to **train RadHAR/radar and IMU**, while using an open-source model for
+camera. That is a good workload split for v1: radar and IMU stay project-specific,
+and the camera uses a proven low-compute pose model.
+
+## 2. Recommended approach
 
 Use this hybrid stack:
 
 | Modality | Use pretrained? | Recommended model/tool | What we still train |
 |----------|-----------------|------------------------|---------------------|
-| Vision | Yes | MediaPipe Pose Landmarker or MoveNet Lightning | Small temporal pose classifier / FusionSense vision encoder if needed. |
-| Radar | Maybe | RadHAR pretrained classifiers if using compatible mmWave point-cloud data | Adapter/calibration for LD2410 features, because LD2410 is not the same as TI point-cloud radar. |
-| IMU | Usually no | Public HAR repos can be references, but pretrained IMU weights often do not transfer cleanly | Tiny IMU encoder or classical baseline on SisFall/UCI-HAR/local MPU-6050 data. |
+| Vision | Yes | MediaPipe Pose Landmarker or MoveNet Lightning | No camera-model training for v1; optional tiny temporal pose head later. |
+| Radar | Train | RadHAR dataset/model code | Train the radar branch now, then adapt/calibrate later for LD2410 features. |
+| IMU | Train | SisFall / UCI-HAR / local MPU-6050 data | Train the tiny IMU encoder locally. |
 | Fusion | Yes, keep small | FusionSense cross-modal attention already small | Train only fusion head/attention after feature extraction. |
 
 This keeps FusionSense as an AI project while avoiding expensive raw-video or
 full tri-modal training from scratch.
 
-## 2. Vision options
+## 3. Vision options
 
 ### Option A — MediaPipe Pose Landmarker (recommended)
 
@@ -60,7 +66,7 @@ models can classify RGB actions, but they are less aligned with this project:
 
 Use them only as a baseline, not as the main project path.
 
-## 3. Radar options
+## 4. Radar options
 
 ### RadHAR pretrained classifiers
 
@@ -80,7 +86,7 @@ Recommended use:
 2. Use RadHAR as literature/reference or optional pretrained radar baseline.
 3. Collect small LD2410 recordings for the exact hardware later.
 
-## 4. IMU options
+## 5. IMU options
 
 Open-source IMU HAR repositories exist, but pretrained weights are usually not a
 clean replacement because IMU signals depend heavily on:
@@ -99,16 +105,14 @@ Recommended use:
 - Do not depend on a random pretrained IMU checkpoint unless its sensor placement
   and labels match our project.
 
-## 5. Final recommendation for FusionSense
+## 6. Final recommendation for FusionSense
 
 Use this workload-reduced plan:
 
-1. **Vision:** replace vision pretraining with MediaPipe Pose or MoveNet feature
-   extraction, then train only a tiny temporal head if needed.
-2. **IMU:** train the small existing IMU encoder; it is cheap and safer than
-   relying on mismatched pretrained IMU weights.
-3. **Radar:** start with simple LD2410 temporal features; keep RadHAR as optional
-   reference/pretrained baseline if compatible data is available.
+1. **Radar:** train the radar branch using RadHAR first.
+2. **IMU:** train the small existing IMU encoder on SisFall/UCI-HAR/local data.
+3. **Camera:** use MediaPipe Pose or MoveNet as the open-source camera model;
+   skip camera model training for v1.
 4. **Fusion:** train only the FusionSense attention/head on windows. This is the
    real project contribution and is already lightweight.
 
