@@ -8,6 +8,8 @@ reliable sensor per window. Demonstrated on **elderly fall detection**.
 > **Framework vs. application:** FusionSense is a *general HAR framework*; fall
 > detection is the *demo*. Write it that way — it's reusable and stronger.
 
+For the current v1 plan, see **[docs/CURRENT_PROJECT_PLAN.md](docs/CURRENT_PROJECT_PLAN.md)**.
+
 ## Two ways to run: simulator (plumbing) vs. real data (results)
 
 There is **one data contract** — `FusionWindow` (`fusionsense/contract.py`) — and
@@ -23,10 +25,10 @@ two sources that both emit it:
 ## Training is two stages (modular pretraining)
 
 ```
-Stage 1  Pretrain each encoder SEPARATELY on real single-modality data
+Stage 1  Pretrain trainable sensor encoders on real single-modality data
               enc_imu   <- SisFall / UCI-HAR      (scripts/pretrain_imu.py)
               enc_radar <- RadHAR                 (scripts/pretrain_radar.py)
-              enc_vis   <- MediaPipe pose / video (scripts/pretrain_vision.py)
+              camera    <- Open-source pose model (MediaPipe/MoveNet; no v1 training)
 
 Stage 2  Train the CROSS-MODAL ATTENTION on PAIRED data (sensors time-aligned)
               UP-Fall (camera + IMU)              (scripts/train_fusion.py)
@@ -35,6 +37,10 @@ Stage 2  Train the CROSS-MODAL ATTENTION on PAIRED data (sensors time-aligned)
 Why paired data for Stage 2: attention learns *relationships between modalities
 at the same instant* ("dark → trust radar"). Separate datasets never show all
 sensors describing one moment, so the cross-modal layer needs aligned data.
+
+## Updated hardware direction
+
+The v1 path is **train radar + IMU first, use an open-source camera pose model, then set up Arduino/ESP32 hardware**. The microcontroller reads the MPU-6050 IMU and LD2410 radar, streams timestamped rows over USB serial or WiFi, and the laptop builds `FusionWindow`s, extracts camera pose features, runs the PyTorch model, and returns predictions through a local API. See **[docs/CURRENT_PROJECT_PLAN.md](docs/CURRENT_PROJECT_PLAN.md)**.
 
 ## Quick start
 
@@ -45,17 +51,15 @@ pip install -r requirements.txt          # CUDA torch build for your 4060
 python scripts/viz_windows.py
 python tests/test_pipeline.py
 
-# Smoke-test the WHOLE pretraining pipeline on the simulator (needs torch):
+# Smoke-test the WHOLE training pipeline on the simulator (needs torch):
 python scripts/pretrain_imu.py --sim
 python scripts/pretrain_radar.py --sim
-python scripts/pretrain_vision.py --sim
 python scripts/train_fusion.py --sim
 
-# Real training: download datasets (docs/DATASETS.md) into data/raw/, then:
-python scripts/pretrain_imu.py
+# Real v1 training priority: train radar + IMU, use open-source camera pose model:
 python scripts/pretrain_radar.py
-python scripts/pretrain_vision.py        # set CFG.vision_dv = 99 first
-python scripts/train_fusion.py
+python scripts/pretrain_imu.py
+python scripts/train_fusion.py           # fusion consumes pose features; skip vision pretrain for v1
 ```
 
 `scripts/baseline_numpy.py` gives a torch-free baseline + the robustness figure
@@ -106,15 +110,16 @@ hardware/
   esp32_firmware/      # ESP32 gateway (.ino)
   wokwi/               # in-browser circuit simulation
 docs/
+  CURRENT_PROJECT_PLAN.md # current v1 plan: train radar+IMU, open-source camera pose
   DATASETS.md          # downloads + expected layouts (read this before real training)
 tests/test_pipeline.py # numpy-only checks
 ```
 
 ## Roadmap
 
-- **Now:** pretrain encoders on real benchmarks → train fusion on UP-Fall.
-- **Hardware:** ESP32 firmware (I²C IMU + UART radar) + Pi pose extractor, all
-  emitting the same `FusionWindow`; quantize to ONNX/TFLite; measure Pi latency;
-  collect a small real **tri-modal** set (the one thing UP-Fall lacks: radar).
+- **Now:** train RadHAR/radar and IMU branches; use MediaPipe/MoveNet for camera pose; then train fusion.
+- **Hardware:** after model branches are understood, use Arduino/ESP32 firmware
+  (I²C IMU + UART radar) + laptop API inference, all emitting/consuming the same
+  `FusionWindow`; collect a small real **tri-modal** set for validation.
 - **Paper (V2):** real sensor-degradation study + health-conditioned ablation.
 ```

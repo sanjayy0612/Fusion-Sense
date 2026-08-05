@@ -83,7 +83,7 @@ The insight: every sensor in your rig emits a cheap, physical *self-report of it
 
 Feed these three scalar *health signals* as an explicit prior into the attention/pooling, alongside the learned features. Now your model's trust weights are grounded in **physically measurable sensor state**, not just learned correlations — which is (a) more interpretable, (b) more robust, (c) cheaper, and (d) **a framing I did not find for tri-modal edge HAR.** It directly turns your earlier "reliability-aware" idea into something concrete and defensible.
 
-This is the difference between "we added confidence scores" (crowded) and "we condition fusion on free hardware reliability telemetry, validated under real degradation on a Pi" (much narrower, much more your own).
+This is the difference between "we added confidence scores" (crowded) and "we condition fusion on free hardware reliability telemetry, validated under real degradation through the laptop API demo" (much narrower, much more your own).
 
 ---
 

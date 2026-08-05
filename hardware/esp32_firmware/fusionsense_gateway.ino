@@ -6,7 +6,7 @@
  *   - MPU-6050 6-DoF IMU over I2C  (accel x/y/z + gyro x/y/z)
  *   - HLK-LD2410 mmWave radar over UART (target distance + energy)
  * Emits: one CSV line per sample over USB serial @ 115200, consumed by the
- *        edge node (Raspberry Pi, or your laptop during development).
+ *        laptop API node during v1 development.
  *
  * CSV format (one row per IMU tick, ~50 Hz):
  *   t_ms, ax, ay, az, gx, gy, gz, radar_dist_cm, radar_energy

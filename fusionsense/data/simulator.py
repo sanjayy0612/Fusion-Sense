@@ -130,6 +130,18 @@ def sample_window(activity: str, rng: np.random.Generator,
             if imu_health < 0.08:
                 imu_valid = False
 
+    # The model masks invalid modalities. If every modality is invalid, the
+    # attention softmax has no legal token and can produce NaNs, so keep the
+    # least-bad sensor available for the window.
+    if not (imu_valid or radar_valid or vision_valid):
+        best = int(np.argmax([imu_health, radar_energy, image_quality]))
+        if best == 0:
+            imu_valid = True
+        elif best == 1:
+            radar_valid = True
+        else:
+            vision_valid = True
+
     return FusionWindow(
         t_start=0.0,
         imu=imu, radar=radar, vision=vision,

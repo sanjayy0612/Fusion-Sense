@@ -1,8 +1,11 @@
-"""Stage 2 — train the CROSS-MODAL ATTENTION on paired data (UP-Fall), loading
-the pretrained encoders from Stage 1 and freezing them.
+"""Stage 2 — train the CROSS-MODAL ATTENTION on paired data.
 
-  python scripts/train_fusion.py            # real paired data + pretrained encoders
-  python scripts/train_fusion.py --sim      # simulator fallback (smoke test)
+V1 expects pretrained radar + IMU encoders when available and uses open-source
+camera pose features rather than a separately trained raw camera model. A vision
+pose-head checkpoint is optional; if absent, the pose branch trains with fusion.
+
+  python scripts/train_fusion.py              # real paired data + available encoders
+  python scripts/train_fusion.py --sim        # simulator fallback (smoke test)
   python scripts/train_fusion.py --no-freeze  # fine-tune encoders too
 
 Encoders are loaded from checkpoints/enc_{imu,radar,vis}.pt if present.

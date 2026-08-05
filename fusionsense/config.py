@@ -19,9 +19,9 @@ class Config:
     # --- per-modality channel dims ---
     imu_ch: int = 6          # ax ay az gx gy gz
     radar_k: int = 8         # radar per-frame features (voxel/energy summary)
-    vision_dv: int = 32      # vision embedding dim (NOT raw pixels).
-    #   NOTE: for real MediaPipe pose set vision_dv = 33*3 = 99 (see DATASETS.md).
-    #   The simulator scales to whatever vision_dv is, so smoke tests still work.
+    vision_dv: int = 99      # open-source camera pose dim: 33 MediaPipe landmarks * xyz.
+    #   V1 uses MediaPipe/MoveNet-style pose features instead of training a raw
+    #   camera model. The simulator scales to whatever vision_dv is.
 
     # --- model dims ---
     d_model: int = 128
