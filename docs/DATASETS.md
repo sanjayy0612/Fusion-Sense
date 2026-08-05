@@ -47,15 +47,39 @@ Run: `python scripts/pretrain_imu.py`  → `checkpoints/enc_imu.pt`
 
 Run: `python scripts/pretrain_radar.py`  → `checkpoints/enc_radar.pt`
 
-### Vision — pose from real video (MediaPipe)
+### Vision — pose from small video clips (MediaPipe, storage-light path)
 - We never train on raw pixels. Real video → MediaPipe Pose → 33 landmarks × 3
   = **99-dim** per-frame vector (privacy-preserving, posture-rich).
 - **Set `CFG.vision_dv = 99`** before real vision training.
-- Labeled clips at `data/raw/vision_videos/<label>/*.mp4`. Any action-recognition
-  video source works (e.g., UCF/Kinetics subsets, or your own recordings).
+- Do **not** download a huge full video dataset first. Start with a small, curated
+  subset or your own laptop/webcam clips, convert each video to pose windows, and
+  cache only the extracted keypoints/features. After extraction, raw `.mp4` files
+  can be moved to external storage or deleted if your review only needs the
+  feature dataset.
+- Labeled clips at `data/raw/vision_videos/<label>/*.mp4`. Keep the labels aligned
+  to the 5-class FusionSense mapping: `walking`, `sitting`, `standing`, `lying`,
+  `fall`. If a public dataset uses more labels, copy only the classes you need.
 - Install: `pip install mediapipe opencv-python`
 
 Run: `python scripts/pretrain_vision.py`  → `checkpoints/enc_vis.pt`
+
+#### If video storage is the blocker
+
+Use this order instead of downloading hundreds of GB:
+
+1. Record **short 5–10 second clips** on your laptop/webcam or phone for each
+   safe class. For falls, use safe staged events: mattress/cushion, dummy object,
+   or controlled sit-to-lying transitions; do not perform unsafe falls.
+2. Extract MediaPipe pose features immediately. The training input becomes small
+   numeric arrays instead of raw video. A 10-second clip at 10 FPS with 99 float32
+   pose values is roughly 40 KB before metadata, so the feature cache is tiny
+   compared with the original videos.
+3. Train the vision encoder on pose windows, not raw pixels. This is enough for
+   posture/fall cues and matches the deployed laptop API, which also extracts
+   pose before inference.
+4. For the report, be explicit: “vision encoder trained on pose/keypoint
+   features extracted from a curated small video set,” not “trained on a massive
+   raw-video dataset.”
 
 ---
 

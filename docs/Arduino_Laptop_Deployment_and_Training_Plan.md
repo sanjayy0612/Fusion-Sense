@@ -116,11 +116,15 @@ this as an engineering risk, not a dead end:
    the closest real data available.
 2. **Use paired camera + IMU data for the first fusion result.** This validates
    the attention and masking behavior with real synchronized sensors.
-3. **Collect a small local tri-modal dataset.** Record 5–10 subjects or repeated
+3. **Make vision storage-light.** Do not keep a huge raw-video corpus on the
+   laptop. Record or download short clips, extract MediaPipe pose/keypoint arrays,
+   and train on the cached numeric features. This keeps the vision branch close
+   to the actual deployment path while avoiding hundreds of GB of video storage.
+4. **Collect a small local tri-modal dataset.** Record 5–10 subjects or repeated
    trials for safe activities, plus controlled fall-like events using a cushion
    or dummy object. Even a small dataset can be used for calibration, qualitative
    demos, and robustness tests.
-4. **Run ablations honestly.** Report simulator results as pipeline validation,
+5. **Run ablations honestly.** Report simulator results as pipeline validation,
    public-dataset results as encoder/fusion learning, and local tri-modal data as
    the hardware demonstration.
 
