@@ -8,6 +8,9 @@ reliable sensor per window. Demonstrated on **elderly fall detection**.
 > **Framework vs. application:** FusionSense is a *general HAR framework*; fall
 > detection is the *demo*. Write it that way — it's reusable and stronger.
 
+For the step-by-step project alignment and learning plan, see
+**[docs/PROJECT_ALIGNMENT_AND_LEARNING_PLAN.md](docs/PROJECT_ALIGNMENT_AND_LEARNING_PLAN.md)**.
+
 ## Two ways to run: simulator (plumbing) vs. real data (results)
 
 There is **one data contract** — `FusionWindow` (`fusionsense/contract.py`) — and
