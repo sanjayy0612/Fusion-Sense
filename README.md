@@ -36,6 +36,10 @@ Why paired data for Stage 2: attention learns *relationships between modalities
 at the same instant* ("dark → trust radar"). Separate datasets never show all
 sensors describing one moment, so the cross-modal layer needs aligned data.
 
+## Updated hardware direction
+
+The cost-constrained deployment path is now **Arduino/ESP32 sensor gateway + laptop inference API**. The microcontroller reads the MPU-6050 IMU and LD2410 radar, streams timestamped rows over USB serial or WiFi, and the laptop builds `FusionWindow`s, extracts camera features, runs the PyTorch model, and returns predictions through a local API. See **[docs/Arduino_Laptop_Deployment_and_Training_Plan.md](docs/Arduino_Laptop_Deployment_and_Training_Plan.md)**.
+
 ## Quick start
 
 ```bash
@@ -113,8 +117,9 @@ tests/test_pipeline.py # numpy-only checks
 ## Roadmap
 
 - **Now:** pretrain encoders on real benchmarks → train fusion on UP-Fall.
-- **Hardware:** ESP32 firmware (I²C IMU + UART radar) + Pi pose extractor, all
-  emitting the same `FusionWindow`; quantize to ONNX/TFLite; measure Pi latency;
-  collect a small real **tri-modal** set (the one thing UP-Fall lacks: radar).
+- **Hardware:** Arduino/ESP32 firmware (I²C IMU + UART radar) + laptop API inference, all
+  emitting/consuming the same `FusionWindow`; collect a small real **tri-modal**
+  set (the one thing UP-Fall lacks: radar). Optional later step: port the same
+  checkpoint to Pi/ONNX/TFLite and measure edge latency.
 - **Paper (V2):** real sensor-degradation study + health-conditioned ablation.
 ```

@@ -4,7 +4,7 @@
 
 Authors: Sanjay E (24CS0836), Shirdithan Pon (24CS0899)
 Document type: System architecture + design decisions (software-first build)
-Status: Draft v1 · Date: 2026-06-26
+Status: Draft v2 · Date: 2026-08-05
 
 > This document is the engineering blueprint for FusionSense. It is written **software-first** because hardware is not yet in hand — every component is designed so you can build and validate it in simulation now, then drop in real sensors later with minimal change. It doubles as the backbone for your research paper (the novelty argument lives in Sections 4 and 9).
 
@@ -31,7 +31,7 @@ A glossary is at the end (Section 10) — HAR, modality, token, etc.
 | F2 | Segment each stream into fixed-length, time-aligned windows (e.g., 2 s windows, 50% overlap). |
 | F3 | Classify each window into one of N human-activity classes (e.g., walking, sitting, standing, lying, **fall**). |
 | F4 | Dynamically weight each modality's contribution per window via a learned cross-modal attention mechanism (the core innovation). |
-| F5 | Run all inference locally on the edge (Raspberry Pi 5) — no cloud, no raw video leaves the device. |
+| F5 | Run inference locally on the development laptop through a local API; the Arduino/ESP32 gateway never sends raw video or runs the model. |
 | F6 | Publish classified activity + per-modality attention weights over MQTT to a local dashboard. |
 | F7 | Raise a distinct, low-latency alert on the **fall** class. |
 | F8 | Degrade gracefully: if one modality drops out (camera blinded, radar unplugged), the system still classifies using the remaining modalities. |
@@ -41,16 +41,16 @@ A glossary is at the end (Section 10) — HAR, modality, token, etc.
 | ID | Requirement | Target |
 |----|-------------|--------|
 | N1 | End-to-end latency (sensor → classification → MQTT) | < 300 ms |
-| N2 | Inference time on Pi 5 (CPU, single window) | < 100 ms |
+| N2 | Laptop API inference time (single window, RTX 4060 or CPU fallback) | < 100 ms target during development |
 | N3 | Model size (quantized) | < 10 MB |
 | N4 | Sustained throughput | ≥ 5 windows/s (with overlap) |
 | N5 | Privacy | Raw camera frames never persisted or transmitted; only derived features leave the vision node |
 | N6 | Robustness | No single modality failure causes a system-wide failure (see F8) |
-| N7 | Power (target deployment) | Runs on Pi 5 + USB peripherals, < 15 W |
+| N7 | Cost/power (current prototype) | Arduino/ESP32 sensor node + existing laptop; no Raspberry Pi required |
 
 ### 1.3 Constraints & assumptions
 
-- **Constraint:** Two-person student team, ~4-month timeline (per your project plan), commodity hardware (ESP32, Pi 5).
+- **Constraint:** Two-person student team, ~4-month timeline (per your project plan), commodity hardware (Arduino-compatible ESP32, MPU-6050, LD2410, laptop).
 - **Constraint:** No existing public dataset combines *camera + mmWave + IMU* for the same subjects/activities. **This is the single biggest risk** — addressed in Section 6.
 - **Assumption:** Activities are single-person, indoor, short-duration (seconds-scale). Multi-person tracking is explicitly out of scope for v1.
 - **Assumption:** "Real-time" means soft real-time (sub-second), not hard deadlines.
@@ -59,7 +59,7 @@ A glossary is at the end (Section 10) — HAR, modality, token, etc.
 
 ## 2. High-level architecture
 
-FusionSense is a **three-tier edge pipeline**: a bare-metal sensor gateway, an edge compute node, and a local IoT/visualization layer.
+FusionSense is now a **three-tier prototype pipeline**: an Arduino-compatible sensor gateway, a laptop inference/API node, and a local visualization layer. The earlier Raspberry Pi target remains an optional future deployment path, not a blocker for the current build.
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────┐
@@ -74,7 +74,7 @@ FusionSense is a **three-tier edge pipeline**: a bare-metal sensor gateway, an e
                   ESP32 sends timestamped IMU + radar frames             │
                                                                           ▼
 ┌──────────────────────────────────────────────────────────────────────────┐
-│                    TIER 2 — EDGE COMPUTE NODE (Raspberry Pi 5)              │
+│                    TIER 2 — LAPTOP INFERENCE/API NODE                  │
 │                                                                            │
 │   USB/CSI Camera ──► [Vision feature extractor]  ──┐                        │
 │   ESP32 stream  ──► [IMU windower]   ─────────────►├─► [Time-sync &         │
@@ -82,7 +82,7 @@ FusionSense is a **three-tier edge pipeline**: a bare-metal sensor gateway, an e
 │                                                    │          │            │
 │                                                    │          ▼            │
 │                                            ┌───────────────────────────┐    │
-│                                            │  FUSION MODEL (PyTorch)   │    │
+│                                            │  FUSION MODEL (PyTorch/API) │    │
 │                                            │  per-modality encoders →  │    │
 │                                            │  cross-modal attention →  │    │
 │                                            │  classifier head          │    │
@@ -93,7 +93,7 @@ FusionSense is a **three-tier edge pipeline**: a bare-metal sensor gateway, an e
 │                                            [MQTT publisher]                  │
 └────────────────────────────────────────────────────┼──────────────────────┘
                                                      │
-                          MQTT (local broker, e.g. Mosquitto on Pi)
+                          Local HTTP/API or MQTT event stream
                                                      ▼
 ┌──────────────────────────────────────────────────────────────────────────┐
 │              TIER 3 — IoT / DASHBOARD (Node-RED, local)                     │
@@ -104,7 +104,7 @@ FusionSense is a **three-tier edge pipeline**: a bare-metal sensor gateway, an e
 ### 2.1 Why this split
 
 - **ESP32 is a sensor gateway, not a compute node.** It does deterministic, low-jitter acquisition of I²C (IMU) and UART (radar) — the one thing it's genuinely good at — and timestamps each sample. It does *not* run the model.
-- **The Pi 5 is the brain.** It owns the camera (which needs more bandwidth/compute than the ESP32 can give), runs the fusion model, and hosts the MQTT broker.
+- **The laptop is the brain for v1.** It owns the camera/webcam pipeline, builds windows, runs the PyTorch fusion model on the RTX 4060 or CPU, and exposes a local API/dashboard output. A Raspberry Pi can be revisited later as an optimization target.
 - **The dashboard is just a subscriber.** It holds no logic and can be swapped (Node-RED, a small web app, Grafana) without touching the pipeline.
 
 ### 2.2 The two data planes
@@ -112,9 +112,13 @@ FusionSense is a **three-tier edge pipeline**: a bare-metal sensor gateway, an e
 There are two distinct flows, and keeping them separate is what makes the system tractable:
 
 1. **Training plane (offline, now):** recorded/simulated multimodal windows → PyTorch training loop → trained checkpoint. Runs on your laptop/Colab. **This is what you build first.**
-2. **Inference plane (online, later):** live sensors → windowing → quantized model → MQTT. Runs on the Pi.
+2. **Inference plane (online prototype):** live Arduino/ESP32 sensor stream + laptop camera → windowing → PyTorch checkpoint → local API/MQTT output. Runs on the laptop first; Pi/ONNX/TFLite is optional later.
 
 Because hardware isn't here, **you build the entire training plane and validate the model on a simulated/recorded dataset, behind the same data contract the live system will use** (Section 3). When sensors arrive, you only swap the data *source*, not the model.
+
+### 2.3 Current cost-constrained deployment decision
+
+Due to Raspberry Pi cost constraints, v1 should use the existing laptop as the compute node. This does not weaken the model research plan because the model boundary is the `FusionWindow`, not the device. The Arduino/ESP32 gateway streams timestamped IMU/radar samples, and the laptop converts those samples plus camera features into the same windows used by simulation and training. See `docs/Arduino_Laptop_Deployment_and_Training_Plan.md` for the concrete laptop API and training sequence.
 
 ---
 
@@ -130,7 +134,7 @@ Everything downstream depends on one decision: **what does a single "window" of 
 | Spatial | LD2410 mmWave | ~10–20 Hz frames | 20 Hz | `(40, K)` — 40 frames × K gate/energy features |
 | Vision | Camera | 30 fps | 10 fps | `(20, D_v)` — 20 frames × D_v embedding dims |
 
-> **Vision privacy note:** the vision modality is reduced to a per-frame **embedding vector** (e.g., a small MobileNet/pose-keypoint vector of dim `D_v`) on the Pi. Raw pixels are processed in-memory and discarded — they never enter the window buffer that the model or MQTT sees. This is how you satisfy N5 (privacy) *by construction*, and it's a defensible design claim for the paper.
+> **Vision privacy note:** the vision modality is reduced to a per-frame **embedding vector** (e.g., a small MobileNet/pose-keypoint vector of dim `D_v`) on the laptop. Raw pixels are processed in-memory and discarded — they never enter the window buffer that the model or MQTT sees. This is how you satisfy N5 (privacy) *by construction*, and it's a defensible design claim for the paper.
 
 ### 3.2 The canonical Window object
 
@@ -154,8 +158,8 @@ The `*_valid` flags are how F8 (graceful degradation) is implemented end-to-end:
 
 Sensors run at different rates and on different clocks (ESP32 vs. Pi). Strategy:
 
-- **Single authority clock:** the Pi's monotonic clock is the truth. ESP32 samples carry an ESP32-local timestamp; on first contact the Pi computes a clock offset and corrects incoming timestamps.
-- **Windowing by wall-clock buckets:** every 1 s the Pi closes a 2 s window (50% overlap). For each modality it takes all samples whose corrected timestamp falls in the window and **resamples to the fixed length** (linear interpolation for IMU/radar; nearest-frame for vision).
+- **Single authority clock:** the laptop's monotonic clock is the truth. ESP32 samples carry an ESP32-local timestamp; on first contact the Pi computes a clock offset and corrects incoming timestamps.
+- **Windowing by wall-clock buckets:** every 1 s the laptop closes a 2 s window (50% overlap). For each modality it takes all samples whose corrected timestamp falls in the window and **resamples to the fixed length** (linear interpolation for IMU/radar; nearest-frame for vision).
 - **Late/missing data:** if a modality contributes < X% of expected samples in a window, mark `*_valid = False`.
 
 This bucket-and-resample approach is simple, robust to jitter, and — crucially — identical in simulation and on hardware.

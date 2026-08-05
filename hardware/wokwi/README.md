@@ -1,7 +1,9 @@
 # FusionSense — Wokwi hardware simulation
 
-Runs the ESP32 sensor-gateway firmware **with no physical parts**, so you can
-demonstrate a working hardware implementation for the review.
+Runs the ESP32/Arduino-style sensor-gateway firmware **with no physical parts**, so you can
+demonstrate a working hardware implementation for the review. In the updated
+prototype, this gateway streams samples to the laptop inference API rather than
+to a Raspberry Pi.
 
 ## How to run (no downloads, no parts)
 
@@ -31,7 +33,7 @@ demonstrate a working hardware implementation for the review.
 | ESP32 | ✅ full | ✅ |
 | MPU-6050 IMU (I2C) | ✅ full | ✅ |
 | LD2410 radar (UART) | ❌ not a Wokwi part — code is guarded by `RADAR_PRESENT` | ✅ set `RADAR_PRESENT 1` |
-| Camera | n/a (handled on the Pi/laptop, not the ESP32) | ✅ |
+| Camera | n/a (handled on the laptop API, not the ESP32/Arduino gateway) | ✅ webcam/laptop camera |
 
 When you get the real LD2410, set `RADAR_PRESENT 1`, wire TX→GPIO16 / RX→GPIO17,
 and the same sketch streams radar distance + energy alongside the IMU.
