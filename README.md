@@ -11,6 +11,9 @@ reliable sensor per window. Demonstrated on **elderly fall detection**.
 For the step-by-step project alignment and learning plan, see
 **[docs/PROJECT_ALIGNMENT_AND_LEARNING_PLAN.md](docs/PROJECT_ALIGNMENT_AND_LEARNING_PLAN.md)**.
 
+For the current model-first priority, see
+**[docs/IMMEDIATE_MODEL_TRAINING_PLAN.md](docs/IMMEDIATE_MODEL_TRAINING_PLAN.md)**.
+
 ## Two ways to run: simulator (plumbing) vs. real data (results)
 
 There is **one data contract** — `FusionWindow` (`fusionsense/contract.py`) — and
