@@ -14,6 +14,9 @@ For the step-by-step project alignment and learning plan, see
 For the current model-first priority, see
 **[docs/IMMEDIATE_MODEL_TRAINING_PLAN.md](docs/IMMEDIATE_MODEL_TRAINING_PLAN.md)**.
 
+For pretrained/open-source model options that can reduce training work, see
+**[docs/OPEN_SOURCE_MODEL_SHORTLIST.md](docs/OPEN_SOURCE_MODEL_SHORTLIST.md)**.
+
 ## Two ways to run: simulator (plumbing) vs. real data (results)
 
 There is **one data contract** — `FusionWindow` (`fusionsense/contract.py`) — and
