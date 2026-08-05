@@ -8,14 +8,7 @@ reliable sensor per window. Demonstrated on **elderly fall detection**.
 > **Framework vs. application:** FusionSense is a *general HAR framework*; fall
 > detection is the *demo*. Write it that way — it's reusable and stronger.
 
-For the step-by-step project alignment and learning plan, see
-**[docs/PROJECT_ALIGNMENT_AND_LEARNING_PLAN.md](docs/PROJECT_ALIGNMENT_AND_LEARNING_PLAN.md)**.
-
-For the current model-first priority, see
-**[docs/IMMEDIATE_MODEL_TRAINING_PLAN.md](docs/IMMEDIATE_MODEL_TRAINING_PLAN.md)**.
-
-For pretrained/open-source model options that can reduce training work, see
-**[docs/OPEN_SOURCE_MODEL_SHORTLIST.md](docs/OPEN_SOURCE_MODEL_SHORTLIST.md)**.
+For the current v1 plan, see **[docs/CURRENT_PROJECT_PLAN.md](docs/CURRENT_PROJECT_PLAN.md)**.
 
 ## Two ways to run: simulator (plumbing) vs. real data (results)
 
@@ -47,7 +40,7 @@ sensors describing one moment, so the cross-modal layer needs aligned data.
 
 ## Updated hardware direction
 
-The cost-constrained deployment path is now **Arduino/ESP32 sensor gateway + laptop inference API**. The microcontroller reads the MPU-6050 IMU and LD2410 radar, streams timestamped rows over USB serial or WiFi, and the laptop builds `FusionWindow`s, extracts camera features, runs the PyTorch model, and returns predictions through a local API. See **[docs/Arduino_Laptop_Deployment_and_Training_Plan.md](docs/Arduino_Laptop_Deployment_and_Training_Plan.md)**.
+The v1 path is **train radar + IMU first, use an open-source camera pose model, then set up Arduino/ESP32 hardware**. The microcontroller reads the MPU-6050 IMU and LD2410 radar, streams timestamped rows over USB serial or WiFi, and the laptop builds `FusionWindow`s, extracts camera pose features, runs the PyTorch model, and returns predictions through a local API. See **[docs/CURRENT_PROJECT_PLAN.md](docs/CURRENT_PROJECT_PLAN.md)**.
 
 ## Quick start
 
@@ -117,16 +110,16 @@ hardware/
   esp32_firmware/      # ESP32 gateway (.ino)
   wokwi/               # in-browser circuit simulation
 docs/
+  CURRENT_PROJECT_PLAN.md # current v1 plan: train radar+IMU, open-source camera pose
   DATASETS.md          # downloads + expected layouts (read this before real training)
 tests/test_pipeline.py # numpy-only checks
 ```
 
 ## Roadmap
 
-- **Now:** pretrain encoders on real benchmarks → train fusion on UP-Fall.
-- **Hardware:** Arduino/ESP32 firmware (I²C IMU + UART radar) + laptop API inference, all
-  emitting/consuming the same `FusionWindow`; collect a small real **tri-modal**
-  set (the one thing UP-Fall lacks: radar). Optional later step: port the same
-  checkpoint to Pi/ONNX/TFLite and measure edge latency.
+- **Now:** train RadHAR/radar and IMU branches; use MediaPipe/MoveNet for camera pose; then train fusion.
+- **Hardware:** after model branches are understood, use Arduino/ESP32 firmware
+  (I²C IMU + UART radar) + laptop API inference, all emitting/consuming the same
+  `FusionWindow`; collect a small real **tri-modal** set for validation.
 - **Paper (V2):** real sensor-degradation study + health-conditioned ablation.
 ```

@@ -29,15 +29,15 @@ def architecture():
     fig, ax = plt.subplots(figsize=(12, 4.2)); ax.set_xlim(0, 12); ax.set_ylim(0, 4.2); ax.axis("off")
     box(ax, 0.2, 2.6, 1.9, 0.7, "MPU-6050\nIMU (I2C)", GREEN, 9)
     box(ax, 0.2, 1.6, 1.9, 0.7, "LD2410\nRadar (UART)", GREEN, 9)
-    box(ax, 0.2, 0.6, 1.9, 0.7, "Camera\n(USB/CSI)", GREEN, 9)
-    box(ax, 2.9, 1.6, 1.9, 0.7, "ESP32\nGateway", ORANGE, 9)
-    box(ax, 5.5, 0.6, 2.4, 2.7, "Raspberry Pi 5\n(edge brain)\n\nsync + windowing\nFusionWindow", BLUE, 9)
-    box(ax, 8.5, 1.9, 3.2, 1.2, "FusionSense model\nencoders -> cross-modal\nattention -> trust", BLUE, 9)
-    box(ax, 8.5, 0.5, 3.2, 0.9, "MQTT -> Dashboard\nactivity + trust + fall alert", GREY, 9)
+    box(ax, 0.2, 0.6, 1.9, 0.7, "Camera\n(webcam)", GREEN, 9)
+    box(ax, 2.9, 1.6, 1.9, 0.7, "Arduino/ESP32\nGateway", ORANGE, 9)
+    box(ax, 5.5, 0.6, 2.4, 2.7, "Laptop API\n\npose extraction\nsync + windowing\nFusionWindow", BLUE, 9)
+    box(ax, 8.5, 1.9, 3.2, 1.2, "FusionSense model\nradar+IMU encoders\nfusion attention -> trust", BLUE, 9)
+    box(ax, 8.5, 0.5, 3.2, 0.9, "API/MQTT -> Dashboard\nactivity + trust + fall alert", GREY, 9)
     arrow(ax, 2.1, 2.95, 2.9, 2.1); arrow(ax, 2.1, 1.95, 2.9, 1.95)
-    arrow(ax, 2.1, 0.95, 5.5, 1.3)               # camera -> pi
-    arrow(ax, 4.8, 1.95, 5.5, 1.95)              # esp -> pi
-    arrow(ax, 7.9, 2.3, 8.5, 2.5)                # pi -> model
+    arrow(ax, 2.1, 0.95, 5.5, 1.3)               # camera -> laptop
+    arrow(ax, 4.8, 1.95, 5.5, 1.95)              # gateway -> laptop
+    arrow(ax, 7.9, 2.3, 8.5, 2.5)                # laptop -> model
     arrow(ax, 10.1, 1.9, 10.1, 1.4)             # model -> mqtt
     ax.set_title("FusionSense — Logical / System Architecture", fontsize=13, weight="bold")
     fig.tight_layout(); fig.savefig(f"{FIG}/architecture_block.png", dpi=120); plt.close(fig)
@@ -49,7 +49,7 @@ def physical():
                                 fc="#f4f4f4", ec=GREY, lw=1.5))
     ax.text(4.5, 5.4, "Room (top view)", ha="center", fontsize=11, color=GREY)
     box(ax, 0.7, 4.3, 2.4, 0.7, "Camera + LD2410\n(on wall/tripod)", GREEN, 9)
-    box(ax, 0.7, 3.4, 2.4, 0.7, "Raspberry Pi 5\n(beside sensors)", BLUE, 9)
+    box(ax, 0.7, 3.4, 2.4, 0.7, "Laptop API\n(inference node)", BLUE, 9)
     # person
     ax.plot(6.2, 2.6, "o", ms=18, color=ORANGE)
     ax.plot([6.2, 6.2], [2.4, 1.4], color=ORANGE, lw=3)
@@ -58,7 +58,7 @@ def physical():
     arrow(ax, 3.1, 4.2, 6.0, 2.9); ax.text(4.3, 3.9, "camera + radar\nobserve person", fontsize=8, color=GREY)
     ax.annotate("", xy=(6.7, 2.2), xytext=(3.1, 3.7),
                 arrowprops=dict(arrowstyle="-|>", ls="--", color=BLUE))
-    ax.text(4.2, 2.7, "ESP32 -> Pi\n(UART/Wi-Fi)", fontsize=8, color=BLUE)
+    ax.text(4.2, 2.7, "ESP32 -> laptop\n(USB/Wi-Fi)", fontsize=8, color=BLUE)
     ax.set_title("FusionSense — Physical Design (deployment layout)", fontsize=13, weight="bold")
     fig.tight_layout(); fig.savefig(f"{FIG}/physical_layout.png", dpi=120); plt.close(fig)
 
@@ -84,7 +84,7 @@ def circuit():
     wire(2.7, 1.1, 4.2, 2.15, "purple", "TX->D16(RX2)")
     wire(2.7, 0.9, 4.2, 2.0,  "orange", "RX->D17(TX2)")
     # ESP32 -> host
-    box(ax, 8.2, 2.3, 2.4, 1.0, "Edge node\n(Pi / laptop)", BLUE, 10)
+    box(ax, 8.2, 2.3, 2.4, 1.0, "Laptop API\nnode", BLUE, 10)
     wire(6.8, 2.8, 8.2, 2.8, GREY, "USB serial 115200")
     ax.set_title("FusionSense — Circuit / Wiring Diagram", fontsize=13, weight="bold")
     fig.tight_layout(); fig.savefig(f"{FIG}/circuit_diagram.png", dpi=120); plt.close(fig)

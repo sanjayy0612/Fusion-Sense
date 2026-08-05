@@ -61,6 +61,12 @@ def test_balanced_dataset():
     print("PASS test_balanced_dataset")
 
 
+def test_degraded_dataset_never_all_dropped():
+    ds = make_dataset(n_per_class=400, seed=0, degrade=True)
+    assert all(w.valid_vector().any() for w in ds), "degraded dataset has all-invalid window"
+    print("PASS test_degraded_dataset_never_all_dropped")
+
+
 def test_record_and_replay_roundtrip():
     with tempfile.TemporaryDirectory() as tmpdir:
         out_path = os.path.join(tmpdir, "sim_output.npz")
@@ -79,5 +85,6 @@ if __name__ == "__main__":
     test_never_all_dropped()
     test_health_in_range()
     test_balanced_dataset()
+    test_degraded_dataset_never_all_dropped()
     test_record_and_replay_roundtrip()
     print("\nALL PIPELINE TESTS PASSED")

@@ -4,7 +4,7 @@
 
 Authors: Sanjay E (24CS0836), Shirdithan Pon (24CS0899)
 Document type: System architecture + design decisions (software-first build)
-Status: Draft v2 · Date: 2026-08-05
+Status: Current v1 plan · Date: 2026-08-05
 
 > This document is the engineering blueprint for FusionSense. It is written **software-first** because hardware is not yet in hand — every component is designed so you can build and validate it in simulation now, then drop in real sensors later with minimal change. It doubles as the backbone for your research paper (the novelty argument lives in Sections 4 and 9).
 
@@ -42,7 +42,7 @@ A glossary is at the end (Section 10) — HAR, modality, token, etc.
 |----|-------------|--------|
 | N1 | End-to-end latency (sensor → classification → MQTT) | < 300 ms |
 | N2 | Laptop API inference time (single window, RTX 4060 or CPU fallback) | < 100 ms target during development |
-| N3 | Model size (quantized) | < 10 MB |
+| N3 | Fusion model/checkpoint size | Lightweight enough for laptop API and future edge export |
 | N4 | Sustained throughput | ≥ 5 windows/s (with overlap) |
 | N5 | Privacy | Raw camera frames never persisted or transmitted; only derived features leave the vision node |
 | N6 | Robustness | No single modality failure causes a system-wide failure (see F8) |
@@ -59,7 +59,7 @@ A glossary is at the end (Section 10) — HAR, modality, token, etc.
 
 ## 2. High-level architecture
 
-FusionSense is now a **three-tier prototype pipeline**: an Arduino-compatible sensor gateway, a laptop inference/API node, and a local visualization layer. The earlier Raspberry Pi target remains an optional future deployment path, not a blocker for the current build.
+FusionSense is now a **three-tier prototype pipeline**: an Arduino-compatible sensor gateway, a laptop inference/API node, and a local visualization layer. The old Raspberry Pi-first plan is no longer the v1 target.
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────┐
@@ -104,7 +104,7 @@ FusionSense is now a **three-tier prototype pipeline**: an Arduino-compatible se
 ### 2.1 Why this split
 
 - **ESP32 is a sensor gateway, not a compute node.** It does deterministic, low-jitter acquisition of I²C (IMU) and UART (radar) — the one thing it's genuinely good at — and timestamps each sample. It does *not* run the model.
-- **The laptop is the brain for v1.** It owns the camera/webcam pipeline, builds windows, runs the PyTorch fusion model on the RTX 4060 or CPU, and exposes a local API/dashboard output. A Raspberry Pi can be revisited later as an optimization target.
+- **The laptop is the brain for v1.** It owns the camera/webcam pipeline, builds windows, runs the PyTorch fusion model on the RTX 4060 or CPU, and exposes a local API/dashboard output.
 - **The dashboard is just a subscriber.** It holds no logic and can be swapped (Node-RED, a small web app, Grafana) without touching the pipeline.
 
 ### 2.2 The two data planes
@@ -112,13 +112,13 @@ FusionSense is now a **three-tier prototype pipeline**: an Arduino-compatible se
 There are two distinct flows, and keeping them separate is what makes the system tractable:
 
 1. **Training plane (offline, now):** recorded/simulated multimodal windows → PyTorch training loop → trained checkpoint. Runs on your laptop/Colab. **This is what you build first.**
-2. **Inference plane (online prototype):** live Arduino/ESP32 sensor stream + laptop camera → windowing → PyTorch checkpoint → local API/MQTT output. Runs on the laptop first; Pi/ONNX/TFLite is optional later.
+2. **Inference plane (online prototype):** live Arduino/ESP32 sensor stream + laptop camera → windowing → PyTorch checkpoint → local API/MQTT output. Runs on the laptop for v1.
 
 Because hardware isn't here, **you build the entire training plane and validate the model on a simulated/recorded dataset, behind the same data contract the live system will use** (Section 3). When sensors arrive, you only swap the data *source*, not the model.
 
 ### 2.3 Current cost-constrained deployment decision
 
-Due to Raspberry Pi cost constraints, v1 should use the existing laptop as the compute node. This does not weaken the model research plan because the model boundary is the `FusionWindow`, not the device. The Arduino/ESP32 gateway streams timestamped IMU/radar samples, and the laptop converts those samples plus camera features into the same windows used by simulation and training. See `docs/Arduino_Laptop_Deployment_and_Training_Plan.md` for the concrete laptop API and training sequence.
+Current v1 decision: train RadHAR/radar and IMU first, use an open-source pose model for camera, then set up the Arduino/ESP32 gateway and laptop API. The model boundary is still the `FusionWindow`, so the Arduino/ESP32 gateway streams timestamped IMU/radar samples and the laptop converts those samples plus camera pose features into the same windows used by simulation and training. See `docs/CURRENT_PROJECT_PLAN.md` for the integrated plan.
 
 ---
 
@@ -156,9 +156,9 @@ The `*_valid` flags are how F8 (graceful degradation) is implemented end-to-end:
 
 ### 3.3 Synchronization strategy
 
-Sensors run at different rates and on different clocks (ESP32 vs. Pi). Strategy:
+Sensors run at different rates and on different clocks (ESP32 vs. laptop). Strategy:
 
-- **Single authority clock:** the laptop's monotonic clock is the truth. ESP32 samples carry an ESP32-local timestamp; on first contact the Pi computes a clock offset and corrects incoming timestamps.
+- **Single authority clock:** the laptop's monotonic clock is the truth. ESP32 samples carry an ESP32-local timestamp; on first contact the laptop computes a clock offset and corrects incoming timestamps.
 - **Windowing by wall-clock buckets:** every 1 s the laptop closes a 2 s window (50% overlap). For each modality it takes all samples whose corrected timestamp falls in the window and **resamples to the fixed length** (linear interpolation for IMU/radar; nearest-frame for vision).
 - **Late/missing data:** if a modality contributes < X% of expected samples in a window, mark `*_valid = False`.
 
@@ -174,9 +174,9 @@ This is the part your paper is *about*, so it gets the most detail. You're PyTor
 
 Three modalities → three **per-modality encoders** that each produce a single fixed-dim **token** (embedding) → a **shared self-attention block over the 3 modality tokens** (this is our cross-modal mechanism) → an **attention-weighted pool** that produces the dynamic per-modality trust weights → a **classifier head**.
 
-> **Terminology (be precise in the paper):** we use *merged-token self-attention* — each modality is compressed to one token and the three tokens attend to one another in a single shared Transformer encoder layer. This is a legitimate form of cross-modal attention (modalities exchange information and re-weight each other), and it is chosen deliberately over *pairwise cross-attention over full sequences*. The latter builds an O(sequence²) attention matrix for every modality pair every window, which is incompatible with real-time edge inference on a Pi-class CPU. Pairwise cross-attention *after* token compression is also rejected — it adds parameters and code with no measurable benefit over shared self-attention at 3-token granularity. The interpretable "which sensor did we trust" weights come from the **masked attention-weighted pooling** step, which is the output you export to the dashboard and the paper.
+> **Terminology (be precise in the paper):** we use *merged-token self-attention* — each modality is compressed to one token and the three tokens attend to one another in a single shared Transformer encoder layer. This is a legitimate form of cross-modal attention (modalities exchange information and re-weight each other), and it is chosen deliberately over *pairwise cross-attention over full sequences*. The latter builds an O(sequence²) attention matrix for every modality pair every window, which is incompatible with real-time edge inference on a laptop CPU/GPU. Pairwise cross-attention *after* token compression is also rejected — it adds parameters and code with no measurable benefit over shared self-attention at 3-token granularity. The interpretable "which sensor did we trust" weights come from the **masked attention-weighted pooling** step, which is the output you export to the dashboard and the paper.
 
-The novelty vs. prior work (Section 9): prior edge HAR fuses **two** modalities (camera+IMU) or applies attention within a **single** modality. FusionSense does **tri-modal** fusion with an attention mechanism whose weights are (a) *interpretable* (you can read which sensor was trusted) and (b) *robust to modality dropout* via masking — all in a model small enough to run on a Pi CPU.
+The novelty vs. prior work (Section 9): prior edge HAR fuses **two** modalities (camera+IMU) or applies attention within a **single** modality. FusionSense does **tri-modal** fusion with an attention mechanism whose weights are (a) *interpretable* (you can read which sensor was trusted) and (b) *robust to modality dropout* via masking — all in a model small enough to run on a laptop runtime.
 
 ### 4.2 Architecture, layer by layer
 
@@ -261,7 +261,7 @@ class FusionSense(nn.Module):
         return self.head(z)
 ```
 
-> This is a faithful skeleton, not the final code. When we move to the implementation phase I'll flesh out the encoders, the windowing/dataset code, the training loop, metrics, and the TFLite/ONNX export for the Pi.
+> This is a faithful skeleton, not the final code. When we move to the implementation phase I'll flesh out the encoders, the windowing/dataset code, the training loop, metrics, and the laptop API and optional export.
 
 ---
 
@@ -282,23 +282,23 @@ Short ADRs for the decisions that actually shape the build. Format follows your 
 
 **Decision:** Option C. The attention is over only 3 tokens, so the "Transformer" is cheap; the win is dynamic, interpretable, dropout-robust weighting — which is exactly the paper's claim. **Consequence:** more training complexity and the need for modality-dropout augmentation; revisit head design if classes grow beyond ~10.
 
-### ADR-002: Where to split compute (ESP32 vs. Pi)
+### ADR-002: Where to split compute (Arduino/ESP32 vs. laptop)
 
 **Status:** Accepted
-**Context:** Could push some inference onto the ESP32, or treat it purely as a gateway.
-**Decision:** ESP32 = acquisition + timestamping + framing only; all ML on the Pi. ESP32 lacks the RAM/throughput for the camera path and the model; splitting the model across two clocks would be a synchronization nightmare. **Consequence:** ESP32 firmware stays simple and testable; the Pi is the single point of compute (and single point of failure — acceptable for v1).
+**Context:** Could push some inference onto the Arduino/ESP32, or treat it purely as a gateway.
+**Decision:** Arduino/ESP32 = acquisition + timestamping + framing only; all ML runs on the laptop for v1. The microcontroller lacks the RAM/throughput for the camera path and the model; the laptop can run open-source pose extraction plus PyTorch fusion. **Consequence:** gateway firmware stays simple and testable; the laptop is the v1 compute/API node.
 
 ### ADR-003: Transport between tiers
 
 **Status:** Accepted
-**Context:** ESP32→Pi link and Pi→dashboard link.
-**Decision:** ESP32→Pi over **UART (wired) for v1**, with Wi-Fi/ESP-NOW as a later option; Pi→dashboard over **MQTT** (local Mosquitto). UART removes wireless jitter while you're still validating sync; MQTT is the natural fit for the pub/sub dashboard and matches your project plan. **Consequence:** wired tether for the demo; revisit wireless once timing is proven.
+**Context:** Arduino/ESP32→laptop link and laptop→dashboard/API link.
+**Decision:** start with USB serial for v1 capture, with Wi-Fi/ESP-NOW as a later option; laptop output can be local HTTP API or MQTT. USB serial removes wireless jitter while sync and windowing are being validated. **Consequence:** wired tether is acceptable for the learning/demo phase.
 
-### ADR-004: Model export / runtime on the Pi
+### ADR-004: Model runtime for v1
 
-**Status:** Proposed
-**Context:** Train in PyTorch; must run fast on Pi 5 CPU.
-**Decision (proposed):** train in PyTorch → export to **ONNX or TFLite**, apply **int8 post-training quantization**, run with onnxruntime/tflite-runtime on the Pi. Keeps training ergonomic and inference small (N2/N3). **Consequence:** need a quantization-validation step (accuracy drop check) before deployment; revisit if accuracy loss > ~2%.
+**Status:** Accepted
+**Context:** Train in PyTorch; run inference on the laptop API first.
+**Decision:** keep v1 runtime in PyTorch on the laptop. Use MediaPipe/MoveNet for camera pose extraction, load radar/IMU checkpoints when available, and train the small fusion attention/head. **Consequence:** no Pi/quantization work is required for v1; export can be revisited only after the laptop demo works.
 
 ### ADR-005: Window size & overlap
 
@@ -367,7 +367,7 @@ fusionsense/
     └── test_shapes.py          # contract conformance
 ```
 
-**The golden rule:** `simulator.py` and the real `edge/` capture both emit the *same* `FusionWindow`. Everything in `models/`, `train/`, and `infer/` is hardware-agnostic and testable on your laptop today.
+**The golden rule:** `simulator.py`, dataset loaders, and future laptop capture must all emit the *same* `FusionWindow`. Everything in `models/`, `train/`, and future inference code stays hardware-agnostic and testable on your laptop today.
 
 ---
 
@@ -381,8 +381,8 @@ Your slide plan is hardware-first (ESP32 → pipeline → AI → deploy). Since 
 | **1** | Fusion model + training plane | Trained model on sim data; attention reweights under dropout (first result) | No |
 | **2** | Encoder pretraining on public data | Per-modality encoders + transfer-learning ablation | No |
 | **3** | Windowing/sync + inference pipeline + MQTT + dashboard (run on simulated stream) | End-to-end live pipeline, sensors mocked | No |
-| **4** | ESP32 firmware + Pi capture, swap mock → real sensors | Real tri-modal capture through the same contract | **Yes** |
-| **5** | Quantize, deploy to Pi, measure latency, collect Stage-C data | On-device numbers for the paper | **Yes** |
+| **4** | Arduino/ESP32 firmware + laptop capture, swap mock → real sensors | Real tri-modal capture through the same contract | **Yes** |
+| **5** | Laptop API demo, collect small tri-modal validation set | End-to-end demo and honest validation | **Yes** |
 
 Phases 0–3 are everything except the physical sensors — and they include your headline result (attention-based robustness). You can write most of the paper from Phases 1–3.
 
@@ -390,16 +390,16 @@ Phases 0–3 are everything except the physical sensors — and they include you
 
 ## 9. Research-paper framing
 
-**Working contribution statement:** *"A lightweight, interpretable cross-modal attention model that fuses vision, mmWave radar, and inertial data for human activity recognition, runs in real time on a Raspberry Pi-class edge device, and degrades gracefully under per-modality sensor failure."*
+**Working contribution statement:** *"A lightweight, interpretable cross-modal attention model that fuses vision, mmWave radar, and inertial data for human activity recognition, runs through a laptop inference API for v1, and degrades gracefully under per-modality sensor failure."*
 
 What makes it publishable (each maps to prior-work gaps from your Slide 7):
 
 1. **Tri-modal, not bi-modal** — Nakabayashi & Saito (2024) do camera+IMU on edge; you add radar for dark/privacy-sensitive settings.
-2. **Edge-deployed attention** — Koupai et al. (2022) use fusion Transformers but on cloud/desktop; you bring it to a Pi with quantization numbers.
+2. **Practical low-cost deployment** — Arduino/ESP32 handles sensor capture while the laptop API runs open-source camera pose extraction and lightweight fusion.
 3. **Robustness as a measured property** — modality-dropout training + masked attention, with an ablation showing graceful degradation. Prior surveys (Aguileta 2019) note naive fusion fails under sensor loss; you quantify that you don't.
 4. **Interpretability** — published attention weights as a reliability signal ("trusted radar in the dark"). This is a clean figure.
 
-**Suggested evaluation table for the paper:** overall accuracy & macro-F1; per-class fall recall; accuracy under each single-modality dropout (vision-off ≈ darkness); model size and Pi-5 latency; ablation with/without modality-dropout training.
+**Suggested evaluation table for the paper:** overall accuracy & macro-F1; per-class fall recall; accuracy under each single-modality dropout (vision-off ≈ darkness); model size and laptop API latency; ablation with/without modality-dropout training.
 
 ---
 

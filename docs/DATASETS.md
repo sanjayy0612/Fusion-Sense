@@ -5,11 +5,11 @@ robustness logic, not real performance. Real numbers come from the datasets
 below. Training happens in **two stages**:
 
 ```
-Stage 1  Pretrain each encoder SEPARATELY on real single-modality data
+Stage 1  Pretrain the trainable sensor encoders on real single-modality data
          (unpaired is fine — we only want good per-modality features)
-              enc_imu   <- SisFall / UCI-HAR
               enc_radar <- RadHAR
-              enc_vis   <- pose from real video (MediaPipe)
+              enc_imu   <- SisFall / UCI-HAR
+              camera    <- open-source pose model (MediaPipe/MoveNet), no v1 camera training
 
 Stage 2  Train the CROSS-MODAL ATTENTION on PAIRED data
          (sensors aligned in time — required to learn cross-relationships)
@@ -21,7 +21,7 @@ Put downloaded/unzipped data under `data/raw/<name>/`. Nothing is committed
 
 ---
 
-## Stage 1 — single-modality datasets (for the encoders)
+## Stage 1 — single-modality datasets (for the trainable branches)
 
 ### IMU — SisFall (recommended) or UCI-HAR
 - **SisFall** — waist-worn IMU, 19 ADLs + 15 fall types, 38 subjects. Waist
@@ -47,39 +47,16 @@ Run: `python scripts/pretrain_imu.py`  → `checkpoints/enc_imu.pt`
 
 Run: `python scripts/pretrain_radar.py`  → `checkpoints/enc_radar.pt`
 
-### Vision — pose from small video clips (MediaPipe, storage-light path)
-- We never train on raw pixels. Real video → MediaPipe Pose → 33 landmarks × 3
-  = **99-dim** per-frame vector (privacy-preserving, posture-rich).
-- **Set `CFG.vision_dv = 99`** before real vision training.
-- Do **not** download a huge full video dataset first. Start with a small, curated
-  subset or your own laptop/webcam clips, convert each video to pose windows, and
-  cache only the extracted keypoints/features. After extraction, raw `.mp4` files
-  can be moved to external storage or deleted if your review only needs the
-  feature dataset.
-- Labeled clips at `data/raw/vision_videos/<label>/*.mp4`. Keep the labels aligned
-  to the 5-class FusionSense mapping: `walking`, `sitting`, `standing`, `lying`,
-  `fall`. If a public dataset uses more labels, copy only the classes you need.
-- Install: `pip install mediapipe opencv-python`
-
-Run: `python scripts/pretrain_vision.py`  → `checkpoints/enc_vis.pt`
-
-#### If video storage is the blocker
-
-Use this order instead of downloading hundreds of GB:
-
-1. Record **short 5–10 second clips** on your laptop/webcam or phone for each
-   safe class. For falls, use safe staged events: mattress/cushion, dummy object,
-   or controlled sit-to-lying transitions; do not perform unsafe falls.
-2. Extract MediaPipe pose features immediately. The training input becomes small
-   numeric arrays instead of raw video. A 10-second clip at 10 FPS with 99 float32
-   pose values is roughly 40 KB before metadata, so the feature cache is tiny
-   compared with the original videos.
-3. Train the vision encoder on pose windows, not raw pixels. This is enough for
-   posture/fall cues and matches the deployed laptop API, which also extracts
-   pose before inference.
-4. For the report, be explicit: “vision encoder trained on pose/keypoint
-   features extracted from a curated small video set,” not “trained on a massive
-   raw-video dataset.”
+### Camera — open-source pose model, not v1 camera training
+- Use **MediaPipe Pose Landmarker** first. It extracts 33 landmarks × 3 values =
+  **99-dim** per-frame pose features, which match the repo's default vision input.
+- **MoveNet Lightning** is the alternative if you prefer a TensorFlow/TFLite path;
+  it has fewer keypoints, so it may need an adapter.
+- Do not download a huge raw-video dataset just to train a camera model in v1.
+  Capture or reuse short clips only for testing pose extraction and paired fusion.
+- If clips are used, place them at `data/raw/vision_videos/<label>/*.mp4`, but
+  treat `scripts/pretrain_vision.py` as optional. The required v1 training work is
+  radar + IMU + fusion.
 
 ---
 
@@ -107,10 +84,10 @@ them, trains the attention, prints the robustness table, saves
 ## Full command sequence
 
 ```bash
-# Stage 1 — encoders (real data in data/raw/…)
-python scripts/pretrain_imu.py
+# Stage 1 — v1 trainable branches (real data in data/raw/…)
 python scripts/pretrain_radar.py
-python scripts/pretrain_vision.py          # after setting CFG.vision_dv = 99
+python scripts/pretrain_imu.py
+# Camera uses MediaPipe/MoveNet pose features; skip camera-model training in v1.
 
 # Stage 2 — cross-modal attention on paired data
 python scripts/train_fusion.py
@@ -123,8 +100,8 @@ python scripts/train_fusion.py --sim
 ## Honesty checklist (for the report/paper)
 
 - ✅ "Simulator validates architecture + robustness mechanism."
-- ✅ "Encoders pretrained on real single-modality benchmarks."
-- ✅ "Cross-modal attention trained on paired UP-Fall data."
+- ✅ "Radar and IMU encoders pretrained on real single-modality benchmarks."
+- ✅ "Camera branch uses an open-source pose model; cross-modal attention is trained on paired data."
 - ❌ Never report simulator accuracy as real-world performance.
 - ⚠️ The tri-modal (camera+radar+IMU together) claim needs your own paired
   capture — UP-Fall covers only camera+IMU.

@@ -1,11 +1,14 @@
-"""Stage 1 — pretrain the vision encoder on real pose sequences.
+"""Optional camera experiment — train a tiny temporal head on pose sequences.
+
+V1 does NOT train a raw camera model. The camera path should use an open-source
+pose extractor (MediaPipe Pose or MoveNet). This script remains available only if
+you later want to train a small pose-sequence encoder on labeled clips.
 
 Real mode expects labeled video clips laid out as:
   data/raw/vision_videos/<label>/<clip>.mp4
 Each clip -> MediaPipe pose -> (t_vis, vision_dv) windows.
-Set CFG.vision_dv = 99 for full pose (33 landmarks x 3).
 
-  python scripts/pretrain_vision.py                       # real videos
+  python scripts/pretrain_vision.py                       # optional real pose-head training
   python scripts/pretrain_vision.py --sim                 # simulator fallback
 """
 import os, sys, glob

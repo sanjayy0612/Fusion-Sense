@@ -2,8 +2,7 @@
 
 Runs the ESP32/Arduino-style sensor-gateway firmware **with no physical parts**, so you can
 demonstrate a working hardware implementation for the review. In the updated
-prototype, this gateway streams samples to the laptop inference API rather than
-to a Raspberry Pi.
+prototype, this gateway streams samples to the laptop inference API.
 
 ## How to run (no downloads, no parts)
 
