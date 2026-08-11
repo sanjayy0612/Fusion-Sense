@@ -11,4 +11,5 @@ checkpoints/
 node_modules/
 data/raw/*
 !data/raw/.gitkeep
+assets/models/*.task
 CLAUDE.md

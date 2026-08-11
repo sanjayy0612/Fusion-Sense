@@ -32,7 +32,7 @@ prototype, this gateway streams samples to the laptop inference API.
 | ESP32 | ✅ full | ✅ |
 | MPU-6050 IMU (I2C) | ✅ full | ✅ |
 | LD2410 radar (UART) | ❌ not a Wokwi part — code is guarded by `RADAR_PRESENT` | ✅ set `RADAR_PRESENT 1` |
-| Camera | n/a (handled on the laptop API, not the ESP32/Arduino gateway) | ✅ webcam/laptop camera |
+| Camera | n/a (separate from the wearable gateway) | ✅ OV2640 on ESP32-CAM streams to laptop OpenCV |
 
 When you get the real LD2410, set `RADAR_PRESENT 1`, wire TX→GPIO16 / RX→GPIO17,
 and the same sketch streams radar distance + energy alongside the IMU.

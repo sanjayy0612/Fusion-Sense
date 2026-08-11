@@ -1,5 +1,5 @@
 /*
- * FusionSense — ESP32 Sensor Gateway firmware
+ * FusionSense — wearable ESP32 IMU gateway firmware
  * -------------------------------------------------
  * Role: bare-metal sensor acquisition + timestamping + framing.
  * Reads:

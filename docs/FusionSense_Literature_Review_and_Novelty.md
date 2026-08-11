@@ -11,7 +11,13 @@ Date: 2026-06-29 · Status: Discovery-level review (≈30 papers surfaced via al
 1. **Your tri-modal hardware combination (camera + mmWave radar + wearable IMU, edge-deployed) appears genuinely uncommon** — I did not find a published system that integrates exactly these three. That's real, but on its own it reads as *"engineering integration,"* not a research contribution.
 2. **Almost every individual "novelty axis" we got excited about already exists in the literature.** Reliability-aware fusion, modality-dropout robustness, missing-modality transformers, interpretable fusion, uncertainty-aware HAR, edge HAR — each is an active or mature sub-field with recent papers. **This is the part that corrects our earlier optimism.** "Reliability-aware cross-modal attention" is *not* new in general multimodal ML.
 3. **So the defensible contribution is not a new fusion equation.** It's the **systems + empirical** contribution: a deployed tri-modal edge HAR system studied under *real, physically-induced* sensor degradation, using *hardware-reported sensor-health signals* as explicit reliability priors. That last idea (Section 5) is the one angle I found genuinely under-explored.
-4. **Venue calibration:** as-is, V1 is a solid **undergraduate IEEE conference / workshop / Sensors-type** paper. A top-tier ML venue would reject "we combined three sensors with attention." Aim realistically.
+4. **Venue calibration:** the camera–IMU V1 is first a working project prototype.
+   Claims about the uncommon tri-modal combination belong to the later mmWave
+   extension and require paired physical data.
+
+> **Scope note:** V1 now uses camera + wearable IMU only. Radar is the planned
+> third modality and remains represented by a disabled model slot
+> (`radar_valid=False`) until the later extension.
 
 ---
 
@@ -93,7 +99,10 @@ This is the difference between "we added confidence scores" (crowded) and "we co
 
 > *FusionSense is a lightweight, sensor-health-aware multimodal HAR framework for edge devices. We demonstrate it on elderly fall monitoring.*
 
-The **framework** (tri-modal, health-conditioned fusion, edge) is the contribution; **elderly fall detection** is the demonstration. This makes it reusable (hospital, rehab, workplace safety) and stops a reviewer from dismissing it as one narrow app.
+The long-term **framework** (tri-modal, health-conditioned fusion, edge) is the
+research direction; **V1 validates the camera–IMU core** and elderly fall
+detection is the demonstration. Keep claims about evaluated radar behavior for
+the later hardware extension.
 
 ---
 
@@ -101,17 +110,22 @@ The **framework** (tri-modal, health-conditioned fusion, edge) is the contributi
 
 | Version | What it is | Honest contribution level | Realistic venue |
 |---------|-----------|---------------------------|-----------------|
-| **V1 (build this first)** | Working tri-modal edge prototype: camera + radar + IMU → merged-token attention → HAR → MQTT dashboard. | Systems integration + working demo | Project / workshop / poster |
-| **V2 (the paper)** | Add **sensor-health-conditioned attention** (Section 5) + a real **degradation study** (Gap A) + interpretable trust output. | Genuine empirical + modest methodological | IEEE conference / Sensors-type journal |
-| **V3 (stretch)** | Move toward camera+radar-only (drop the wearable), add uncertainty calibration, or context-conditioned attention. | Methodological | Stronger journal |
+| **V1 (build this first)** | Working camera + wearable-IMU prototype → laptop fusion → HAR/dashboard/fall alerts; radar masked with `radar_valid=False`. | Systems integration + working demo | Project / poster |
+| **V2 (mmWave extension)** | Add fixed mmWave as the third modality and collect paired physical data without replacing V1. | Uncommon integration + empirical extension | Workshop / IEEE Sensors-type |
+| **V3 (research contribution)** | Add sensor-health priors + a real degradation protocol + ablations against vanilla attention and modality dropout. | **Under-explored and defensible** | Sensors / IoT / ubiquitous-computing venue |
 
-**Do not** try to make V1 itself "novel by architecture." Its job is to *work*. The novelty is bolted on in V2 once the rig runs.
+**Do not** try to make V1 itself "novel by architecture." Its job is to make
+the camera–IMU system work end to end. Radar and the stronger novelty study are
+extensions built on that functioning pipeline.
 
 ---
 
 ## 8. What to do — concrete next steps
 
-1. **Build V1 now, software-first.** Start the repo + simulator (the FusionWindow generator). You don't need novelty resolved to start coding the working system — and a running system is your stated #1 goal.
+1. **Build V1 now:** wearable MPU-6050 → ESP32 plus OV2640 → ESP32-CAM
+   MJPEG, decoded with OpenCV and converted by MediaPipe Pose on the laptop;
+   synchronize both streams into two-second windows and connect the dashboard
+   and fall-alert path.
 2. **Bake the V2 hooks in from day one.** Make the `FusionWindow` carry three extra scalars — `radar_energy`, `image_quality`, `imu_clip` — even if the simulator fakes them. That one decision keeps the Section-5 idea cheap to add later instead of a rewrite.
 3. **Read the 4 closest neighbors before writing any claims:** intake-gesture radar+IMU robustness (2507.07261), bathroom-fall edge two-stream (2603.17069), Unbiased Dynamic Multimodal Fusion (2603.19681), missing-modality survey (2409.07825). These define what you must differentiate against.
 4. **When ready, I run the full 50–70 paper deep review** and build the real gap matrix with per-paper contribution columns, so your related-work section and novelty claims are airtight before submission.

@@ -1,3 +1,5 @@
 numpy>=1.24
 matplotlib>=3.6
 torch>=2.0        # install the CUDA build for your RTX 4060 from pytorch.org
+mediapipe>=0.10.30
+opencv-python>=4.8

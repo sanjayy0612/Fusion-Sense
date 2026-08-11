@@ -1,86 +1,114 @@
 # FusionSense — Current Project Plan
 
-This is the single current plan. Older Pi-first and train-everything plans are no
-longer the v1 direction.
+This is the authoritative plan for the first practical FusionSense version.
+Older Pi-first and radar-first plans are not the V1 direction.
 
-## 1. V1 priorities
+## 1. V1 objective
 
-1. **Train radar branch** with RadHAR.
-2. **Train IMU branch** with SisFall, UCI-HAR, or local MPU-6050 captures.
-3. **Use an open-source camera model** for pose/keypoint extraction; do not train
-   a raw camera model in v1.
-4. **Train FusionSense fusion attention/head** after radar and IMU checkpoints are
-   available.
-5. **Set up Arduino/ESP32 hardware after model branches are understood.**
-
-## 2. Final v1 architecture
+Build a working **camera + wearable IMU** activity-recognition and fall-alert
+system. mmWave radar remains the intended third modality, but it is integrated
+only after the two-modality pipeline works end to end.
 
 ```text
-LD2410 radar ─┐
-              ├─ Arduino/ESP32 gateway ── USB serial/WiFi ── laptop
-MPU-6050 IMU ─┘                                                │
-                                                               │
-Laptop webcam/camera ── MediaPipe Pose or MoveNet ─────────────┤
-                                                               ▼
-                                                   FusionWindow builder
-                                                               ▼
-                                               FusionSense fusion model/API
+MPU-6050 → wearable ESP32 → timestamped IMU ──┐
+                                                   ├─→ Laptop synchronizer
+OV2640 → ESP32-CAM → Wi-Fi MJPEG → OpenCV ─┘          │
+                                                              ├─→ ML model
+                                                   MediaPipe Pose ─┘      │
+                                                                         └─→ Dashboard → Fall alerts
 ```
 
-The microcontroller is only a sensor gateway. The laptop handles pose extraction,
-windowing, model training, inference, and API/dashboard output.
+## 2. V1 system decisions
 
-## 3. Camera decision
+- One wearable ESP32 reads the MPU-6050 and transmits timestamped accelerometer
+  and gyroscope samples.
+- A dedicated ESP32-CAM captures OV2640 frames and streams MJPEG over Wi-Fi.
+- OpenCV receives the ESP32-CAM stream on the laptop.
+- MediaPipe Pose Landmarker runs on the laptop and converts decoded frames into
+  33 landmark coordinates (99 values per pose frame).
+- The laptop is the clock authority and synchronizes camera and IMU samples into
+  two-second windows.
+- The model fuses the camera-pose and IMU branches.
+- The radar tensor stays zero-filled and `radar_valid=False` for every V1
+  training and inference window.
+- The dashboard reports activity, confidence, camera/IMU health, and fall alerts.
+- No Raspberry Pi is used. V1 has two ESP32 roles: wearable IMU acquisition and
+  fixed ESP32-CAM video streaming.
+- A future radar node may use another microcontroller; it is not part of V1.
 
-The camera path uses an open-source pose model:
+## 3. Data contract and future compatibility
 
-- **Recommended:** MediaPipe Pose Landmarker, because the repo already supports
-  33 landmarks × `(x, y, z)` = 99-dimensional pose frames.
-- **Alternative:** MoveNet Lightning, if a TensorFlow/TFLite path is preferred.
+V1 keeps the existing three-slot `FusionWindow` contract:
 
-This is still AI: the open-source model extracts human pose, while FusionSense
-learns how to fuse camera pose with radar and IMU signals. We skip raw camera
-model training because it adds dataset size, compute, and labeling work without
-being the core contribution.
+```text
+imu     (100, 6)   valid=True when enough wearable samples are present
+vision  (20, 99)   valid=True when MediaPipe detects usable pose landmarks
+radar   (40, K)    all zeros, radar_valid=False, radar_energy=0.0
+```
 
-## 4. Training plan
+Keeping the dormant radar slot is deliberate. The future camera + IMU + mmWave
+system can activate that slot without changing the window builder, model API,
+training loop, dashboard event schema, or present hardware pipeline.
+
+## 4. Practical build order
+
+1. Validate MPU-6050 sampling and timestamped ESP32-to-laptop transport.
+2. Flash ESP32-CAM CameraWebServer and validate its browser MJPEG stream.
+3. Validate OpenCV capture and MediaPipe Pose extraction from that stream.
+4. Synchronize both streams into two-second `FusionWindow`s.
+5. Train or load the IMU encoder and train the camera–IMU fusion head on paired
+   data such as UP-Fall or local captures.
+6. Add live laptop inference, sensor-health reporting, activity confidence,
+   dashboard updates, and fall alerts.
+7. Test sensor loss: IMU missing, camera stream missing/dark, and recovery.
+8. Only after V1 works, integrate mmWave as the third modality.
+
+## 5. V1 training commands
 
 ```bash
-# Smoke tests first
+# Plumbing and simulator checks
 python tests/test_pipeline.py
-python scripts/pretrain_radar.py --sim
+python tests/test_camera_stream.py
+python scripts/download_pose_model.py
+python scripts/test_esp32_camera.py --host <esp32-cam-ip>
 python scripts/pretrain_imu.py --sim
 python scripts/train_fusion.py --sim
 
-# Real v1 branch training
-python scripts/pretrain_radar.py
+# Real V1 model path
 python scripts/pretrain_imu.py
-
-# Fusion after branch checkpoints exist
 python scripts/train_fusion.py
 ```
 
-For v1, do not run `scripts/pretrain_vision.py` as a required step. Keep it only
-as an optional experiment for training a small temporal pose head later.
+MediaPipe supplies the camera pose features, so raw-camera-model training is
+not required. Radar pretraining is optional future-extension work and is not on
+the V1 critical path.
 
-## 5. Dataset plan
+## 6. V1 completion criteria
 
-| Modality | Dataset/source | Needed now? | Notes |
-|----------|----------------|-------------|-------|
-| Radar | RadHAR | Yes | Main radar pretraining source. Adapt later for LD2410. |
-| IMU | SisFall or UCI-HAR | Yes | SisFall is better for fall detection; UCI-HAR is easier for a first pass. |
-| Camera | MediaPipe/MoveNet on webcam/video | Yes, but no raw camera training | Keep only pose/keypoint features where possible. |
-| Fusion | UP-Fall or local paired captures | Later | Use after branch checkpoints exist. |
+V1 is complete when:
 
-Do not commit raw datasets to git. Keep datasets under `data/raw/` locally and
-commit only code, docs, preprocessing utilities, and small placeholders.
+- one wearable ESP32 continuously streams valid MPU-6050 data;
+- the ESP32-CAM streams stable OV2640 frames to the laptop;
+- the laptop continuously extracts MediaPipe pose landmarks from that stream;
+- the laptop creates synchronized two-second camera–IMU windows with radar
+  disabled;
+- the model produces an activity label and confidence for each window;
+- the dashboard shows activity, confidence, camera health, and IMU health;
+- a detected fall produces a visible alert; and
+- unplugging or degrading one active sensor does not crash the pipeline.
 
-## 6. What to claim honestly
+## 7. Later mmWave extension
 
-- FusionSense is a lightweight, sensor-health-aware multimodal fusion framework.
-- V1 trains radar and IMU branches, uses an open-source pose model for camera,
-  and trains the fusion attention/head.
-- The Arduino/ESP32 gateway is for live sensor acquisition after model training
-  is understood.
-- Simulator results prove plumbing only, not final real-world accuracy.
-- A small local tri-modal capture is still needed for final hardware validation.
+The final target remains **camera + wearable IMU + fixed mmWave radar**. A
+second ESP32 may acquire the radar stream and transmit it to the same laptop.
+The laptop then populates the existing radar tensor and changes
+`radar_valid=True` for healthy radar windows. This extends V1; it does not
+replace it.
+
+## 8. Honest project claims
+
+- V1 is a practical bi-modal camera–IMU HAR and fall-alert prototype.
+- MediaPipe performs pose extraction; FusionSense learns temporal sensor fusion.
+- Simulator results validate plumbing only, not real-world accuracy.
+- Tri-modal accuracy or robustness claims require later paired camera + IMU +
+  mmWave captures.

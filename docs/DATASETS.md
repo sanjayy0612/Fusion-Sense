@@ -5,11 +5,9 @@ robustness logic, not real performance. Real numbers come from the datasets
 below. Training happens in **two stages**:
 
 ```
-Stage 1  Pretrain the trainable sensor encoders on real single-modality data
-         (unpaired is fine — we only want good per-modality features)
-              enc_radar <- RadHAR
+Stage 1  Prepare the two V1 branches
               enc_imu   <- SisFall / UCI-HAR
-              camera    <- open-source pose model (MediaPipe/MoveNet), no v1 camera training
+              camera    <- MediaPipe Pose, no raw-camera training
 
 Stage 2  Train the CROSS-MODAL ATTENTION on PAIRED data
          (sensors aligned in time — required to learn cross-relationships)
@@ -21,7 +19,7 @@ Put downloaded/unzipped data under `data/raw/<name>/`. Nothing is committed
 
 ---
 
-## Stage 1 — single-modality datasets (for the trainable branches)
+## Stage 1 — V1 branch preparation
 
 ### IMU — SisFall (recommended) or UCI-HAR
 - **SisFall** — waist-worn IMU, 19 ADLs + 15 fall types, 38 subjects. Waist
@@ -38,25 +36,30 @@ Put downloaded/unzipped data under `data/raw/<name>/`. Nothing is committed
 
 Run: `python scripts/pretrain_imu.py`  → `checkpoints/enc_imu.pt`
 
-### Radar — RadHAR
+### Radar — RadHAR (future extension, not required for V1)
 - mmWave point-cloud HAR, 5 activities. ~70 GB preprocessed.
   Repo/data: https://github.com/nesl/RadHAR
   Preprocess into per-sample `.npy` (frames × features) at
   `data/raw/radhar/<activity>/*.npy`. Adapt `_to_frame_features` in
   `radar_loader.py` if your layout differs.
 
-Run: `python scripts/pretrain_radar.py`  → `checkpoints/enc_radar.pt`
+Optional later command: `python scripts/pretrain_radar.py` →
+`checkpoints/enc_radar.pt`. Do not block the camera–IMU V1 on this dataset.
 
 ### Camera — open-source pose model, not v1 camera training
 - Use **MediaPipe Pose Landmarker** first. It extracts 33 landmarks × 3 values =
   **99-dim** per-frame pose features, which match the repo's default vision input.
+- The live V1 source is the OV2640 on ESP32-CAM. OpenCV decodes its MJPEG stream
+  on the laptop; MediaPipe and FusionSense do not run on the camera board.
+- Download the official Lite bundle with `python scripts/download_pose_model.py`
+  and test live capture with `python scripts/test_esp32_camera.py --host <ip>`.
 - **MoveNet Lightning** is the alternative if you prefer a TensorFlow/TFLite path;
   it has fewer keypoints, so it may need an adapter.
 - Do not download a huge raw-video dataset just to train a camera model in v1.
   Capture or reuse short clips only for testing pose extraction and paired fusion.
 - If clips are used, place them at `data/raw/vision_videos/<label>/*.mp4`, but
-  treat `scripts/pretrain_vision.py` as optional. The required v1 training work is
-  radar + IMU + fusion.
+  treat `scripts/pretrain_vision.py` as optional. The required V1 work is IMU
+  preparation plus paired camera–IMU fusion.
 
 ---
 
@@ -66,10 +69,9 @@ Run: `python scripts/pretrain_radar.py`  → `checkpoints/enc_radar.pt`
 - Multimodal: **2 cameras + 5 wearable IMUs + ambient**, 17 subjects, 11
   activities + falls. Published in *Sensors* (2019). ~850 GB full.
   Site: http://sites.google.com/up.edu.mx/har-up/ · Code: https://github.com/jpnm561/HAR-UP
-- UP-Fall has **no mmWave radar**, so `paired_loader` marks `radar_valid=False`
-  per window — the model's masking handles the missing modality natively. You
-  add real radar later from your own capture (or lean on the RadHAR-pretrained
-  encoder).
+- UP-Fall has **no mmWave radar**, which exactly matches the V1 modality set.
+  `paired_loader` zero-fills radar and marks `radar_valid=False` per window; the
+  model's masking removes that token from fusion.
 - Normalize into:
   `data/raw/up_fall/<subject>/<activity>/<trial>/imu.csv`  (cols `ax,ay,az,gx,gy,gz`)
   `data/raw/up_fall/<subject>/<activity>/<trial>/video.mp4`
@@ -84,10 +86,9 @@ them, trains the attention, prints the robustness table, saves
 ## Full command sequence
 
 ```bash
-# Stage 1 — v1 trainable branches (real data in data/raw/…)
-python scripts/pretrain_radar.py
+# Stage 1 — V1 IMU branch (real data in data/raw/…)
 python scripts/pretrain_imu.py
-# Camera uses MediaPipe/MoveNet pose features; skip camera-model training in v1.
+# Camera uses MediaPipe Pose features; skip raw-camera training in V1.
 
 # Stage 2 — cross-modal attention on paired data
 python scripts/train_fusion.py
@@ -100,8 +101,8 @@ python scripts/train_fusion.py --sim
 ## Honesty checklist (for the report/paper)
 
 - ✅ "Simulator validates architecture + robustness mechanism."
-- ✅ "Radar and IMU encoders pretrained on real single-modality benchmarks."
-- ✅ "Camera branch uses an open-source pose model; cross-modal attention is trained on paired data."
+- ✅ "V1 fuses MediaPipe camera-pose features with wearable IMU data."
+- ✅ "Radar is zero-filled and masked with `radar_valid=False` in V1."
 - ❌ Never report simulator accuracy as real-world performance.
-- ⚠️ The tri-modal (camera+radar+IMU together) claim needs your own paired
-  capture — UP-Fall covers only camera+IMU.
+- ⚠️ Any tri-modal claim needs a later paired camera + radar + IMU capture;
+  UP-Fall supports only the bi-modal V1.
