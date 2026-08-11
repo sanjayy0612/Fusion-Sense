@@ -39,9 +39,14 @@ def load_imu_windows(cfg=CFG, source: str | None = None):
     X, codes = [], []
     for f in files:
         try:
-            arr = np.loadtxt(f, delimiter=",", ndmin=2)
+            # SisFall rows contain nine comma-separated values and end with a
+            # semicolon.  The first six are the accel+gyro channels used by
+            # this project; selecting them avoids parsing the terminator in
+            # the ninth field while remaining compatible with six-column CSVs.
+            arr = np.loadtxt(f, delimiter=",", usecols=range(6), ndmin=2)
         except Exception:
-            arr = np.genfromtxt(f, delimiter=",", invalid_raise=False)
+            arr = np.genfromtxt(f, delimiter=",", usecols=range(6),
+                                invalid_raise=False)
         if arr.ndim != 2 or arr.shape[1] < 6:
             continue
         sig = arr[:, :6].astype(np.float32)               # ax..gz
