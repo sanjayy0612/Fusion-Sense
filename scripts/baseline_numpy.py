@@ -89,7 +89,7 @@ def scores(y, p):
         tp = ((p == c) & (y == c)).sum(); fp = ((p == c) & (y != c)).sum(); fn = ((p != c) & (y == c)).sum()
         pr = tp / (tp + fp + 1e-9); rc = tp / (tp + fn + 1e-9)
         f1s.append(2 * pr * rc / (pr + rc + 1e-9))
-    fall = LABEL2ID["falling"]
+    fall = LABEL2ID["stand_to_fall"]
     fr = ((p == fall) & (y == fall)).sum() / ((y == fall).sum() + 1e-9)
     return acc, float(np.mean(f1s)), float(fr)
 
@@ -111,15 +111,16 @@ def main():
     print(f"accuracy {acc:.3f} | macro-F1 {f1:.3f} | fall-recall {fr:.3f}")
 
     # confusion matrix
-    C = np.zeros((5, 5), int)
+    n_classes = len(ACTIVITIES)
+    C = np.zeros((n_classes, n_classes), int)
     for t, pp in zip(yte, p):
         C[t, pp] += 1
     fig, ax = plt.subplots(figsize=(5.5, 4.8))
     im = ax.imshow(C, cmap="Blues")
-    ax.set_xticks(range(5)); ax.set_yticks(range(5))
+    ax.set_xticks(range(n_classes)); ax.set_yticks(range(n_classes))
     ax.set_xticklabels(ACTIVITIES, rotation=40, ha="right"); ax.set_yticklabels(ACTIVITIES)
-    for i in range(5):
-        for j in range(5):
+    for i in range(n_classes):
+        for j in range(n_classes):
             ax.text(j, i, C[i, j], ha="center", va="center",
                     color="white" if C[i, j] > C.max() / 2 else "black", fontsize=9)
     ax.set_xlabel("predicted"); ax.set_ylabel("true"); ax.set_title(f"Confusion matrix (acc {acc:.2f})")

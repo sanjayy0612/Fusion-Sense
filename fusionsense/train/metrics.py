@@ -19,7 +19,7 @@ def summarize(y_true, y_pred):
         rec = tp / (tp + fn + 1e-9)
         f1s.append(2 * prec * rec / (prec + rec + 1e-9))
     macro_f1 = float(np.mean(f1s))
-    fall = LABEL2ID["falling"]
+    fall = LABEL2ID["stand_to_fall"]
     fall_recall = float(((y_pred == fall) & (y_true == fall)).sum()
                         / ((y_true == fall).sum() + 1e-9))
     return float(acc), macro_f1, fall_recall
@@ -64,10 +64,13 @@ def robustness_report(model, windows, device):
             keep = v.any(1)                      # skip samples with nothing left
             if keep.sum() == 0:
                 continue
-            pred = model(imu, radar, vision, v, h).argmax(1)
-            ys.append(y[keep.cpu()].numpy()); ps.append(pred[keep].cpu().numpy())
-        acc, f1, fall = summarize(np.concatenate(ys), np.concatenate(ps))
-        rows[name] = dict(acc=acc, macro_f1=f1, fall_recall=fall)
+            pred = model(
+                imu[keep], radar[keep], vision[keep], v[keep], h[keep]
+            ).argmax(1)
+            ys.append(y[keep.cpu()].numpy()); ps.append(pred.cpu().numpy())
+        if ys:
+            acc, f1, fall = summarize(np.concatenate(ys), np.concatenate(ps))
+            rows[name] = dict(acc=acc, macro_f1=f1, fall_recall=fall)
     return rows
 
 

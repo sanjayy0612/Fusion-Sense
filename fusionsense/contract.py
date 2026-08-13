@@ -22,8 +22,17 @@ from typing import Optional
 
 import numpy as np
 
-# Canonical activity label set for v1.
-ACTIVITIES = ["walking", "standing", "sitting", "lying", "falling"]
+# Canonical C-MHAD transition labels for V1.  These names describe events,
+# not persistent postures: ``stand_to_sit`` means the complete transition.
+ACTIVITIES = [
+    "stand_to_sit",
+    "sit_to_stand",
+    "sit_to_lie",
+    "lie_to_sit",
+    "lie_to_stand",
+    "stand_to_lie",
+    "stand_to_fall",
+]
 LABEL2ID = {name: i for i, name in enumerate(ACTIVITIES)}
 ID2LABEL = {i: name for name, i in LABEL2ID.items()}
 

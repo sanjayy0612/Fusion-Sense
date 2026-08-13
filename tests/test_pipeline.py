@@ -16,11 +16,12 @@ from fusionsense.data.simulator import (
 )
 from fusionsense.data.paired_loader import _imu_windows
 from fusionsense.data.splitting import split_paired_windows
+from fusionsense.data.cmhad_loader import read_annotations, read_imu_stream, crop_stream_window
 
 
 def test_shapes():
     rng = np.random.default_rng(0)
-    w = sample_window("walking", rng, degrade=False)
+    w = sample_window("stand_to_sit", rng, degrade=False)
     assert w.imu.shape == (CFG.t_imu, CFG.imu_ch), w.imu.shape
     assert w.radar.shape == (CFG.t_radar, CFG.radar_k), w.radar.shape
     assert w.vision.shape == (CFG.t_vis, CFG.vision_dv), w.vision.shape
@@ -119,6 +120,34 @@ def test_paired_split_keeps_recordings_together():
     print("PASS test_paired_split_keeps_recordings_together")
 
 
+def test_cmhad_annotation_and_imu_parsing():
+    from openpyxl import Workbook
+    with tempfile.TemporaryDirectory() as tmpdir:
+        annotation_path = os.path.join(tmpdir, "labels.xlsx")
+        workbook = Workbook()
+        sheet = workbook.active
+        sheet.append(["Video", "Action", "StartTime(Seconds)", "EndTime(Seconds)"])
+        sheet.append([3, 7, 10.0, 12.0])
+        workbook.save(annotation_path)
+        rows = read_annotations(annotation_path)
+        assert rows == [{"recording": 3, "label": 6, "start": 10.0, "end": 12.0}]
+
+        imu_path = os.path.join(tmpdir, "imu.csv")
+        with open(imu_path, "w") as handle:
+            handle.write("Time Stamp,ax,ay,az,gx,gy,gz\n")
+            handle.write("CAL,CAL,CAL,CAL,CAL,CAL,CAL\n")
+            handle.write("milliseconds,m/s2,m/s2,m/s2,deg/s,deg/s,deg/s\n")
+            for index in range(5964):
+                handle.write(f"{index * 20},1,2,3,4,5,6\n")
+        stream = read_imu_stream(imu_path)
+        assert stream.shape == (6001, 6)
+        assert np.allclose(stream[:37], 0.0)
+        window = crop_stream_window(stream, 1.0)
+        assert window.shape == (CFG.t_imu, CFG.imu_ch)
+        assert np.allclose(window[0], [1, 2, 3, 4, 5, 6])
+        print("PASS test_cmhad_annotation_and_imu_parsing")
+
+
 if __name__ == "__main__":
     test_shapes()
     test_no_nans()
@@ -129,4 +158,5 @@ if __name__ == "__main__":
     test_record_and_replay_roundtrip()
     test_collector_imu_csv_is_read_without_timestamp_channel()
     test_paired_split_keeps_recordings_together()
+    test_cmhad_annotation_and_imu_parsing()
     print("\nALL PIPELINE TESTS PASSED")

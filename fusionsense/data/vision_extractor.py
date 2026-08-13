@@ -159,3 +159,59 @@ def pose_sequence_to_windows(seq: np.ndarray, cfg=CFG, src_fps: float = 30.0):
         else np.pad(seq, ((0, 0), (0, cfg.vision_dv - seq.shape[1])))
     )
     return segment_recording(seq, src_fps, cfg.t_vis, cfg.window_seconds)
+
+
+def video_to_aligned_pose_windows(
+    video_path: str,
+    window_starts: list[float],
+    cfg=CFG,
+    model_path: str | Path = DEFAULT_MODEL_PATH,
+):
+    """Extract only the frames needed for timestamp-aligned C-MHAD windows.
+
+    The video is decoded once per recording. Requested source-frame indices are
+    deduplicated, which is much faster than running MediaPipe over every frame
+    in each two-minute stream. Returns ``(pose_windows, valid_ratios,
+    quality_means)`` in the same order as ``window_starts``.
+    """
+    cv2, _ = _lazy_imports()
+    cap = cv2.VideoCapture(video_path)
+    if not cap.isOpened():
+        raise FileNotFoundError(f"Could not open video {video_path}")
+    src_fps = float(cap.get(cv2.CAP_PROP_FPS)) or 15.0
+    frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+
+    requested = []
+    for start in window_starts:
+        indices = [
+            int(round((start + offset / cfg.vision_fps) * src_fps))
+            for offset in range(cfg.t_vis)
+        ]
+        requested.append([max(0, min(index, frame_count - 1)) for index in indices])
+
+    unique_indices = sorted({index for indices in requested for index in indices})
+    extracted = {}
+    try:
+        with PoseExtractor(model_path) as extractor:
+            for index in unique_indices:
+                cap.set(cv2.CAP_PROP_POS_FRAMES, index)
+                ok, frame = cap.read()
+                if not ok:
+                    extracted[index] = PoseFrame(
+                        captured_at=index / src_fps,
+                        landmarks=np.zeros(POSE_DIM, dtype=np.float32),
+                        valid=False,
+                        image_quality=0.0,
+                    )
+                    continue
+                extracted[index] = extractor.extract(frame, captured_at=index / src_fps)
+    finally:
+        cap.release()
+
+    windows, valid_ratios, qualities = [], [], []
+    for indices in requested:
+        frames = [extracted[index] for index in indices]
+        windows.append(np.stack([frame.landmarks for frame in frames]).astype(np.float32))
+        valid_ratios.append(float(np.mean([frame.valid for frame in frames])))
+        qualities.append(float(np.mean([frame.image_quality for frame in frames])))
+    return windows, valid_ratios, qualities

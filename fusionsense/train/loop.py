@@ -18,8 +18,8 @@ def _class_weights(windows, device):
         counts[w.label] += 1
     inv = counts.sum() / (counts + 1e-6)
     inv = inv / inv.mean()
-    # extra emphasis on the critical 'falling' class
-    inv[LABEL2ID["falling"]] *= 1.5
+    # extra emphasis on the critical fall-transition class
+    inv[LABEL2ID["stand_to_fall"]] *= 1.5
     return torch.tensor(inv, dtype=torch.float32, device=device)
 
 

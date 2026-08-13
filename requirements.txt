@@ -4,3 +4,4 @@ torch>=2.0        # install the CUDA build for your RTX 4060 from pytorch.org
 mediapipe>=0.10.30
 opencv-python>=4.8
 pyserial>=3.5        # ESP32 IMU capture over USB serial
+openpyxl>=3.1        # C-MHAD timestamp annotations (.xlsx)

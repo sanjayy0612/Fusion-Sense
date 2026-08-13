@@ -15,7 +15,8 @@ from ..models.encoders import EncoderClassifier
 
 
 def pretrain_encoder(X, y, n_classes, in_ch, out_path,
-                     d=None, epochs=20, batch_size=128, lr=1e-3, device=None):
+                     d=None, epochs=20, batch_size=128, lr=1e-3, device=None,
+                     X_val=None, y_val=None, seed=42):
     """X: (N,T,in_ch) float32,  y: (N,) int.  Saves encoder to out_path."""
     from ..device import get_device
     device = device or get_device()
@@ -23,11 +24,21 @@ def pretrain_encoder(X, y, n_classes, in_ch, out_path,
 
     X = torch.tensor(np.asarray(X), dtype=torch.float32)
     y = torch.tensor(np.asarray(y), dtype=torch.long)
-    n_val = max(1, int(0.2 * len(X)))
-    perm = torch.randperm(len(X))
-    tr, va = perm[n_val:], perm[:n_val]
-    tl = DataLoader(TensorDataset(X[tr], y[tr]), batch_size=batch_size, shuffle=True)
-    vl = DataLoader(TensorDataset(X[va], y[va]), batch_size=batch_size)
+    if X_val is None or y_val is None:
+        n_val = max(1, int(0.2 * len(X)))
+        generator = torch.Generator().manual_seed(seed)
+        perm = torch.randperm(len(X), generator=generator)
+        tr, va = perm[n_val:], perm[:n_val]
+        train_ds = TensorDataset(X[tr], y[tr])
+        val_ds = TensorDataset(X[va], y[va])
+    else:
+        train_ds = TensorDataset(X, y)
+        val_ds = TensorDataset(
+            torch.tensor(np.asarray(X_val), dtype=torch.float32),
+            torch.tensor(np.asarray(y_val), dtype=torch.long),
+        )
+    tl = DataLoader(train_ds, batch_size=batch_size, shuffle=True)
+    vl = DataLoader(val_ds, batch_size=batch_size)
 
     model = EncoderClassifier(in_ch, d, n_classes).to(device)
     opt = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=1e-4)

@@ -27,7 +27,7 @@ class Config:
     d_model: int = 128
     n_heads: int = 4
     n_layers: int = 2
-    n_classes: int = 5
+    n_classes: int = 7
 
     # --- training ---
     modality_dropout_p: float = 0.3   # prob. of zeroing a modality per sample
@@ -36,7 +36,7 @@ class Config:
     # --- dataset directory names under DATA_ROOT ---
     imu_dir: str = "sisfall"          # single-modality IMU (or "uci_har")
     radar_dir: str = "radhar"         # single-modality mmWave
-    paired_dir: str = "up_fall"       # paired camera + IMU (fusion stage)
+    paired_dir: str = "cmhad"          # prepared C-MHAD camera + IMU cache
 
     @property
     def t_imu(self) -> int:
