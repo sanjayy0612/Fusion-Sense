@@ -23,7 +23,7 @@ def _periodic(T, freq, amp, phase=0.0, rng=None):
     t = np.linspace(0, 1, T, endpoint=False)
     sig = amp * np.sin(2 * np.pi * freq * t + phase)
     if rng is not None:
-        sig = sig + rng.normal(0, 0.05 * amp + 1e-3, size=T)
+        sig = sig + rng.normal(0, 0.05 * abs(amp) + 1e-3, size=T)
     return sig
 
 
@@ -32,24 +32,29 @@ def _imu_signature(activity, rng):
     T = CFG.t_imu
     x = np.zeros((T, 6), dtype=np.float32)
     g = 9.81
-    if activity == "walking":
-        for a in range(3):
-            x[:, a] = _periodic(T, freq=2.0, amp=2.0, phase=a, rng=rng)
-        x[:, 2] += g
-        for a in range(3, 6):
-            x[:, a] = _periodic(T, freq=2.0, amp=30.0, phase=a, rng=rng)
-    elif activity in ("standing", "sitting", "lying"):
-        # mostly static; gravity vector orientation differs per posture
-        grav = {"standing": [0, 0, g], "sitting": [0, 0.4 * g, 0.9 * g],
-                "lying": [g, 0, 0]}[activity]
-        for a in range(3):
-            x[:, a] = grav[a] + rng.normal(0, 0.15, size=T)
-        for a in range(3, 6):
-            x[:, a] = rng.normal(0, 1.0, size=T)
-    elif activity == "falling":
+    start, end = activity.split("_to_")
+    gravities = {
+        "stand": np.array([0.0, 0.0, g]),
+        "sit": np.array([0.0, 0.4 * g, 0.9 * g]),
+        "lie": np.array([g, 0.0, 0.0]),
+        "fall": np.array([g, 0.0, 0.0]),
+    }
+    alpha = np.linspace(0.0, 1.0, T)[:, None]
+    x[:, :3] = (
+        (1.0 - alpha) * gravities[start]
+        + alpha * gravities[end]
+        + rng.normal(0, 0.18, size=(T, 3))
+    )
+    direction = {
+        "stand_to_sit": 1.0, "sit_to_stand": -1.0,
+        "sit_to_lie": 2.0, "lie_to_sit": -2.0,
+        "lie_to_stand": -3.0, "stand_to_lie": 3.0,
+        "stand_to_fall": 5.0,
+    }[activity]
+    x[:, 3:] = rng.normal(0, 1.5, size=(T, 3))
+    x[:, 3] += _periodic(T, freq=0.5, amp=20.0 * direction, rng=rng)
+    if activity == "stand_to_fall":
         # free-fall dip then sharp impact spike, then still
-        x[:, :3] = rng.normal(0, 0.2, size=(T, 3))
-        x[:, 2] += g
         drop = int(T * 0.4)
         impact = int(T * 0.55)
         x[drop:impact, 2] *= 0.15                       # near free-fall
@@ -66,16 +71,9 @@ def _radar_signature(activity, rng):
     T, K = CFG.t_radar, CFG.radar_k
     x = rng.normal(0, 0.1, size=(T, K)).astype(np.float32)
     base_range = rng.uniform(1.5, 4.0)
-    if activity == "walking":
-        x[:, 0] = base_range - np.linspace(0, 1.2, T) + rng.normal(0, 0.05, T)
-        x[:, 1] = np.abs(_periodic(T, 2.0, 1.0, rng=rng)) + 0.5
-    elif activity in ("standing", "sitting"):
-        x[:, 0] = base_range + rng.normal(0, 0.03, T)
-        x[:, 1] = np.abs(rng.normal(0, 0.1, T))
-    elif activity == "lying":
-        x[:, 0] = base_range + rng.normal(0, 0.03, T)
-        x[:, 1] = np.abs(rng.normal(0, 0.05, T))
-    elif activity == "falling":
+    x[:, 0] = base_range + rng.normal(0, 0.03, T)
+    x[:, 1] = np.abs(_periodic(T, 0.7, 0.5, rng=rng))
+    if activity == "stand_to_fall":
         drop = int(T * 0.45)
         x[:, 0] = base_range + rng.normal(0, 0.03, T)
         x[drop:, 0] = base_range - 0.6 + rng.normal(0, 0.05, T - drop)  # height drop
@@ -90,16 +88,17 @@ def _vision_signature(activity, rng):
     posture code so classes are separable; rest is noise."""
     T, D = CFG.t_vis, CFG.vision_dv
     x = rng.normal(0, 0.3, size=(T, D)).astype(np.float32)
-    code = {"walking": [1, 0, 0], "standing": [0, 1, 0], "sitting": [0, 0.5, 0.5],
-            "lying": [0, 0, 1], "falling": [0, 0, 1]}[activity]
-    for i, c in enumerate(code):
-        x[:, i] += c
-    if activity == "walking":
-        x[:, 0] += _periodic(T, 2.0, 0.3, rng=rng)      # gait bob
-    if activity == "falling":
-        half = T // 2
-        x[:half, 1] += 1.0                              # upright -> down transition
-        x[half:, 2] += 1.0
+    posture = {
+        "stand": np.array([0.0, 1.0, 0.0]),
+        "sit": np.array([0.0, 0.5, 0.5]),
+        "lie": np.array([0.0, 0.0, 1.0]),
+        "fall": np.array([0.0, 0.0, 1.0]),
+    }
+    start, end = activity.split("_to_")
+    alpha = np.linspace(0.0, 1.0, T)[:, None]
+    x[:, :3] += (1.0 - alpha) * posture[start] + alpha * posture[end]
+    if activity == "stand_to_fall":
+        x[T // 2:, :3] += 0.8
     return x.astype(np.float32)
 
 

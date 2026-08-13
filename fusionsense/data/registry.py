@@ -2,7 +2,7 @@
 paired data, with an optional simulator fallback so smoke tests always run.
 
   get_pretrain_data("imu")            -> (X, y, n_classes) from real dataset
-  get_paired_windows()                -> list[FusionWindow] from UP-Fall
+  get_paired_windows()                -> list[FusionWindow] from C-MHAD cache
   ...allow_sim_fallback=True          -> use the simulator if real data absent
 """
 from __future__ import annotations
@@ -27,7 +27,7 @@ def get_pretrain_data(modality: str, cfg=CFG, allow_sim_fallback=False):
         if modality == "vision":
             raise FileNotFoundError(
                 "Vision pretraining runs from video via vision_extractor; provide "
-                "videos + labels or use the paired UP-Fall data. See docs/DATASETS.md.")
+                "videos + labels or use the prepared C-MHAD data. See docs/DATASETS.md.")
         raise ValueError(f"unknown modality {modality}")
     except (FileNotFoundError, ImportError) as e:
         if not allow_sim_fallback:
@@ -39,8 +39,11 @@ def get_pretrain_data(modality: str, cfg=CFG, allow_sim_fallback=False):
 
 def get_paired_windows(cfg=CFG, allow_sim_fallback=False):
     try:
+        if cfg.paired_dir == "cmhad":
+            from .cmhad_loader import load_cmhad_windows
+            return load_cmhad_windows(cfg=cfg)
         from .paired_loader import load_paired_windows
-        return load_paired_windows(cfg)
+        return load_paired_windows(cfg=cfg)
     except (FileNotFoundError, RuntimeError, ImportError) as e:
         if not allow_sim_fallback:
             raise
