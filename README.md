@@ -71,6 +71,11 @@ python scripts/train_fusion.py --sim
 # Real V1: wearable IMU + MediaPipe camera pose
 python scripts/pretrain_imu.py
 python scripts/train_fusion.py           # paired camera+IMU; radar_valid=False
+
+# Or collect your own paired trials with the actual ESP32 devices
+python scripts/collect_paired.py --port <serial-port> --camera-host <esp32-cam-ip> \
+  --subject s01 --activity walking --trial 01 --seconds 20
+python scripts/check_paired_dataset.py
 ```
 
 `scripts/pretrain_radar.py` and the radar encoder remain available for the
