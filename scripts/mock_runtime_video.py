@@ -16,13 +16,14 @@ import numpy as np
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from fusionsense.data.simulator import MockRuntime, sample_window
+from fusionsense.contract import ACTIVITIES
 
 
 def build_frame_sequence(n_windows: int = 15, delay_between_values: int = 4, seed: int = 7) -> list:
     """Create a sequence of windows with repeated pause frames between values."""
     print(f"Generating {n_windows} activity windows with {delay_between_values} pause frames between each...")
     runtime = MockRuntime(seed=seed, degrade=False)
-    activities = cycle(["walking", "standing", "sitting", "lying", "falling"])
+    activities = cycle(ACTIVITIES)
     frames = []
     for index in range(n_windows):
         activity = next(activities)

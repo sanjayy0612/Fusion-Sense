@@ -1,4 +1,4 @@
-"""Visualize a 'walking' vs a 'falling' FusionWindow so you can SEE the data
+"""Visualize two transition FusionWindows so you can SEE the data
 the model learns from. Saves a PNG — no torch required.
 
 Run:  python scripts/viz_windows.py
@@ -22,12 +22,12 @@ def plot_window(ax_row, w, title):
 
 def main():
     rng = np.random.default_rng(1)
-    walk = sample_window("walking", rng, degrade=False)
-    fall = sample_window("falling", rng, degrade=False)
+    walk = sample_window("stand_to_sit", rng, degrade=False)
+    fall = sample_window("stand_to_fall", rng, degrade=False)
 
     fig, axes = plt.subplots(2, 3, figsize=(13, 6))
-    plot_window(axes[0], walk, "walking")
-    plot_window(axes[1], fall, "falling")
+    plot_window(axes[0], walk, "stand_to_sit")
+    plot_window(axes[1], fall, "stand_to_fall")
     fig.tight_layout()
     out = os.path.join(os.path.dirname(__file__), "..", "window_preview.png")
     fig.savefig(out, dpi=110)
