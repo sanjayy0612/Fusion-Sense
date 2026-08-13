@@ -65,6 +65,44 @@ Optional later command: `python scripts/pretrain_radar.py` →
 
 ## Stage 2 — paired dataset (for the cross-modal attention)
 
+### Your own paired dataset (recommended first milestone)
+
+You do not need to wait for a perfect public dataset. The repository includes a
+collector for your exact hardware topology. It records the ESP32 IMU serial
+stream and the ESP32-CAM video during the same labelled trial:
+
+```bash
+python scripts/collect_paired.py \
+  --port /dev/cu.usbserial-XXXX --camera-host 192.168.1.42 \
+  --subject s01 --activity walking --trial 01 --seconds 20
+```
+
+For the laptop webcam, replace `--camera-host 192.168.1.42` with
+`--camera-source 0`. MediaPipe still runs later on the laptop in both cases.
+
+Repeat this for all five labels (`walking`, `standing`, `sitting`, `lying`,
+`falling`), multiple trials, and every available subject. Each trial is saved
+under `data/raw/up_fall/<subject>/<activity>/<trial>/` with `imu.csv`,
+`video.mp4`, and `metadata.json`, so it is immediately readable by
+`scripts/train_fusion.py`. Start with 10–20 trials per class, then expand to
+different people, camera distances, lighting, and IMU placement.
+
+Collect at least two separate trials per class before the first smoke training
+run; otherwise a class cannot appear in both training and validation without
+leaking windows from the same recording. Check readiness without running
+MediaPipe:
+
+```bash
+python scripts/check_paired_dataset.py
+```
+
+The training script holds out complete subjects when possible, and otherwise
+keeps complete recordings together in a class-stratified split.
+
+For a fall trial, use a safe controlled setup and have the subject remain still
+for about one second at the beginning and end. Do not train on simulator data
+as if it were real sensor data; the simulator is only a pipeline smoke test.
+
 ### UP-Fall
 - Multimodal: **2 cameras + 5 wearable IMUs + ambient**, 17 subjects, 11
   activities + falls. Published in *Sensors* (2019). ~850 GB full.

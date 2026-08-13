@@ -50,6 +50,11 @@ class FusionWindow:
 
     label: Optional[int] = None    # set only for training/eval data
 
+    # Optional provenance used to prevent train/validation leakage. These do
+    # not affect model inputs; dataset loaders populate them when available.
+    subject_id: Optional[str] = None
+    recording_id: Optional[str] = None
+
     def valid_vector(self) -> np.ndarray:
         return np.array(
             [self.imu_valid, self.radar_valid, self.vision_valid], dtype=bool
