@@ -4,8 +4,8 @@ This file provides guidance to any coding agent which reades the codebase
 
 ## What this is
 
-FusionSense is a **general HAR (Human Activity Recognition) framework**, demonstrated via **elderly fall
-detection**. It fuses camera + mmWave radar + wearable IMU with a merged-token cross-modal attention model,
+FusionSense is a **general HAR (Human Activity Recognition) framework**, demonstrated via **posture-transition
+and fall detection**. V1 fuses third-person camera pose + waist IMU with a merged-token cross-modal attention model,
 and dynamically trusts whichever sensor is currently reliable. Write about it as a reusable framework first,
 fall-detection demo second.
 
@@ -25,10 +25,9 @@ python scripts/pretrain_vision.py --sim
 python scripts/train_fusion.py --sim
 
 # Real training (after downloading datasets per docs/DATASETS.md into data/raw/)
-python scripts/pretrain_imu.py
-python scripts/pretrain_radar.py
-python scripts/pretrain_vision.py        # set CFG.vision_dv = 99 first (real MediaPipe pose dim)
-python scripts/train_fusion.py
+python scripts/check_cmhad.py
+python scripts/prepare_cmhad.py
+python scripts/train_cmhad.py --stage all
 
 # Torch-free baseline + robustness figure (useful before the GPU model is trained)
 python scripts/baseline_numpy.py
@@ -67,13 +66,12 @@ rates, channel dims, model dims, or dataset directory names there, not by hardco
 ### Training: two independent stages (modular pretraining)
 
 ```
-Stage 1  Pretrain each encoder SEPARATELY on real single-modality data
-              enc_imu   <- SisFall / UCI-HAR      (scripts/pretrain_imu.py, fusionsense/train/pretrain.py)
-              enc_radar <- RadHAR                 (scripts/pretrain_radar.py)
-              enc_vis   <- MediaPipe pose / video (scripts/pretrain_vision.py)
+Stage 1  Train the two V1 encoders separately on C-MHAD training subjects
+              enc_imu   <- C-MHAD waist IMU
+              enc_vis   <- C-MHAD MediaPipe pose
 
 Stage 2  Train the CROSS-MODAL ATTENTION on PAIRED data (sensors time-aligned)
-              UP-Fall (camera + IMU)              (scripts/train_fusion.py, fusionsense/train/loop.py)
+              C-MHAD (third-person camera + waist IMU) (scripts/train_cmhad.py)
 ```
 
 Stage 2 requires paired (time-aligned) data specifically because attention learns relationships *between*
@@ -105,7 +103,7 @@ fusionsense/
     imu_loader.py         # SisFall / UCI-HAR      -> IMU windows
     radar_loader.py        # RadHAR                 -> radar windows
     vision_extractor.py     # video -> MediaPipe pose -> vision windows
-    paired_loader.py         # UP-Fall (camera+IMU)   -> FusionWindows
+    cmhad_loader.py          # C-MHAD annotations/video/IMU -> FusionWindows
     registry.py               # unified access + optional simulator fallback
     dataset.py                 # torch Dataset + modality-dropout augmentation
   models/
@@ -129,7 +127,7 @@ tests/test_pipeline.py   # numpy-only sanity checks (run directly, not via pytes
 
 ## Roadmap context
 
-- Current focus: pretrain encoders on real benchmarks, then train fusion on UP-Fall.
+- Current focus: prepare C-MHAD, then train IMU, pose, and fusion with a subject-isolated split.
 - Planned: ESP32 firmware (I2C IMU + UART radar) + Raspberry Pi pose extractor emitting the same
   `FusionWindow`; quantize to ONNX/TFLite; measure Pi latency; collect a small real tri-modal dataset (UP-Fall
   lacks radar).

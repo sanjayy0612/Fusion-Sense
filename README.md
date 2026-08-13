@@ -1,9 +1,10 @@
 # FusionSense
 
 Lightweight, **sensor-health-aware** multimodal Human Activity Recognition (HAR)
-for edge devices. The practical V1 fuses **ESP32-CAM pose + wearable IMU**
-with a merged-token cross-modal attention model and demonstrates **elderly fall
-detection**. mmWave radar is the planned third modality, not a V1 dependency.
+for edge devices. The practical V1 fuses **third-person MediaPipe pose + a
+waist-worn IMU** with merged-token cross-modal attention. It recognizes seven
+C-MHAD posture transitions, including stand-to-fall. mmWave radar is a future
+third modality, not a V1 dependency.
 
 > **Framework vs. application:** FusionSense is a *general HAR framework*; fall
 > detection is the *demo*. Write it that way — it's reusable and stronger.
@@ -25,12 +26,12 @@ two sources that both emit it:
 ## Training is two stages (modular pretraining)
 
 ```
-Stage 1  Prepare the two V1 branches
-              enc_imu   <- SisFall / UCI-HAR      (scripts/pretrain_imu.py)
-              camera    <- MediaPipe Pose landmarks (no raw-camera training)
+Stage 1  Train both V1 encoders on C-MHAD training subjects
+              enc_imu   <- waist IMU windows
+              enc_vis   <- MediaPipe pose sequences
 
 Stage 2  Train the CROSS-MODAL ATTENTION on PAIRED data (sensors time-aligned)
-              UP-Fall (camera + IMU)              (scripts/train_fusion.py)
+              C-MHAD (camera + waist IMU)          (scripts/train_cmhad.py)
 ```
 
 Why paired data for Stage 2: attention learns *relationships between modalities
@@ -39,10 +40,9 @@ moment, so the cross-modal layer needs aligned camera and IMU data.
 
 ## V1 hardware and runtime
 
-V1 uses two purpose-specific ESP32 nodes. A wearable ESP32 reads the MPU-6050
-and transmits timestamped IMU samples. An ESP32-CAM captures OV2640 JPEG frames
-and exposes a Wi-Fi MJPEG stream. OpenCV receives that stream on the laptop,
-where MediaPipe Pose extracts landmarks. The laptop synchronizes both streams
+V1 uses a wearable ESP32 to read the waist-mounted MPU-6050 and transmit
+timestamped samples. A fixed external laptop/USB camera observes the complete
+person. MediaPipe Pose extracts landmarks, and the laptop synchronizes both streams
 into two-second `FusionWindow`s, runs the model, and drives the dashboard and
 fall alerts. Radar is zero-filled with `radar_valid=False`; no Raspberry Pi is
 involved. See
@@ -68,14 +68,10 @@ python scripts/test_esp32_camera.py --host 192.168.1.42
 python scripts/pretrain_imu.py --sim
 python scripts/train_fusion.py --sim
 
-# Real V1: wearable IMU + MediaPipe camera pose
-python scripts/pretrain_imu.py
-python scripts/train_fusion.py           # paired camera+IMU; radar_valid=False
-
-# Or collect your own paired trials with the actual ESP32 devices
-python scripts/collect_paired.py --port <serial-port> --camera-host <esp32-cam-ip> \
-  --subject s01 --activity walking --trial 01 --seconds 20
-python scripts/check_paired_dataset.py
+# Real C-MHAD V1
+python scripts/check_cmhad.py --raw-root data/raw/cmhad
+python scripts/prepare_cmhad.py --raw-root data/raw/cmhad
+python scripts/train_cmhad.py --stage all
 ```
 
 `scripts/pretrain_radar.py` and the radar encoder remain available for the
@@ -112,7 +108,7 @@ fusionsense/
     radar_loader.py    # future mmWave extension
     camera_stream.py   # ESP32-CAM URL/local-camera adapter
     vision_extractor.py# MediaPipe Tasks -> 99-value pose frames/windows
-    paired_loader.py   # UP-Fall (camera+IMU)   -> FusionWindows
+    cmhad_loader.py    # C-MHAD camera+waist IMU -> FusionWindows
     registry.py        # unified access + optional simulator fallback
     dataset.py         # torch Dataset + modality-dropout augmentation
   models/
@@ -123,9 +119,9 @@ fusionsense/
     loop.py            # Stage 2 fusion training/eval
     metrics.py         # accuracy, fall recall, robustness_report
 scripts/
-  pretrain_imu.py                  # required V1 encoder pretraining
-  pretrain_{radar,vision}.py       # optional/future experiments
-  train_fusion.py                  # Stage 2
+  prepare_cmhad.py                 # aligned pose+IMU cache
+  check_cmhad.py                   # raw/cache validation
+  train_cmhad.py                   # IMU -> vision -> fusion training
   download_pose_model.py           # install official pose model asset
   test_esp32_camera.py             # live camera/pose verification
   viz_windows.py, make_figures.py, make_diagrams.py, baseline_numpy.py
@@ -141,8 +137,9 @@ tests/test_pipeline.py # numpy-only checks
 
 ## Roadmap
 
-- **V1 now:** wearable MPU-6050 → ESP32 plus OV2640 → ESP32-CAM stream;
-  run MediaPipe Pose and fusion on the laptop, then show health and fall alerts.
+- **V1 now:** waist MPU-6050 → ESP32 plus a fixed third-person camera;
+  run MediaPipe Pose and fusion on the laptop, then show transition confidence
+  and stand-to-fall alerts.
 - **V1 model rule:** keep radar zeroed and masked with `radar_valid=False`.
 - **Later extension:** add a fixed mmWave node, enable the existing radar slot,
   and collect a paired tri-modal dataset without replacing the V1 pipeline.
