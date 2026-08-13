@@ -18,6 +18,7 @@ Returns list[FusionWindow] (label set, radar zeroed+invalid).
 from __future__ import annotations
 
 import glob
+import json
 import os
 import numpy as np
 
@@ -25,8 +26,6 @@ from ..config import CFG, DATA_ROOT
 from ..contract import FusionWindow, LABEL2ID
 from .windowing import segment_recording
 from .vision_extractor import video_to_pose_sequence, pose_sequence_to_windows
-
-UPFALL_IMU_HZ = 100.0
 
 # map UP-Fall activity folder -> our 5 classes (adjust to the folder names you use)
 ACTIVITY_MAP = {
@@ -38,10 +37,19 @@ ACTIVITY_MAP = {
 
 
 def _imu_windows(csv_path, cfg):
-    arr = np.genfromtxt(csv_path, delimiter=",", invalid_raise=False)
+    # Accept both public-dataset files with six channels and collector files
+    # with a leading ESP32 timestamp: t_ms, ax, ay, az, gx, gy, gz.
+    first_line = open(csv_path, encoding="utf-8").readline().lower()
+    if "ax" in first_line and "gx" in first_line:
+        named = np.genfromtxt(csv_path, delimiter=",", names=True, dtype=np.float32)
+        names = {name.lower(): name for name in (named.dtype.names or ())}
+        wanted = [names.get(name) for name in ("ax", "ay", "az", "gx", "gy", "gz")]
+        arr = np.column_stack([named[name] for name in wanted]) if all(wanted) else np.empty((0, 0))
+    else:
+        arr = np.genfromtxt(csv_path, delimiter=",", invalid_raise=False)
     if arr.ndim != 2 or arr.shape[1] < 6:
         return []
-    return segment_recording(arr[:, :6].astype(np.float32), UPFALL_IMU_HZ,
+    return segment_recording(arr[:, :6].astype(np.float32), cfg.imu_hz,
                              cfg.t_imu, cfg.window_seconds)
 
 
@@ -55,7 +63,10 @@ def load_paired_windows(cfg=CFG, source: str | None = None, use_vision=True):
 
     windows = []
     for trial in trials:
+        trial_path = os.path.normpath(trial)
+        recording = os.path.basename(trial_path)
         activity = os.path.basename(os.path.dirname(trial))
+        subject = os.path.basename(os.path.dirname(os.path.dirname(trial_path)))
         cls = ACTIVITY_MAP.get(activity.lower())
         if cls is None:
             continue
@@ -70,7 +81,12 @@ def load_paired_windows(cfg=CFG, source: str | None = None, use_vision=True):
         if use_vision and os.path.exists(video):
             try:
                 seq = video_to_pose_sequence(video)
-                vis_ws = pose_sequence_to_windows(seq, cfg)
+                fps = 30.0
+                metadata_path = os.path.join(trial, "metadata.json")
+                if os.path.exists(metadata_path):
+                    with open(metadata_path, encoding="utf-8") as handle:
+                        fps = float(json.load(handle).get("video_fps", fps))
+                vis_ws = pose_sequence_to_windows(seq, cfg, src_fps=fps)
             except ImportError:
                 vis_ws = None
 
@@ -86,6 +102,8 @@ def load_paired_windows(cfg=CFG, source: str | None = None, use_vision=True):
                 imu_valid=True, radar_valid=False, vision_valid=vision_valid,
                 radar_energy=0.0, image_quality=1.0 if vision_valid else 0.0,
                 imu_health=1.0, label=label,
+                subject_id=subject,
+                recording_id=f"{subject}/{activity}/{recording}",
             ))
     if not windows:
         raise RuntimeError(f"Parsed 0 paired windows from {root} — check layout / ACTIVITY_MAP.")
