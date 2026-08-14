@@ -1,6 +1,7 @@
 """Training + evaluation loop for FusionSense."""
 from __future__ import annotations
 
+from copy import deepcopy
 import numpy as np
 import torch
 import torch.nn as nn
@@ -37,6 +38,9 @@ def train(train_windows, val_windows, epochs=15, batch_size=64, lr=1e-3,
                             lr=lr, weight_decay=1e-4)
     crit = nn.CrossEntropyLoss(weight=_class_weights(train_windows, device))
 
+    best_f1 = -1.0
+    best_epoch = 0
+    best_state = None
     for ep in range(1, epochs + 1):
         model.train()
         tot = 0.0
@@ -48,8 +52,16 @@ def train(train_windows, val_windows, epochs=15, batch_size=64, lr=1e-3,
             opt.zero_grad(); loss.backward(); opt.step()
             tot += loss.item() * y.size(0)
         acc, f1, fall_recall = evaluate(model, va_loader, device)
+        if f1 > best_f1:
+            best_f1 = f1
+            best_epoch = ep
+            best_state = deepcopy(model.state_dict())
         print(f"epoch {ep:2d} | loss {tot/len(tr_loader.dataset):.3f} "
               f"| val acc {acc:.3f} | macroF1 {f1:.3f} | fall-recall {fall_recall:.3f}")
+    if best_state is None:
+        raise RuntimeError("Fusion training produced no validation result")
+    model.load_state_dict(best_state)
+    print(f"restored best fusion epoch {best_epoch} (macroF1 {best_f1:.3f})")
     return model
 
 
