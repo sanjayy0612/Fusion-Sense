@@ -30,6 +30,13 @@ def arrays(windows, modality):
         windows = [window for window in windows if window.vision_valid]
         if not windows:
             raise ValueError("No MediaPipe-valid windows available for camera pretraining")
+    labels = {window.label for window in windows}
+    expected = set(range(CFG.n_classes))
+    if labels != expected:
+        raise ValueError(
+            f"{modality} training data does not contain all {CFG.n_classes} classes; "
+            f"found {sorted(labels)}"
+        )
     return (
         np.stack([getattr(window, modality) for window in windows]).astype(np.float32),
         np.array([window.label for window in windows], dtype=np.int64),
@@ -47,15 +54,33 @@ def main():
     parser.add_argument("--val-fraction", type=float, default=0.2)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument(
+        "--expected-subjects",
+        type=int,
+        choices=range(2, 13),
+        metavar="N",
+        help="fail unless the prepared cache contains exactly N subjects",
+    )
+    parser.add_argument(
         "--fine-tune",
         action="store_true",
         help="fine-tune pretrained encoders during fusion instead of freezing them",
     )
     args = parser.parse_args()
 
+    np.random.seed(args.seed)
+    torch.manual_seed(args.seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(args.seed)
+
     device = get_device()
     print("device:", device)
     windows = load_cmhad_windows(args.cache)
+    subjects = {window.subject_id for window in windows}
+    if args.expected_subjects is not None and len(subjects) != args.expected_subjects:
+        raise ValueError(
+            f"Expected {args.expected_subjects} subjects, found {len(subjects)}: "
+            f"{sorted(subjects)}"
+        )
     train_w, val_w, description = split_paired_windows(
         windows, val_fraction=args.val_fraction, seed=args.seed
     )
@@ -70,7 +95,19 @@ def main():
     fusion_checkpoint = os.path.join(args.output_dir, "fusionsense_cmhad.pt")
     np.savez(os.path.join(args.output_dir, "normalization.npz"), **stats)
     with open(os.path.join(args.output_dir, "labels.json"), "w", encoding="utf-8") as handle:
-        json.dump({"activities": ACTIVITIES, "split": description}, handle, indent=2)
+        json.dump(
+            {
+                "activities": ACTIVITIES,
+                "subjects": sorted(subjects),
+                "window_count": len(windows),
+                "split": description,
+                "seed": args.seed,
+                "encoder_epochs": args.encoder_epochs,
+                "fusion_epochs": args.fusion_epochs,
+            },
+            handle,
+            indent=2,
+        )
 
     if args.stage in ("all", "imu"):
         x_train, y_train = arrays(train_w, "imu")
