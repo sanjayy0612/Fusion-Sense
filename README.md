@@ -69,9 +69,11 @@ python scripts/pretrain_imu.py --sim
 python scripts/train_fusion.py --sim
 
 # Real C-MHAD V1
-python scripts/check_cmhad.py --raw-root data/raw/cmhad
+python scripts/check_cmhad.py --raw-root data/raw/cmhad --expected-subjects 4
 python scripts/prepare_cmhad.py --raw-root data/raw/cmhad
-python scripts/train_cmhad.py --stage all
+python scripts/check_cmhad.py --expected-subjects 4 --require-cache
+python scripts/train_cmhad.py --stage all --expected-subjects 4 \
+  --output-dir checkpoints/cmhad_pilot4
 ```
 
 `scripts/pretrain_radar.py` and the radar encoder remain available for the
