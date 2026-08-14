@@ -34,7 +34,8 @@ After approval:
 
 - Inspect nvidia-smi, Python version, available disk space, and the current Git
   status. Preserve all existing files and changes.
-- Create a project-local virtual environment named .venv if one does not exist.
+- Prefer Python 3.11 for MediaPipe compatibility. Create a project-local virtual
+  environment named .venv if one does not exist.
 - Install a CUDA PyTorch build from the current official PyTorch instructions,
   then install requirements.txt. Verify torch.cuda.is_available(), GPU name,
   and a small CUDA tensor operation.
@@ -53,29 +54,35 @@ After approval:
     VideoData/video_subN_tr*.avi
 - Make the selected extraction visible at data/raw/cmhad. A symlink is allowed
   if the files live outside the repository.
-- Run python scripts/check_cmhad.py --raw-root data/raw/cmhad and stop to explain
-  any missing subjects, annotations, videos, or IMU files.
+- For the four-subject pilot, run:
+    python scripts/check_cmhad.py --raw-root data/raw/cmhad --expected-subjects 4
+  For the full run, use --expected-subjects 12. Stop to explain any validation
+  failure involving subjects, annotations, videos, or IMU files.
 - Run python scripts/prepare_cmhad.py --raw-root data/raw/cmhad. Do not use
   --max-subjects for the final selected run. This creates the ignored compact
   cache data/processed/cmhad_windows.npz.
-- Run python scripts/check_cmhad.py again. Report the per-class counts and the
-  number of MediaPipe-invalid windows. If more than 20% are invalid, inspect
-  sample frames and diagnose before training.
+- Run the same check again with --require-cache. Report per-class counts and
+  the number of MediaPipe-invalid windows. The checker must exit successfully;
+  if more than 20% are invalid, inspect sample frames and diagnose before training.
 - Run the repository tests:
     python tests/test_pipeline.py
     python tests/test_camera_stream.py
 - Start all real training stages with logging:
     python scripts/train_cmhad.py --stage all --encoder-epochs 20 \
-      --fusion-epochs 20 --batch-size 64
+      --fusion-epochs 20 --batch-size 64 --expected-subjects 4 \
+      --output-dir checkpoints/cmhad_pilot4
+  For the full run, use --expected-subjects 12 and --output-dir
+  checkpoints/cmhad_full12. Retrain all three stages on all twelve subjects;
+  do not fine-tune only on Subject5 through Subject12.
   If CUDA runs out of memory, retry only by lowering --batch-size to 32 and then
   16. Do not change labels, windows, subject split, or architecture without my
   approval.
 - The script must train in this order:
     1) C-MHAD waist-IMU encoder FROM RANDOM INITIALIZATION (do not load
-       SisFall or any existing checkpoint) -> checkpoints/cmhad/enc_imu.pt
+       SisFall or any existing checkpoint) -> <output-dir>/enc_imu.pt
     2) MediaPipe camera-pose encoder FROM RANDOM INITIALIZATION ->
-       checkpoints/cmhad/enc_vis.pt
-    3) cross-modal Transformer -> checkpoints/cmhad/fusionsense_cmhad.pt
+       <output-dir>/enc_vis.pt
+    3) cross-modal Transformer -> <output-dir>/fusionsense_cmhad.pt
 - Confirm that validation holds out entire subjects and report the held-out
   subject names. Never use a random window-level split.
 - At completion, summarize final validation accuracy, macro-F1,

@@ -31,9 +31,9 @@ larger drive.
 
 ```bash
 python scripts/download_pose_model.py
-python scripts/check_cmhad.py --raw-root data/raw/cmhad
+python scripts/check_cmhad.py --raw-root data/raw/cmhad --expected-subjects 4
 python scripts/prepare_cmhad.py --raw-root data/raw/cmhad
-python scripts/check_cmhad.py
+python scripts/check_cmhad.py --expected-subjects 4 --require-cache
 ```
 
 Preparation reads each annotation, centres a two-second interval on it,
@@ -41,10 +41,11 @@ restores the documented missing leading IMU samples, extracts the matching
 100×6 IMU data, and runs MediaPipe on 20 aligned video frames. It writes
 `data/processed/cmhad_windows.npz`, normally only tens of megabytes.
 
-## Training
+## Training the four-subject pilot
 
 ```bash
-python scripts/train_cmhad.py --stage all --encoder-epochs 20 --fusion-epochs 20
+python scripts/train_cmhad.py --stage all --encoder-epochs 20 --fusion-epochs 20 \
+  --expected-subjects 4 --output-dir checkpoints/cmhad_pilot4
 ```
 
 This uses one subject-level split for all three stages, fits normalization only
@@ -52,6 +53,10 @@ on training subjects, and trains IMU and camera-pose from random initialization
 before training fusion. For a deadline
 pilot, complete Subject1–Subject4 can be used; final reported results should use
 all 12 subjects.
+
+When all twelve subjects are available, rebuild the cache and retrain all three
+stages from scratch with `--expected-subjects 12 --output-dir
+checkpoints/cmhad_full12`. Do not train only on the eight newly added subjects.
 
 The complete interactive GPU handoff is in
 [CODEX_CMHAD_TRAINING_PROMPT.md](CODEX_CMHAD_TRAINING_PROMPT.md).

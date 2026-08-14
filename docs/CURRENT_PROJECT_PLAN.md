@@ -28,14 +28,15 @@ The seven outputs are `stand_to_sit`, `sit_to_stand`, `sit_to_lie`,
 
 ```bash
 python scripts/download_pose_model.py
-python scripts/check_cmhad.py --raw-root data/raw/cmhad
+python scripts/check_cmhad.py --raw-root data/raw/cmhad --expected-subjects 4
 python scripts/prepare_cmhad.py --raw-root data/raw/cmhad
-python scripts/check_cmhad.py
-python scripts/train_cmhad.py --stage all --encoder-epochs 20 --fusion-epochs 20
+python scripts/check_cmhad.py --expected-subjects 4 --require-cache
+python scripts/train_cmhad.py --stage all --encoder-epochs 20 --fusion-epochs 20 \
+  --expected-subjects 4 --output-dir checkpoints/cmhad_pilot4
 ```
 
 The stages save `enc_imu.pt`, `enc_vis.pt`, and `fusionsense_cmhad.pt` under
-the ignored `checkpoints/cmhad/` directory. Normalization statistics and the label
+the ignored `checkpoints/cmhad_pilot4/` directory. Normalization statistics and the label
 order are saved beside them for live inference.
 
 ## Completion criteria
