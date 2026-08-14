@@ -8,8 +8,10 @@
  * Emits: one CSV line per sample over USB serial @ 115200, consumed by the
  *        laptop API node during v1 development.
  *
- * CSV format (one row per IMU tick, ~50 Hz):
+ * CSV format (one row per IMU tick, ~50 Hz). Units intentionally match
+ * C-MHAD so its saved normalization can be used at live inference:
  *   t_ms, ax, ay, az, gx, gy, gz, radar_dist_cm, radar_energy
+ *         acceleration m/s^2       angular velocity degrees/s
  *
  * Wiring (see hardware/wokwi/diagram.json):
  *   MPU-6050:  SDA->GPIO21, SCL->GPIO22, VCC->3V3, GND->GND
@@ -29,9 +31,14 @@
 #define MPU_ADDR      0x68
 #define REG_PWR_MGMT  0x6B
 #define REG_ACCEL_X   0x3B
+#define REG_GYRO_CFG  0x1B
+#define REG_ACCEL_CFG 0x1C
 
 const uint32_t SAMPLE_HZ = 50;
 const uint32_t SAMPLE_US = 1000000UL / SAMPLE_HZ;
+const float STANDARD_GRAVITY = 9.80665f;
+const float ACCEL_LSB_PER_G = 16384.0f;  // MPU-6050 reset default: +/-2 g
+const float GYRO_LSB_PER_DPS = 131.0f;   // MPU-6050 reset default: +/-250 deg/s
 uint32_t last_us = 0;
 
 // radar state (updated by LD2410 frames)
@@ -47,6 +54,8 @@ void mpuWrite(uint8_t reg, uint8_t val) {
 void mpuInit() {
   Wire.begin(21, 22);          // SDA, SCL
   mpuWrite(REG_PWR_MGMT, 0x00); // wake up
+  mpuWrite(REG_ACCEL_CFG, 0x00); // explicitly select +/-2 g
+  mpuWrite(REG_GYRO_CFG, 0x00);  // explicitly select +/-250 deg/s
   delay(100);
 }
 
@@ -104,10 +113,20 @@ void loop() {
     last_us = now;
     int16_t a[3], g[3];
     mpuRead(a, g);
-    // stream CSV row
+    float accel_mps2[3] = {
+      a[0] * STANDARD_GRAVITY / ACCEL_LSB_PER_G,
+      a[1] * STANDARD_GRAVITY / ACCEL_LSB_PER_G,
+      a[2] * STANDARD_GRAVITY / ACCEL_LSB_PER_G
+    };
+    float gyro_dps[3] = {
+      g[0] / GYRO_LSB_PER_DPS,
+      g[1] / GYRO_LSB_PER_DPS,
+      g[2] / GYRO_LSB_PER_DPS
+    };
+    // Stream physical values, not raw ADC counts.
     Serial.print(millis());        Serial.print(',');
-    Serial.print(a[0]); Serial.print(','); Serial.print(a[1]); Serial.print(','); Serial.print(a[2]); Serial.print(',');
-    Serial.print(g[0]); Serial.print(','); Serial.print(g[1]); Serial.print(','); Serial.print(g[2]); Serial.print(',');
+    Serial.print(accel_mps2[0], 6); Serial.print(','); Serial.print(accel_mps2[1], 6); Serial.print(','); Serial.print(accel_mps2[2], 6); Serial.print(',');
+    Serial.print(gyro_dps[0], 6); Serial.print(','); Serial.print(gyro_dps[1], 6); Serial.print(','); Serial.print(gyro_dps[2], 6); Serial.print(',');
     Serial.print(radar_dist_cm);   Serial.print(',');
     Serial.println(radar_energy);
   }
