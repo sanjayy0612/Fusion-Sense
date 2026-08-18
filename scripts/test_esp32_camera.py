@@ -17,7 +17,11 @@ import numpy as np
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from fusionsense.config import CFG
-from fusionsense.data.camera_stream import CameraStream, esp32_stream_url
+from fusionsense.data.camera_stream import (
+    CameraStream,
+    TimestampedMjpegStream,
+    esp32_stream_url,
+)
 from fusionsense.data.vision_extractor import PoseExtractor
 
 
@@ -35,10 +39,15 @@ def main():
     valid_buffer = deque(maxlen=CFG.t_vis)
     started = time.monotonic()
     processed = 0
+    first_sequence = None
+    last_sequence = None
+    first_device_timestamp_us = None
+    last_device_timestamp_us = None
 
     import cv2
 
-    with CameraStream(source) as camera, PoseExtractor() as extractor:
+    camera_type = TimestampedMjpegStream if args.host else CameraStream
+    with camera_type(source) as camera, PoseExtractor() as extractor:
         print(f"Connected to camera: {source}")
         while time.monotonic() - started < args.seconds:
             frame = camera.read()
@@ -46,6 +55,16 @@ def main():
             pose_buffer.append(pose.landmarks)
             valid_buffer.append(pose.valid)
             processed += 1
+            if frame.sequence is not None:
+                first_sequence = frame.sequence if first_sequence is None else first_sequence
+                last_sequence = frame.sequence
+            if frame.device_timestamp_us is not None:
+                first_device_timestamp_us = (
+                    frame.device_timestamp_us
+                    if first_device_timestamp_us is None
+                    else first_device_timestamp_us
+                )
+                last_device_timestamp_us = frame.device_timestamp_us
 
             if not args.no_preview:
                 preview = frame.image.copy()
@@ -70,6 +89,23 @@ def main():
     elapsed = max(time.monotonic() - started, 1e-6)
     valid_ratio = float(np.mean(valid_buffer)) if valid_buffer else 0.0
     print(f"frames={processed} processing_fps={processed / elapsed:.1f}")
+    if (
+        first_sequence is not None
+        and last_sequence is not None
+        and first_device_timestamp_us is not None
+        and last_device_timestamp_us is not None
+    ):
+        device_elapsed_s = max(
+            (last_device_timestamp_us - first_device_timestamp_us) / 1_000_000.0,
+            1e-6,
+        )
+        sequence_span = last_sequence - first_sequence
+        print(f"device_fps={sequence_span / device_elapsed_s:.2f}")
+        print(f"first_sequence={first_sequence} last_sequence={last_sequence}")
+        print(
+            "device_timestamp_us="
+            f"{first_device_timestamp_us}..{last_device_timestamp_us}"
+        )
     print(f"recent_pose_valid_ratio={valid_ratio:.2f}")
     print(f"vision_window_ready={len(pose_buffer) == CFG.t_vis}")
     if len(pose_buffer) == CFG.t_vis:

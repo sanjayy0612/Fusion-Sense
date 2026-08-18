@@ -48,6 +48,86 @@ fall alerts. Radar is zero-filled with `radar_valid=False`; no Raspberry Pi is
 involved. See
 **[docs/CURRENT_PROJECT_PLAN.md](docs/CURRENT_PROJECT_PLAN.md)**.
 
+### Live IMU status
+
+The wearable ESP32 is currently detected on **COM16** through a CP210x USB-UART
+bridge. Its connected IMU reports `WHO_AM_I=0x70` (MPU-6500-compatible), and the
+updated hardware test sketch produces scaled seven-field rows at the required
+50 Hz (`20 ms` timestamp increments). The timestamped persistent-serial
+recorder is now hardware-verified: a 59.98-second stationary run captured 3,000
+samples at exactly 50.0 Hz, with zero invalid rows, missed slots, sequence gaps,
+or non-monotonic timestamps. Mean acceleration magnitude was `0.99962 g` and
+mean gyroscope magnitude was `0.12035 dps`, so hardware Step 1 passes.
+
+A later live run showed a transient burst of 190 I2C read errors even though the
+50 Hz scheduler itself missed no slots. The firmware now uses a conservative
+100 kHz I2C clock and reports per-window as well as cumulative errors. Stable,
+soldered or firmly seated power/SDA/SCL connections are required; recovery after
+a burst does not count as a passing stability test.
+
+The timestamped ESP32-CAM Step 2 firmware and laptop multipart reader are
+implemented and hardware-verified. A 30.255-second live run delivered 283 QVGA
+JPEG frames at 9.32 device FPS, with zero sequence drops and zero capture
+errors. See
+[`hardware/esp32_cam/README.md`](hardware/esp32_cam/README.md); set Wi-Fi values
+only in its ignored `fusionsense_camera/secrets.h` file.
+
+The camera-only recorder keeps that stream on one persistent Wi-Fi TCP
+connection and stores original JPEGs plus capture/receive metadata:
+
+```powershell
+.\.venv\Scripts\python.exe .\scripts\record_esp32_camera.py --host <esp32-ip> --duration 60
+```
+
+The camera recorder is hardware-verified: 581 original QVGA JPEGs over 60.078
+device seconds at 9.65 FPS, zero drops, and zero capture errors.
+
+The IMU persistent USB-serial contract and laptop recorder are implemented and
+hardware-verified:
+
+```powershell
+.\.venv\Scripts\python.exe .\scripts\record_imu_serial.py --port <imu-com-port> --duration 60 --stationary
+```
+
+The verified session is under `data/recordings/imu_20260817T174209Z/`; its
+`session.json` records the full validation report. Both standalone transports
+are therefore ready for concurrent collection and laptop clock mapping.
+
+### Step 4: synchronized bimodal recording
+
+The combined laptop collector is implemented at
+`scripts/record_fusion_session.py`. It reads the IMU and camera independently,
+performs repeated request/response clock probes, fits
+`host_ns = scale * device_us * 1000 + offset_ns` for each ESP32, and writes both
+raw device timestamps and mapped laptop capture timestamps. It never aligns
+samples by arrival order.
+
+The Step 4 camera firmware is already running: the first combined attempt
+proved that its port-80 `/session`, `/sync`, and `/health` endpoints work. The
+remaining corrections are laptop-only, so neither ESP32 needs another upload.
+After closing Arduino Serial Monitor:
+
+```powershell
+.\.venv\Scripts\python.exe .\scripts\record_fusion_session.py --imu-port COM16 --camera-host <esp32-ip> --duration 60 --motion-check
+```
+
+After about ten seconds, perform three distinct, sharp side-to-side movements
+while the IMU is clearly visible to the camera. The collector now warms the
+camera before flushing the IMU to a complete serial-line boundary, reuses one
+persistent camera control connection, saves malformed input in
+`malformed_imu.csv`, rejects multi-second camera stalls/excessive latency, and
+uses shared-motion cross-correlation for the 50 ms alignment gate. Nearest-IMU
+sample distance is diagnostic only. All 28 unit tests pass. Do not mark Step 4
+hardware-verified until the revised command produces a live `session.json` with
+`"result": "PASS"`.
+
+Close Arduino Serial Monitor, then run the validator from this repository:
+
+```powershell
+cd "C:\Users\SHIRDITHAN\OneDrive\Desktop\fusionsense\Fusion-Sense-fork"
+.\.venv\Scripts\python.exe .\scripts\validate_imu_stream.py --port COM16 --duration 300
+```
+
 ## Quick start
 
 ```bash
@@ -57,6 +137,7 @@ pip install -r requirements.txt          # CUDA torch build for your 4060
 python scripts/viz_windows.py
 python tests/test_pipeline.py
 python tests/test_camera_stream.py
+python -m unittest tests.test_validate_imu_stream -v
 
 # Download the official local MediaPipe model once
 python scripts/download_pose_model.py
