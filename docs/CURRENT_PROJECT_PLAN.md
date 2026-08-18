@@ -55,3 +55,79 @@ order are saved beside them for live inference.
 The model recognizes transitions, not indefinitely persistent posture states.
 Simulator results remain plumbing tests and must not be reported as real
 performance.
+
+## Live hardware progress
+
+Hardware Step 1 is complete for the standalone IMU transport. The compiled 50
+Hz acquisition sketch is compatible with the connected `WHO_AM_I=0x70`
+MPU-6500-class device. A live 59.98-second recorder run captured 3,000 samples
+at exactly 50.0 Hz with 20.0 ms mean intervals, zero invalid rows, zero missed
+slots, zero sequence gaps, and monotonic timestamps. Mean stationary
+acceleration magnitude was 0.99962 g and mean gyroscope magnitude was 0.12035
+dps. The validator returned `PASS`.
+
+The same acceptance run can be repeated with:
+
+```powershell
+.\.venv\Scripts\python.exe .\scripts\record_imu_serial.py --port COM16 --duration 60 --stationary
+```
+
+The validator measures effective rate, timestamp monotonicity/gaps,
+accelerometer magnitude, gyroscope bias, malformed rows, and returns an explicit
+PASS/FAIL report. ESP32-CAM clock alignment is the next phase after this gate.
+
+Camera Step 2 is hardware-validated. The AI Thinker sketch
+captures QVGA JPEG frames at a 10 FPS target and embeds a monotonically
+increasing sequence plus the ESP32 camera framebuffer's microsecond capture
+timestamp in every MJPEG part. The laptop timestamp-aware reader preserves both
+fields. The acceptance run delivered 283 frames over 30.255 seconds at 9.32
+device FPS, with zero sequence drops and zero capture errors. This establishes
+device-local capture timing; mapping the camera clock to the laptop/IMU clock
+remains the following synchronization step.
+
+The camera-only recorder is also implemented. It uses one persistent HTTP/TCP
+stream and saves the original JPEG payloads with a CSV manifest containing
+frame sequence, device capture microseconds, laptop monotonic receive
+nanoseconds, dimensions, payload size, and path. A live 60-second recorded
+session is the final camera-only gate before concurrent IMU ingestion.
+
+That camera recording gate passed with 581 original QVGA JPEGs over 60.078
+device seconds at 9.65 FPS, zero drops, and zero capture errors. The IMU side now
+has a versioned persistent serial packet with device/session IDs, scheduled-slot
+sequence, and 64-bit microsecond capture time. Its laptop recorder writes the
+corresponding laptop monotonic receive time and preserves device health/status.
+That IMU-only recording gate passed with 3,000 samples over 59.98 seconds at
+50.0 Hz and no invalid rows, missed slots, sequence gaps, or non-monotonic
+timestamps. Both standalone transports are verified; concurrent collection and
+per-device affine clock mapping are now the next implementation phase.
+
+Step 4 is now implemented in software. The ESP32-CAM has a separate port-80
+control server for `/session`, `/sync`, and `/health`, so clock probes remain
+available while the persistent port-81 MJPEG stream is open. The existing IMU
+firmware already answers `SYNC` over the persistent serial connection.
+`scripts/record_fusion_session.py` runs independent camera, IMU, and camera-sync
+workers, retains low-round-trip observations across the session, fits an affine
+mapping for each device, and records raw device time, mapped laptop capture
+time, receive time, sequence health, transport latency, and inter-device skew.
+
+The revised camera firmware compiles and the offline clock/parser/recording
+tests pass. Hardware acceptance remains pending. Re-upload the current camera
+sketch, close Serial Monitor, and run:
+
+```powershell
+.\.venv\Scripts\python.exe .\scripts\record_fusion_session.py --imu-port COM16 --camera-host <esp32-ip> --duration 60 --motion-check
+```
+
+The first combined hardware attempt proved concurrent acquisition but failed
+acceptance: one IMU row was malformed, camera clock-fit residual p95 was 44.18
+ms, and camera delivery/capture stalled for 2.74 seconds. The laptop collector
+now opens and warms the camera before flushing serial to a complete line,
+preserves malformed rows, reuses a persistent camera control connection, and
+fails on excessive capture gaps or latency. It also replaces nearest-sample
+alignment acceptance with shared-motion cross-correlation. All 28 unit tests
+pass; neither ESP32 needs reflashing for these laptop changes.
+
+During the revised run, perform three sharp side-to-side movements after ten
+seconds while the IMU is visible to the camera. Do not begin the 2-second window
+assembler until the combined `session.json` reports `PASS`, both clock fits
+pass, and the measured shared-motion lag is at most 50 ms.

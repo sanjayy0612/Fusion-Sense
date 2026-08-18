@@ -132,3 +132,72 @@ tests/test_pipeline.py   # numpy-only sanity checks (run directly, not via pytes
   `FusionWindow`; quantize to ONNX/TFLite; measure Pi latency; collect a small real tri-modal dataset (UP-Fall
   lacks radar).
 - Paper V2: real sensor-degradation study + health-conditioned ablation.
+
+## Verified live hardware state (2026-08-17)
+
+- Windows identifies COM16 as the physical CP210x ESP32 port; COM6 is a
+  Bluetooth serial link and must not be used for this board.
+- The connected IMU reports `WHO_AM_I=0x70`, identifying it as
+  MPU-6500-compatible. The Step 1 sketch accepts MPU-6050/6500/9250/9255
+  identities that share the required motion-register layout.
+- The updated sketch under
+  `hardware/esp32_firmware/mpu6050_usb_test/mpu6050_usb_test.ino` produces
+  the versioned timestamped IMU packet at 50 Hz. The live recorder acceptance
+  run passed with 3,000 samples over 59.98 device seconds at 50.0 Hz, 20.0 ms
+  mean intervals, and zero invalid rows, missed slots, sequence gaps, or
+  non-monotonic timestamps. Mean stationary acceleration magnitude was
+  0.99962 g and mean gyroscope magnitude was 0.12035 dps. Hardware Step 1 and
+  the persistent IMU transport are verified.
+- A live attempt accumulated 190 I2C read failures in a transient burst while
+  scheduler misses remained zero. The firmware was reduced to 100 kHz I2C and
+  now reports interval and cumulative error counts. Treat any nonzero read-error
+  interval as a physical connection/power problem and rerun the full test.
+- ESP32-CAM timestamp synchronization and the live model/dashboard alert path
+  remain pending.
+- ESP32-CAM Step 2 software is implemented under
+  `hardware/esp32_cam/fusionsense_camera/`. It emits QVGA JPEG multipart frames
+  at a 10 FPS target with `X-Frame-Sequence` and camera-driver
+  `X-Capture-Timestamp-Us` headers. `TimestampedMjpegStream` preserves these on
+  the laptop. Compilation and parser tests pass. The live hardware test also
+  passed: 283 QVGA frames over 30.255 seconds (9.32 device FPS), monotonic
+  sequence/capture timestamps, zero dropped frames, and zero capture errors.
+  One stream disconnect is expected when the validator closes the connection.
+- `scripts/record_esp32_camera.py` finishes the camera-only transport path. It
+  keeps one HTTP/TCP stream open and writes the original JPEG payloads plus a
+  manifest containing ESP32 capture time, laptop monotonic receive time,
+  sequence, dimensions, size, and path. Validate one recorded session before
+  adding concurrent IMU ingestion.
+- The camera recorder has now passed live: 581 original QVGA JPEGs over 60.078
+  device seconds at 9.65 FPS, with zero drops and zero capture errors.
+- The IMU firmware now emits
+  `IMU,1,device_id,session_id,seq,t_device_us,ax,ay,az,gx,gy,gz` and accepts
+  `SESSION`, `SYNC`, and `INFO` commands over the same persistent USB serial
+  connection. `scripts/record_imu_serial.py` saves `imu.csv`, device status, and
+  session validation. Compilation, 11 offline tests, and the live stationary
+  recording all pass. The verified artifact is
+  `data/recordings/imu_20260817T174209Z/`.
+- Step 4 software is implemented in `scripts/record_fusion_session.py` and
+  `fusionsense/data/clock_sync.py`. Three concurrent workers read serial IMU
+  samples, persistent MJPEG frames, and camera clock probes. Each device gets a
+  low-RTT affine map into laptop monotonic nanoseconds; raw and mapped capture
+  timestamps, receive timestamps, transport latency, sequence health, and
+  nearest cross-device skew are preserved and reported.
+- The current camera sketch adds a separate port-80 `/session`, `/sync`, and
+  `/health` control server plus device/session headers on the port-81 stream.
+  It compiles for AI Thinker ESP32-CAM at 32% flash and 17% RAM. Offline parser,
+  mapping, recording, and synthetic combined-session tests pass. The firmware
+  has been uploaded, but concurrent synchronization still needs one live
+  combined recorder PASS before it is hardware-verified.
+- The Step 4 camera firmware was subsequently uploaded and one combined run was
+  recorded at `data/recordings/fusion_20260817T182717Z/`. It proved both live
+  inputs can be captured together, but the authoritative result is `FAIL`: one
+  malformed IMU row, camera clock-fit p95 residual 44.18 ms, and a 2.74-second
+  camera stall. Do not use this session as synchronized training evidence.
+- The laptop collector now addresses those findings without another firmware
+  change: warm camera then flush serial to a line boundary, save exact malformed
+  rows, reuse a persistent HTTP control connection, enforce camera gap and
+  transport-latency gates, and validate alignment through shared physical
+  motion cross-correlation. Nearest-sample distance remains diagnostic only.
+  The revised suite has 28 passing unit tests. Live acceptance must use
+  `--motion-check`, include three visible sharp movements, and return top-level
+  `PASS` before Step 5 begins.
