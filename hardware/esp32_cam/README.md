@@ -4,6 +4,28 @@ The ESP32-CAM is FusionSense V1's primary camera. It captures OV2640 JPEG frames
 and exposes a Wi-Fi MJPEG stream. All pose extraction and ML remain on the
 laptop.
 
+## USB-serial transport (current hardware workaround)
+
+`fusionsense_camera_serial/fusionsense_camera_serial.ino` removes Wi-Fi from
+the camera path and sends timestamped QVGA JPEGs through the ESP32-CAM-MB USB
+serial connection at 921600 baud. Each binary frame carries a sequence number,
+camera capture timestamp, dimensions, JPEG length, cumulative capture-error
+count, and CRC32. The original Wi-Fi firmware remains available as a fallback.
+
+After uploading the serial sketch and confirming its readable startup output at
+921600 baud, close Serial Monitor and run:
+
+```powershell
+.\.venv\Scripts\python.exe .\scripts\validate_esp32_camera_serial.py --port COM10 --duration 30
+```
+
+Replace `COM10` with the ESP32-CAM-MB port (COM14 in the verified setup). The laptop sends `START`, validates
+the binary stream and JPEG CRCs, and sends `STOP` after the gate.
+
+Live verification on COM14 passed: 302 QVGA frames over 30.0029 device seconds
+at 10.0324 FPS, capture interval p95/max 108.095/108.153 ms, and zero capture
+errors, CRC errors, dropped frames, sequence gaps, or timestamp regressions.
+
 ## Timestamped firmware
 
 Open
@@ -18,13 +40,13 @@ part carries `X-Device-Id`, `X-Session-Id`, `X-Frame-Sequence`, and
 framebuffer at capture rather than laptop arrival.
 
 Step 4 adds a separate control server on port 80. It remains responsive while
-the persistent MJPEG stream occupies port 81, allowing repeated round-trip
+the persistent MJPEG stream occupies port 8080, allowing repeated round-trip
 clock probes during capture. After boot, verify these endpoints:
 
 ```text
 http://<esp32-ip>/health
 http://<esp32-ip>/sync?id=test1
-http://<esp32-ip>:81/stream
+http://<esp32-ip>:8080/stream
 ```
 
 Then test the complete laptop path:
@@ -73,14 +95,12 @@ OV2640 ribbon camera to that board.
 
 ## Step 4 synchronized camera + IMU recording
 
-Re-upload the current camera sketch before this step; the earlier Step 2 image
-does not provide the separate `/session` and `/sync` control endpoints. The IMU
-firmware already supports `SESSION` and `SYNC`, so it does not need another
-upload. Close both Arduino Serial Monitors, keep the camera powered and joined
-to Wi-Fi, connect the IMU ESP32 over USB, then run:
+Use the USB-serial camera sketch above; Wi-Fi and the HTTP control endpoints are
+not required. The IMU firmware already supports `SESSION` and `SYNC`. Close
+both Arduino Serial Monitors, connect both USB devices, then run:
 
 ```powershell
-.\.venv\Scripts\python.exe .\scripts\record_fusion_session.py --imu-port COM16 --camera-host <esp32-ip> --duration 60 --motion-check
+.\.venv\Scripts\python.exe .\scripts\record_fusion_session.py --imu-port COM17 --camera-port COM14 --duration 60 --motion-check
 ```
 
 The command records both devices concurrently and writes `imu.csv`,
@@ -92,4 +112,10 @@ rows, at least four sync points per device, no more than 20 ms p95 clock-fit
 residual, no capture gap above five target frame intervals, bounded delivery
 latency, and shared-motion correlation with no more than 50 ms remaining lag.
 Nearest-IMU sample distance is not an acceptance test.
+
+The verified session is `data/recordings/fusion_usb_step4_20260819/`: 3,000
+IMU samples at 50.0 Hz and 601 QVGA frames at 10.005 FPS, no invalid rows or
+camera/sequence errors, clock residual p95 of 7.61 ms (IMU) and 14.89 ms
+(camera), shared-motion correlation 0.597, and 0 ms remaining calibrated lag.
+Its `session.json` reports top-level `PASS`.
 

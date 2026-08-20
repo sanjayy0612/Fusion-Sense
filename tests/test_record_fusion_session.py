@@ -1,4 +1,5 @@
 import csv
+from dataclasses import replace
 import math
 import queue
 import tempfile
@@ -6,18 +7,25 @@ import threading
 import unittest
 from pathlib import Path
 
-from fusionsense.data.clock_sync import ClockMapping, SyncObservation
+from fusionsense.data.clock_sync import (
+    ClockMapping,
+    SyncObservation,
+    fit_one_way_clock_lower_envelope,
+)
 from scripts.record_fusion_session import (
     CameraRecord,
     MalformedImuRow,
     build_combined_report,
+    calibrate_one_way_camera_offset,
     flush_imu_to_line_boundary,
     read_imu_until,
+    serial_camera_sync_observation,
     write_camera_manifest,
     write_imu_manifest,
     write_malformed_imu_rows,
     write_sync_manifest,
 )
+from fusionsense.data.camera_serial import SerialCameraFrame
 from scripts.validate_imu_stream import ImuSample
 
 
@@ -42,6 +50,90 @@ def synthetic_activity(time_s: float) -> float:
 
 
 class CombinedRecordingTests(unittest.TestCase):
+    def test_shared_motion_calibrates_one_way_camera_offset(self) -> None:
+        imu_mapping = identity_mapping("imu01")
+        camera_mapping = replace(
+            identity_mapping("cam01"), offset_ns=205_000_000
+        )
+        imu_samples = [
+            ImuSample(
+                host_monotonic_ns=0,
+                t_ms=index * 20,
+                ax_g=0.0,
+                ay_g=0.0,
+                az_g=1.0,
+                gx_dps=100.0 * synthetic_activity(index * 0.02),
+                gy_dps=0.0,
+                gz_dps=0.0,
+                schema_version=1,
+                device_id="imu01",
+                session_id="fusion_test",
+                sequence=index,
+                device_timestamp_us=1_000_000 + index * 20_000,
+            )
+            for index in range(3_000)
+        ]
+        camera_records = [
+            CameraRecord(
+                device_id="cam01",
+                session_id="fusion_test",
+                sequence=index + 1,
+                device_timestamp_us=1_000_000 + index * 100_000,
+                host_received_monotonic_ns=0,
+                width=320,
+                height=240,
+                jpeg_bytes=1_000,
+                relative_path=f"frames/{index + 1:010d}.jpg",
+                motion_score=synthetic_activity(index * 0.1),
+            )
+            for index in range(600)
+        ]
+
+        corrected, calibration = calibrate_one_way_camera_offset(
+            imu_samples, camera_records, imu_mapping, camera_mapping
+        )
+
+        self.assertEqual(calibration["result"], "PASS")
+        self.assertAlmostEqual(corrected.offset_ns, 5_000_000, delta=5_000_000)
+
+    def test_one_way_clock_fit_rejects_positive_serial_queueing_delay(self) -> None:
+        observations = []
+        for index in range(160):
+            device_us = 1_000_000 + index * 100_000
+            queue_delay_ns = 2_000_000 if index % 10 == 0 else 35_000_000
+            host_ns = device_us * 1000 + 5_000_000_000 + queue_delay_ns
+            observations.append(
+                SyncObservation(
+                    "cam01", f"frame_{index}", device_us, host_ns, host_ns
+                )
+            )
+
+        mapping = fit_one_way_clock_lower_envelope(observations)
+
+        self.assertEqual(mapping.total_points, 160)
+        self.assertAlmostEqual(mapping.scale, 1.0, places=6)
+        self.assertLessEqual(mapping.residual_ms["p95"], 0.001)
+
+    def test_serial_camera_header_arrival_becomes_clock_observation(self) -> None:
+        frame = SerialCameraFrame(
+            sequence=7,
+            device_timestamp_us=1_234_567,
+            width=320,
+            height=240,
+            capture_errors=0,
+            jpeg_bytes=b"\xff\xd8\xff\xd9",
+            jpeg_crc32=0,
+            host_header_received_monotonic_ns=9_000_000,
+            host_received_monotonic_ns=15_000_000,
+        )
+
+        observation = serial_camera_sync_observation(frame)
+
+        self.assertEqual(observation.device_id, "cam01")
+        self.assertEqual(observation.device_time_us, 1_234_567)
+        self.assertEqual(observation.host_midpoint_ns, 9_000_000)
+        self.assertEqual(observation.rtt_ns, 0)
+
     def test_clean_synthetic_bimodal_session_passes(self) -> None:
         imu_mapping = identity_mapping("imu01")
         camera_mapping = identity_mapping("cam01")

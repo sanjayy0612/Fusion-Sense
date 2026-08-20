@@ -1,0 +1,601 @@
+{
+  "schema_version": 1,
+  "generated_at_utc": "2026-08-19T17:12:03.346415+00:00",
+  "result": "PASS",
+  "mode": "mentor_demo",
+  "title": "FusionSense Fall Detection",
+  "disclosure": "Dashboard events are checkpoint predictions on labeled held-out C-MHAD windows. They demonstrate the completed laptop pipeline while ESP32 wiring is being finalized.",
+  "model": {
+    "name": "FusionSense corrected masked IMU + camera fusion",
+    "classes": [
+      "stand_to_sit",
+      "sit_to_stand",
+      "sit_to_lie",
+      "lie_to_sit",
+      "lie_to_stand",
+      "stand_to_lie",
+      "stand_to_fall"
+    ],
+    "checkpoint": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\checkpoints\\cmhad_step7_bimodal_dropout_fixed",
+    "training_subjects": [
+      "Subject1",
+      "Subject2",
+      "Subject3",
+      "Subject4"
+    ],
+    "evaluation_split": "held-out subjects: Subject3",
+    "scope_note": "Four-subject research pilot; not a clinical or safety-certified device."
+  },
+  "input_contract": {
+    "window_seconds": 2.0,
+    "imu": {
+      "shape": [
+        100,
+        6
+      ],
+      "units": [
+        "m/s^2",
+        "m/s^2",
+        "m/s^2",
+        "deg/s",
+        "deg/s",
+        "deg/s"
+      ]
+    },
+    "camera_pose": {
+      "shape": [
+        20,
+        99
+      ],
+      "rate_fps": 10
+    },
+    "radar": {
+      "active": false,
+      "note": "Not present in the C-MHAD pilot"
+    },
+    "live_esp32_conversion": {
+      "source_acceleration_unit": "g",
+      "source_angular_velocity_unit": "deg/s",
+      "target_units": [
+        "m/s^2",
+        "m/s^2",
+        "m/s^2",
+        "deg/s",
+        "deg/s",
+        "deg/s"
+      ],
+      "acceleration_formula": "m/s^2 = g * 9.80665",
+      "acceleration_scale": 9.80665,
+      "gyroscope_formula": "deg/s unchanged"
+    },
+    "dataset_unit_validation": {
+      "valid": true,
+      "samples": 10600,
+      "acceleration_norm_median_mps2": 11.36516,
+      "acceleration_norm_p95_mps2": 13.01559,
+      "finite": true,
+      "canonical_units": [
+        "m/s^2",
+        "m/s^2",
+        "m/s^2",
+        "deg/s",
+        "deg/s",
+        "deg/s"
+      ]
+    }
+  },
+  "evaluation": {
+    "samples": 106,
+    "accuracy": 0.8491,
+    "macro_f1": 0.8221,
+    "fall_recall": 1.0,
+    "confusion_matrix": [
+      [
+        23,
+        2,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        26,
+        1,
+        2,
+        2,
+        0,
+        0
+      ],
+      [
+        0,
+        2,
+        11,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        2,
+        1,
+        14,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        1,
+        2,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        1,
+        1,
+        0,
+        5,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        9
+      ]
+    ]
+  },
+  "alert_policy": {
+    "class": "stand_to_fall",
+    "threshold": 0.6,
+    "condition": "stand_to_fall probability >= threshold",
+    "required_modalities": [
+      "imu",
+      "camera_pose"
+    ]
+  },
+  "events": [
+    {
+      "model": "FusionSense corrected masked IMU + camera fusion",
+      "checkpoint": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\checkpoints\\cmhad_step7_bimodal_dropout_fixed",
+      "window_start": 69.80000305175781,
+      "window_seconds": 2.0,
+      "recording_id": "Subject3/tr6",
+      "subject_id": "Subject3",
+      "input": {
+        "imu_shape": [
+          100,
+          6
+        ],
+        "imu_units": [
+          "m/s^2",
+          "m/s^2",
+          "m/s^2",
+          "deg/s",
+          "deg/s",
+          "deg/s"
+        ],
+        "vision_shape": [
+          20,
+          99
+        ],
+        "radar_shape": [
+          40,
+          8
+        ],
+        "valid_modalities": {
+          "imu": true,
+          "radar": false,
+          "camera_pose": true
+        },
+        "health": {
+          "imu": 1.0,
+          "radar": 0.0,
+          "camera": 0.7675
+        },
+        "normalization": "training-subject per-channel mean/std"
+      },
+      "fall_threshold": 0.6,
+      "fusion_policy": "require_valid_imu_and_camera_pose",
+      "status": "monitoring",
+      "alert": false,
+      "predicted_label": "stand_to_sit",
+      "predicted_class_id": 0,
+      "confidence": 0.952796,
+      "fall_probability": 0.002648,
+      "class_probabilities": {
+        "stand_to_sit": 0.952796,
+        "sit_to_stand": 0.032782,
+        "sit_to_lie": 0.000466,
+        "lie_to_sit": 0.008145,
+        "lie_to_stand": 0.002422,
+        "stand_to_lie": 0.00074,
+        "stand_to_fall": 0.002648
+      },
+      "sensor_trust": {
+        "imu": 0.243375,
+        "radar": 0.0,
+        "camera": 0.756625
+      },
+      "inference_ms": 6.436,
+      "event_id": "held_out_cmhad_replay-001",
+      "sequence": 1,
+      "source_mode": "held_out_cmhad_replay",
+      "ground_truth": "stand_to_sit",
+      "event_timestamp_utc": "2026-08-19T17:12:03.345411+00:00",
+      "dataset_subject": "Subject3",
+      "dataset_recording": "Subject3/tr6",
+      "demo_disclosure": "Labeled held-out C-MHAD replay; this event is not a live ESP32 detection."
+    },
+    {
+      "model": "FusionSense corrected masked IMU + camera fusion",
+      "checkpoint": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\checkpoints\\cmhad_step7_bimodal_dropout_fixed",
+      "window_start": 104.69999694824219,
+      "window_seconds": 2.0,
+      "recording_id": "Subject3/tr10",
+      "subject_id": "Subject3",
+      "input": {
+        "imu_shape": [
+          100,
+          6
+        ],
+        "imu_units": [
+          "m/s^2",
+          "m/s^2",
+          "m/s^2",
+          "deg/s",
+          "deg/s",
+          "deg/s"
+        ],
+        "vision_shape": [
+          20,
+          99
+        ],
+        "radar_shape": [
+          40,
+          8
+        ],
+        "valid_modalities": {
+          "imu": true,
+          "radar": false,
+          "camera_pose": true
+        },
+        "health": {
+          "imu": 1.0,
+          "radar": 0.0,
+          "camera": 0.7593
+        },
+        "normalization": "training-subject per-channel mean/std"
+      },
+      "fall_threshold": 0.6,
+      "fusion_policy": "require_valid_imu_and_camera_pose",
+      "status": "monitoring",
+      "alert": false,
+      "predicted_label": "sit_to_stand",
+      "predicted_class_id": 1,
+      "confidence": 0.934864,
+      "fall_probability": 0.000281,
+      "class_probabilities": {
+        "stand_to_sit": 0.00837,
+        "sit_to_stand": 0.934864,
+        "sit_to_lie": 0.001698,
+        "lie_to_sit": 0.005308,
+        "lie_to_stand": 0.048839,
+        "stand_to_lie": 0.00064,
+        "stand_to_fall": 0.000281
+      },
+      "sensor_trust": {
+        "imu": 0.317216,
+        "radar": 0.0,
+        "camera": 0.682784
+      },
+      "inference_ms": 6.718,
+      "event_id": "held_out_cmhad_replay-002",
+      "sequence": 2,
+      "source_mode": "held_out_cmhad_replay",
+      "ground_truth": "sit_to_stand",
+      "event_timestamp_utc": "2026-08-19T17:12:03.345411+00:00",
+      "dataset_subject": "Subject3",
+      "dataset_recording": "Subject3/tr10",
+      "demo_disclosure": "Labeled held-out C-MHAD replay; this event is not a live ESP32 detection."
+    },
+    {
+      "model": "FusionSense corrected masked IMU + camera fusion",
+      "checkpoint": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\checkpoints\\cmhad_step7_bimodal_dropout_fixed",
+      "window_start": 67.80000305175781,
+      "window_seconds": 2.0,
+      "recording_id": "Subject3/tr2",
+      "subject_id": "Subject3",
+      "input": {
+        "imu_shape": [
+          100,
+          6
+        ],
+        "imu_units": [
+          "m/s^2",
+          "m/s^2",
+          "m/s^2",
+          "deg/s",
+          "deg/s",
+          "deg/s"
+        ],
+        "vision_shape": [
+          20,
+          99
+        ],
+        "radar_shape": [
+          40,
+          8
+        ],
+        "valid_modalities": {
+          "imu": true,
+          "radar": false,
+          "camera_pose": true
+        },
+        "health": {
+          "imu": 1.0,
+          "radar": 0.0,
+          "camera": 0.7716
+        },
+        "normalization": "training-subject per-channel mean/std"
+      },
+      "fall_threshold": 0.6,
+      "fusion_policy": "require_valid_imu_and_camera_pose",
+      "status": "monitoring",
+      "alert": false,
+      "predicted_label": "sit_to_lie",
+      "predicted_class_id": 2,
+      "confidence": 0.769471,
+      "fall_probability": 0.011807,
+      "class_probabilities": {
+        "stand_to_sit": 0.000789,
+        "sit_to_stand": 0.000272,
+        "sit_to_lie": 0.769471,
+        "lie_to_sit": 0.015782,
+        "lie_to_stand": 0.003625,
+        "stand_to_lie": 0.198254,
+        "stand_to_fall": 0.011807
+      },
+      "sensor_trust": {
+        "imu": 0.711348,
+        "radar": 0.0,
+        "camera": 0.288652
+      },
+      "inference_ms": 7.5,
+      "event_id": "held_out_cmhad_replay-003",
+      "sequence": 3,
+      "source_mode": "held_out_cmhad_replay",
+      "ground_truth": "sit_to_lie",
+      "event_timestamp_utc": "2026-08-19T17:12:03.346415+00:00",
+      "dataset_subject": "Subject3",
+      "dataset_recording": "Subject3/tr2",
+      "demo_disclosure": "Labeled held-out C-MHAD replay; this event is not a live ESP32 detection."
+    },
+    {
+      "model": "FusionSense corrected masked IMU + camera fusion",
+      "checkpoint": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\checkpoints\\cmhad_step7_bimodal_dropout_fixed",
+      "window_start": 87.0999984741211,
+      "window_seconds": 2.0,
+      "recording_id": "Subject3/tr10",
+      "subject_id": "Subject3",
+      "input": {
+        "imu_shape": [
+          100,
+          6
+        ],
+        "imu_units": [
+          "m/s^2",
+          "m/s^2",
+          "m/s^2",
+          "deg/s",
+          "deg/s",
+          "deg/s"
+        ],
+        "vision_shape": [
+          20,
+          99
+        ],
+        "radar_shape": [
+          40,
+          8
+        ],
+        "valid_modalities": {
+          "imu": true,
+          "radar": false,
+          "camera_pose": true
+        },
+        "health": {
+          "imu": 1.0,
+          "radar": 0.0,
+          "camera": 0.758
+        },
+        "normalization": "training-subject per-channel mean/std"
+      },
+      "fall_threshold": 0.6,
+      "fusion_policy": "require_valid_imu_and_camera_pose",
+      "status": "monitoring",
+      "alert": false,
+      "predicted_label": "stand_to_lie",
+      "predicted_class_id": 5,
+      "confidence": 0.658276,
+      "fall_probability": 0.02581,
+      "class_probabilities": {
+        "stand_to_sit": 0.001737,
+        "sit_to_stand": 0.000428,
+        "sit_to_lie": 0.308788,
+        "lie_to_sit": 0.003837,
+        "lie_to_stand": 0.001123,
+        "stand_to_lie": 0.658276,
+        "stand_to_fall": 0.02581
+      },
+      "sensor_trust": {
+        "imu": 0.556574,
+        "radar": 0.0,
+        "camera": 0.443426
+      },
+      "inference_ms": 6.651,
+      "event_id": "held_out_cmhad_replay-004",
+      "sequence": 4,
+      "source_mode": "held_out_cmhad_replay",
+      "ground_truth": "stand_to_lie",
+      "event_timestamp_utc": "2026-08-19T17:12:03.346415+00:00",
+      "dataset_subject": "Subject3",
+      "dataset_recording": "Subject3/tr10",
+      "demo_disclosure": "Labeled held-out C-MHAD replay; this event is not a live ESP32 detection."
+    },
+    {
+      "model": "FusionSense corrected masked IMU + camera fusion",
+      "checkpoint": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\checkpoints\\cmhad_step7_bimodal_dropout_fixed",
+      "window_start": 112.3499984741211,
+      "window_seconds": 2.0,
+      "recording_id": "Subject3/tr10",
+      "subject_id": "Subject3",
+      "input": {
+        "imu_shape": [
+          100,
+          6
+        ],
+        "imu_units": [
+          "m/s^2",
+          "m/s^2",
+          "m/s^2",
+          "deg/s",
+          "deg/s",
+          "deg/s"
+        ],
+        "vision_shape": [
+          20,
+          99
+        ],
+        "radar_shape": [
+          40,
+          8
+        ],
+        "valid_modalities": {
+          "imu": true,
+          "radar": false,
+          "camera_pose": true
+        },
+        "health": {
+          "imu": 1.0,
+          "radar": 0.0,
+          "camera": 0.767
+        },
+        "normalization": "training-subject per-channel mean/std"
+      },
+      "fall_threshold": 0.6,
+      "fusion_policy": "require_valid_imu_and_camera_pose",
+      "status": "fall_alert",
+      "alert": true,
+      "predicted_label": "stand_to_fall",
+      "predicted_class_id": 6,
+      "confidence": 0.994536,
+      "fall_probability": 0.994536,
+      "class_probabilities": {
+        "stand_to_sit": 0.000977,
+        "sit_to_stand": 0.000456,
+        "sit_to_lie": 0.001361,
+        "lie_to_sit": 0.000402,
+        "lie_to_stand": 0.000192,
+        "stand_to_lie": 0.002077,
+        "stand_to_fall": 0.994536
+      },
+      "sensor_trust": {
+        "imu": 0.319191,
+        "radar": 0.0,
+        "camera": 0.680809
+      },
+      "inference_ms": 6.389,
+      "event_id": "held_out_cmhad_replay-005",
+      "sequence": 5,
+      "source_mode": "held_out_cmhad_replay",
+      "ground_truth": "stand_to_fall",
+      "event_timestamp_utc": "2026-08-19T17:12:03.346415+00:00",
+      "dataset_subject": "Subject3",
+      "dataset_recording": "Subject3/tr10",
+      "demo_disclosure": "Labeled held-out C-MHAD replay; this event is not a live ESP32 detection."
+    }
+  ],
+  "current_event": {
+    "model": "FusionSense corrected masked IMU + camera fusion",
+    "checkpoint": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\checkpoints\\cmhad_step7_bimodal_dropout_fixed",
+    "window_start": 112.3499984741211,
+    "window_seconds": 2.0,
+    "recording_id": "Subject3/tr10",
+    "subject_id": "Subject3",
+    "input": {
+      "imu_shape": [
+        100,
+        6
+      ],
+      "imu_units": [
+        "m/s^2",
+        "m/s^2",
+        "m/s^2",
+        "deg/s",
+        "deg/s",
+        "deg/s"
+      ],
+      "vision_shape": [
+        20,
+        99
+      ],
+      "radar_shape": [
+        40,
+        8
+      ],
+      "valid_modalities": {
+        "imu": true,
+        "radar": false,
+        "camera_pose": true
+      },
+      "health": {
+        "imu": 1.0,
+        "radar": 0.0,
+        "camera": 0.767
+      },
+      "normalization": "training-subject per-channel mean/std"
+    },
+    "fall_threshold": 0.6,
+    "fusion_policy": "require_valid_imu_and_camera_pose",
+    "status": "fall_alert",
+    "alert": true,
+    "predicted_label": "stand_to_fall",
+    "predicted_class_id": 6,
+    "confidence": 0.994536,
+    "fall_probability": 0.994536,
+    "class_probabilities": {
+      "stand_to_sit": 0.000977,
+      "sit_to_stand": 0.000456,
+      "sit_to_lie": 0.001361,
+      "lie_to_sit": 0.000402,
+      "lie_to_stand": 0.000192,
+      "stand_to_lie": 0.002077,
+      "stand_to_fall": 0.994536
+    },
+    "sensor_trust": {
+      "imu": 0.319191,
+      "radar": 0.0,
+      "camera": 0.680809
+    },
+    "inference_ms": 6.389,
+    "event_id": "held_out_cmhad_replay-005",
+    "sequence": 5,
+    "source_mode": "held_out_cmhad_replay",
+    "ground_truth": "stand_to_fall",
+    "event_timestamp_utc": "2026-08-19T17:12:03.346415+00:00",
+    "dataset_subject": "Subject3",
+    "dataset_recording": "Subject3/tr10",
+    "demo_disclosure": "Labeled held-out C-MHAD replay; this event is not a live ESP32 detection."
+  }
+}

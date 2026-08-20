@@ -9,7 +9,7 @@ import queue
 import sys
 import threading
 import time
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Callable
@@ -17,6 +17,12 @@ from typing import Callable
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from fusionsense.data.camera_control import CameraControlClient, CameraControlError
+from fusionsense.data.camera_serial import (
+    CameraSerialError,
+    SERIAL_CAMERA_BAUD,
+    SerialCameraFrame,
+    SerialCameraStream,
+)
 from fusionsense.data.camera_stream import (
     CameraConnectionError,
     TimestampedMjpegStream,
@@ -27,6 +33,7 @@ from fusionsense.data.clock_sync import (
     SyncObservation,
     clock_mapping_passes,
     fit_affine_clock,
+    fit_one_way_clock_lower_envelope,
     nearest_alignment_report,
     parse_imu_sync_response,
     transport_latency_report,
@@ -49,6 +56,7 @@ CAMERA_FIELDS = [
     "width",
     "height",
     "jpeg_bytes",
+    "capture_errors",
     "motion_score",
     "relative_path",
 ]
@@ -80,6 +88,7 @@ class CameraRecord:
     height: int
     jpeg_bytes: int
     relative_path: str
+    capture_errors: int = 0
     motion_score: float | None = None
 
 
@@ -102,8 +111,13 @@ def default_output_directory(session_id: str) -> Path:
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--imu-port", required=True, help="ESP32 IMU USB port")
-    parser.add_argument("--camera-host", required=True, help="ESP32-CAM IP/host")
+    camera = parser.add_mutually_exclusive_group(required=True)
+    camera.add_argument("--camera-host", help="ESP32-CAM IP/host (Wi-Fi mode)")
+    camera.add_argument(
+        "--camera-port", help="ESP32-CAM USB serial port, e.g. COM14"
+    )
     parser.add_argument("--baud", type=int, default=115200)
+    parser.add_argument("--camera-baud", type=int, default=SERIAL_CAMERA_BAUD)
     parser.add_argument("--duration", type=float, default=60.0)
     parser.add_argument("--target-imu-hz", type=float, default=50.0)
     parser.add_argument("--target-camera-fps", type=float, default=10.0)
@@ -343,6 +357,88 @@ def read_camera_until(
         stop_event.set()
 
 
+def serial_camera_sync_observation(frame: SerialCameraFrame) -> SyncObservation:
+    """Use fixed-header arrival to map the camera clock into the host clock.
+
+    This is a one-way observation.  Its constant serial/firmware delay is
+    absorbed by the affine offset; recording the header before the
+    variable-length JPEG prevents JPEG size from biasing the fit.
+    """
+    observed_ns = frame.host_header_received_monotonic_ns
+    return SyncObservation(
+        device_id="cam01",
+        request_id=f"frame_{frame.sequence:010d}",
+        device_time_us=frame.device_timestamp_us,
+        host_send_ns=observed_ns,
+        host_receive_ns=observed_ns,
+    )
+
+
+def read_serial_camera_until(
+    camera: SerialCameraStream,
+    *,
+    session_id: str,
+    frame_directory: Path,
+    deadline_ns: int,
+    records: list[CameraRecord],
+    sync_points: list[SyncObservation],
+    errors: "queue.SimpleQueue[str]",
+    stop_event: threading.Event,
+    clock_ns: Callable[[], int] = time.monotonic_ns,
+) -> None:
+    previous_gray = None
+    try:
+        try:
+            import cv2
+            import numpy as np
+        except ImportError as error:
+            raise CameraSerialError(
+                "USB camera motion validation needs OpenCV and NumPy"
+            ) from error
+
+        while clock_ns() < deadline_ns and not stop_event.is_set():
+            frame = camera.read()
+            image = cv2.imdecode(
+                np.frombuffer(frame.jpeg_bytes, dtype=np.uint8), cv2.IMREAD_COLOR
+            )
+            if image is None:
+                raise CameraSerialError("OpenCV could not decode the camera JPEG")
+            height, width = image.shape[:2]
+            if (width, height) != (frame.width, frame.height):
+                raise CameraSerialError(
+                    "JPEG dimensions disagree with packet header: "
+                    f"decoded={width}x{height}, header={frame.width}x{frame.height}"
+                )
+
+            current_gray = image.astype("float32").mean(axis=2)
+            motion_score = None
+            if previous_gray is not None and previous_gray.shape == current_gray.shape:
+                motion_score = float(abs(current_gray - previous_gray).mean() / 255.0)
+            previous_gray = current_gray
+
+            relative_path = Path("frames") / f"{frame.sequence:010d}.jpg"
+            save_original_jpeg(frame_directory.parent / relative_path, frame.jpeg_bytes)
+            sync_points.append(serial_camera_sync_observation(frame))
+            records.append(
+                CameraRecord(
+                    device_id="cam01",
+                    session_id=session_id,
+                    sequence=frame.sequence,
+                    device_timestamp_us=frame.device_timestamp_us,
+                    host_received_monotonic_ns=frame.host_received_monotonic_ns,
+                    width=width,
+                    height=height,
+                    jpeg_bytes=len(frame.jpeg_bytes),
+                    relative_path=relative_path.as_posix(),
+                    capture_errors=frame.capture_errors,
+                    motion_score=motion_score,
+                )
+            )
+    except Exception as error:
+        errors.put(f"camera reader failed: {error}")
+        stop_event.set()
+
+
 def sync_camera_until(
     control: CameraControlClient,
     *,
@@ -434,11 +530,86 @@ def write_malformed_imu_rows(path: Path, rows: list[MalformedImuRow]) -> None:
             writer.writerow(asdict(row))
 
 
-def _fit_or_none(points: list[SyncObservation]) -> ClockMapping | None:
+def _fit_or_none(
+    points: list[SyncObservation], *, one_way_serial: bool = False
+) -> ClockMapping | None:
     try:
+        if one_way_serial:
+            return fit_one_way_clock_lower_envelope(points)
         return fit_affine_clock(points)
     except ValueError:
         return None
+
+
+def _shared_motion_report(
+    imu_samples: list[ImuSample],
+    camera_records: list[CameraRecord],
+    imu_mapping: ClockMapping,
+    camera_mapping: ClockMapping,
+) -> dict[str, object]:
+    imu_motion_points = [
+        MotionPoint(
+            host_time_ns=imu_mapping.map_device_us(int(item.device_timestamp_us)),
+            score=(
+                (item.gx_dps**2 + item.gy_dps**2 + item.gz_dps**2) ** 0.5
+                + 50.0
+                * abs(
+                    (item.ax_g**2 + item.ay_g**2 + item.az_g**2) ** 0.5 - 1.0
+                )
+            ),
+        )
+        for item in imu_samples
+        if item.device_timestamp_us is not None
+    ]
+    camera_motion_points = [
+        MotionPoint(
+            host_time_ns=camera_mapping.map_device_us(item.device_timestamp_us),
+            score=float(item.motion_score),
+        )
+        for item in camera_records
+        if item.motion_score is not None
+    ]
+    return motion_alignment_report(imu_motion_points, camera_motion_points)
+
+
+def calibrate_one_way_camera_offset(
+    imu_samples: list[ImuSample],
+    camera_records: list[CameraRecord],
+    imu_mapping: ClockMapping,
+    camera_mapping: ClockMapping,
+) -> tuple[ClockMapping, dict[str, object]]:
+    """Resolve a serial camera map's unknown one-way offset with shared motion."""
+    raw_alignment = _shared_motion_report(
+        imu_samples, camera_records, imu_mapping, camera_mapping
+    )
+    checks = raw_alignment.get("checks", {})
+    shift_ms = raw_alignment.get("best_camera_shift_ms")
+    usable = (
+        isinstance(checks, dict)
+        and checks.get("shared_motion_detected") is True
+        and checks.get("correlation_at_least_0_25") is True
+        and isinstance(shift_ms, (int, float))
+        and abs(float(shift_ms)) <= 400.0
+    )
+    if not usable:
+        return camera_mapping, {
+            "result": "FAIL",
+            "method": "shared_motion_one_way_offset_calibration",
+            "reason": "shared motion did not yield a trustworthy offset",
+            "raw_alignment": raw_alignment,
+        }
+
+    corrected = replace(
+        camera_mapping,
+        offset_ns=camera_mapping.offset_ns + float(shift_ms) * 1_000_000.0,
+    )
+    return corrected, {
+        "result": "PASS",
+        "method": "shared_motion_one_way_offset_calibration",
+        "applied_camera_shift_ms": float(shift_ms),
+        "maximum_allowed_calibration_shift_ms": 400.0,
+        "raw_alignment": raw_alignment,
+    }
 
 
 def build_combined_report(
@@ -512,35 +683,8 @@ def build_combined_report(
             imu_capture_ns, camera_capture_ns
         )
         if motion_check:
-            imu_motion_points = [
-                MotionPoint(
-                    host_time_ns=imu_mapping.map_device_us(
-                        int(item.device_timestamp_us)
-                    ),
-                    score=(
-                        (item.gx_dps**2 + item.gy_dps**2 + item.gz_dps**2) ** 0.5
-                        + 50.0
-                        * abs(
-                            (item.ax_g**2 + item.ay_g**2 + item.az_g**2) ** 0.5
-                            - 1.0
-                        )
-                    ),
-                )
-                for item in imu_samples
-                if item.device_timestamp_us is not None
-            ]
-            camera_motion_points = [
-                MotionPoint(
-                    host_time_ns=camera_mapping.map_device_us(
-                        item.device_timestamp_us
-                    ),
-                    score=float(item.motion_score),
-                )
-                for item in camera_records
-                if item.motion_score is not None
-            ]
-            alignment = motion_alignment_report(
-                imu_motion_points, camera_motion_points
+            alignment = _shared_motion_report(
+                imu_samples, camera_records, imu_mapping, camera_mapping
             )
         else:
             alignment = {
@@ -623,8 +767,12 @@ def main() -> int:
         print("pyserial is missing; install requirements.txt", file=sys.stderr)
         return 2
 
-    control = CameraControlClient(args.camera_host)
-    source = esp32_stream_url(args.camera_host)
+    control = CameraControlClient(args.camera_host) if args.camera_host else None
+    source = (
+        esp32_stream_url(args.camera_host)
+        if args.camera_host
+        else f"serial://{args.camera_port}@{args.camera_baud}"
+    )
     imu_samples: list[ImuSample] = []
     camera_records: list[CameraRecord] = []
     imu_sync_points: list[SyncObservation] = []
@@ -635,17 +783,18 @@ def main() -> int:
     stop_event = threading.Event()
     session_started_utc = datetime.now(timezone.utc).isoformat()
 
-    print(f"Assigning shared session {session_id} to ESP32-CAM...")
-    try:
-        control.set_session(session_id)
-    except CameraControlError as error:
-        control.close()
-        print(
-            f"Camera control setup failed: {error}. Upload the Step 4 camera "
-            "firmware and verify http://<camera-ip>/health.",
-            file=sys.stderr,
-        )
-        return 2
+    if control is not None:
+        print(f"Assigning shared session {session_id} to ESP32-CAM...")
+        try:
+            control.set_session(session_id)
+        except CameraControlError as error:
+            control.close()
+            print(
+                f"Camera control setup failed: {error}. Upload the Step 4 camera "
+                "firmware and verify http://<camera-ip>/health.",
+                file=sys.stderr,
+            )
+            return 2
 
     try:
         with serial.Serial(args.imu_port, args.baud, timeout=0.1) as connection:
@@ -659,8 +808,21 @@ def main() -> int:
             frame_directory = output_directory / "frames"
             frame_directory.mkdir()
 
-            print(f"Opening persistent camera stream: {source}")
-            with TimestampedMjpegStream(source) as camera:
+            if args.camera_port:
+                print(
+                    f"Opening USB camera: {args.camera_port} @ "
+                    f"{args.camera_baud} baud"
+                )
+                camera_context = SerialCameraStream(
+                    args.camera_port,
+                    baud=args.camera_baud,
+                    frame_timeout=args.startup_timeout,
+                )
+            else:
+                print(f"Opening persistent camera stream: {source}")
+                camera_context = TimestampedMjpegStream(source)
+
+            with camera_context as camera:
                 camera.read()  # Warm the MJPEG connection; do not record this frame.
                 flush_imu_to_line_boundary(connection)
                 started_ns = time.monotonic_ns()
@@ -668,7 +830,7 @@ def main() -> int:
                     (started_ns, "# host_capture_start,serial_buffer_aligned=true")
                 )
                 deadline_ns = started_ns + int(args.duration * 1_000_000_000)
-                workers = [
+                workers: list[threading.Thread] = [
                     threading.Thread(
                         target=read_imu_until,
                         kwargs={
@@ -685,32 +847,43 @@ def main() -> int:
                         },
                         name="imu-reader",
                     ),
-                    threading.Thread(
-                        target=read_camera_until,
-                        kwargs={
-                            "camera": camera,
-                            "session_id": session_id,
-                            "frame_directory": frame_directory,
-                            "deadline_ns": deadline_ns,
-                            "records": camera_records,
-                            "errors": worker_errors,
-                            "stop_event": stop_event,
-                        },
-                        name="camera-reader",
-                    ),
-                    threading.Thread(
-                        target=sync_camera_until,
-                        kwargs={
-                            "control": control,
-                            "deadline_ns": deadline_ns,
-                            "regular_sync_interval_s": args.sync_interval,
-                            "sync_points": camera_sync_points,
-                            "errors": worker_errors,
-                            "stop_event": stop_event,
-                        },
-                        name="camera-clock-sync",
-                    ),
                 ]
+                camera_worker_kwargs = {
+                    "camera": camera,
+                    "session_id": session_id,
+                    "frame_directory": frame_directory,
+                    "deadline_ns": deadline_ns,
+                    "records": camera_records,
+                    "errors": worker_errors,
+                    "stop_event": stop_event,
+                }
+                if args.camera_port:
+                    camera_worker_kwargs["sync_points"] = camera_sync_points
+                    camera_worker_target = read_serial_camera_until
+                else:
+                    camera_worker_target = read_camera_until
+                workers.append(
+                    threading.Thread(
+                        target=camera_worker_target,
+                        kwargs=camera_worker_kwargs,
+                        name="camera-reader",
+                    )
+                )
+                if control is not None:
+                    workers.append(
+                        threading.Thread(
+                            target=sync_camera_until,
+                            kwargs={
+                                "control": control,
+                                "deadline_ns": deadline_ns,
+                                "regular_sync_interval_s": args.sync_interval,
+                                "sync_points": camera_sync_points,
+                                "errors": worker_errors,
+                                "stop_event": stop_event,
+                            },
+                            name="camera-clock-sync",
+                        )
+                    )
                 print(
                     f"Capturing both devices for {args.duration:.0f} s; "
                     "do not open Serial Monitor or the camera stream elsewhere..."
@@ -726,24 +899,49 @@ def main() -> int:
                 for worker in workers:
                     worker.join()
                 elapsed_s = (time.monotonic_ns() - started_ns) / 1e9
-    except (OSError, serial.SerialException, RuntimeError) as error:
-        control.close()
+    except (
+        CameraSerialError,
+        OSError,
+        serial.SerialException,
+        RuntimeError,
+    ) as error:
+        if control is not None:
+            control.close()
         print(f"Combined recording setup failed: {error}", file=sys.stderr)
         return 2
 
     errors: list[str] = []
     while not worker_errors.empty():
         errors.append(worker_errors.get())
-    try:
-        camera_health = control.health()
-    except CameraControlError as error:
-        camera_health = None
-        errors.append(f"camera health request failed: {error}")
-    finally:
-        control.close()
+    if control is not None:
+        try:
+            camera_health = control.health()
+        except CameraControlError as error:
+            camera_health = None
+            errors.append(f"camera health request failed: {error}")
+        finally:
+            control.close()
+    else:
+        camera_health = {
+            "capture_errors": max(
+                (record.capture_errors for record in camera_records), default=0
+            )
+        }
 
     imu_mapping = _fit_or_none(imu_sync_points)
-    camera_mapping = _fit_or_none(camera_sync_points)
+    camera_mapping = _fit_or_none(
+        camera_sync_points, one_way_serial=bool(args.camera_port)
+    )
+    camera_offset_calibration: dict[str, object] | None = None
+    if (
+        args.camera_port
+        and args.motion_check
+        and imu_mapping is not None
+        and camera_mapping is not None
+    ):
+        camera_mapping, camera_offset_calibration = calibrate_one_way_camera_offset(
+            imu_samples, camera_records, imu_mapping, camera_mapping
+        )
     write_imu_manifest(output_directory / "imu.csv", imu_samples, imu_mapping)
     write_camera_manifest(
         output_directory / "camera_manifest.csv", camera_records, camera_mapping
@@ -776,6 +974,8 @@ def main() -> int:
         camera_health=camera_health,
         errors=errors,
     )
+    if camera_offset_calibration is not None:
+        validation["camera_clock_offset_calibration"] = camera_offset_calibration
     session = {
         "schema_version": 1,
         "session_id": session_id,
@@ -785,7 +985,21 @@ def main() -> int:
         "host_elapsed_s": round(elapsed_s, 4),
         "sources": {
             "imu": {"device_id": "imu01", "port": args.imu_port, "baud": args.baud},
-            "camera": {"device_id": "cam01", "stream": source},
+            "camera": (
+                {
+                    "device_id": "cam01",
+                    "transport": "usb_serial",
+                    "port": args.camera_port,
+                    "baud": args.camera_baud,
+                    "clock_observation": "fixed_frame_header_arrival",
+                }
+                if args.camera_port
+                else {
+                    "device_id": "cam01",
+                    "transport": "wifi_mjpeg",
+                    "stream": source,
+                }
+            ),
         },
         "artifacts": {
             "imu": "imu.csv",
@@ -802,6 +1016,7 @@ def main() -> int:
             "camera_sync_points": len(camera_sync_points),
             "malformed_imu_rows": len(malformed_imu_rows),
         },
+        "camera_clock_offset_calibration": camera_offset_calibration,
         "validation": validation,
     }
     (output_directory / "session.json").write_text(

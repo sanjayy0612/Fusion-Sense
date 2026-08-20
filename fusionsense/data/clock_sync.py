@@ -154,6 +154,56 @@ def fit_affine_clock(
     )
 
 
+def fit_one_way_clock_lower_envelope(
+    observations: list[SyncObservation], *, maximum_selected_points: int = 16
+) -> ClockMapping:
+    """Fit a one-way serial clock from the least-delayed point per time bucket.
+
+    USB serial delivery can be delayed by host scheduling, but it cannot arrive
+    before the device emitted it.  Selecting the lowest raw host/device offset
+    in each chronological bucket rejects positive queueing delays while still
+    retaining observations across the full session for drift estimation.
+    """
+    if not observations:
+        raise ValueError("at least one sync observation is required")
+    if maximum_selected_points < 2:
+        raise ValueError("maximum_selected_points must be at least two")
+    device_ids = {item.device_id for item in observations}
+    if len(device_ids) != 1:
+        raise ValueError("clock mapping observations must belong to one device")
+
+    ordered = sorted(observations, key=lambda item: item.device_time_us)
+    if len(ordered) <= maximum_selected_points:
+        selected = ordered
+    else:
+        selected = []
+        for index in range(maximum_selected_points):
+            start = index * len(ordered) // maximum_selected_points
+            end = (index + 1) * len(ordered) // maximum_selected_points
+            selected.append(
+                min(
+                    ordered[start:end],
+                    key=lambda item: (
+                        item.host_midpoint_ns - item.device_time_us * 1000
+                    ),
+                )
+            )
+
+    fitted = fit_affine_clock(
+        selected, maximum_selected_points=maximum_selected_points
+    )
+    return ClockMapping(
+        device_id=fitted.device_id,
+        scale=fitted.scale,
+        offset_ns=fitted.offset_ns,
+        total_points=len(observations),
+        selected_points=fitted.selected_points,
+        selected_device_span_s=fitted.selected_device_span_s,
+        rtt_ms=fitted.rtt_ms,
+        residual_ms=fitted.residual_ms,
+    )
+
+
 def clock_mapping_passes(mapping: ClockMapping) -> dict[str, bool]:
     """Return conservative MVP acceptance checks for a fitted mapping."""
     return {

@@ -1,0 +1,28 @@
+host_received_monotonic_ns,message
+638960078000000,# FusionSense timestamped IMU USB stream
+638960078000000,"# format=IMU,1,device_id,session_id,seq,t_device_us,ax_g,ay_g,az_g,gx_dps,gy_dps,gz_dps"
+638960093000000,"# configured_hz=50,accel_range_g=2,gyro_range_dps=250"
+638960109000000,"# i2c_scan,pins=21|22,addresses=0x68"
+638960312000000,# mpu_who_am_i=0x70
+638960312000000,# mpu_i2c_address=0x68
+638960312000000,# mpu_model=MPU-6500
+638960312000000,"# calibration,keep_sensor_stationary,seconds=5"
+638965312000000,"# calibration_ok,accel_bias_g=0.00422|0.00115|0.00466,gyro_bias_dps=-0.6847|0.4416|0.2203"
+638965312000000,# acquisition_started
+638965328000000,"# session_set,id=fusion_usb_preflight_20260819"
+638968390000000,"# host_capture_start,serial_buffer_aligned=true"
+638968406000000,"# SYNC_RESP,i000001,8838526"
+638968656000000,"# SYNC_RESP,i000002,9096530"
+638968921000000,"# SYNC_RESP,i000003,9356526"
+638969187000000,"# SYNC_RESP,i000004,9616530"
+638969421000000,"# SYNC_RESP,i000005,9856525"
+638969687000000,"# SYNC_RESP,i000006,10116531"
+638970328000000,"# health,t_ms=10744,samples=250,read_errors_total=0,read_errors_window=0,missed_slots_total=0,missed_slots_window=0,effective_hz=50.00"
+638971687000000,"# SYNC_RESP,i000007,12116526"
+638973687000000,"# SYNC_RESP,i000008,14116531"
+638975328000000,"# health,t_ms=15744,samples=500,read_errors_total=0,read_errors_window=0,missed_slots_total=0,missed_slots_window=0,effective_hz=50.00"
+638975687000000,"# SYNC_RESP,i000009,16116526"
+638977687000000,"# SYNC_RESP,i000010,18116531"
+638979687000000,"# SYNC_RESP,i000011,20117526"
+638980328000000,"# health,t_ms=20744,samples=750,read_errors_total=0,read_errors_window=0,missed_slots_total=0,missed_slots_window=0,effective_hz=50.00"
+638981687000000,"# SYNC_RESP,i000012,22117531"

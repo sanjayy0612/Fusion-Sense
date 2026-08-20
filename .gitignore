@@ -4,6 +4,7 @@ __pycache__/
 checkpoints/
 *.png
 .venv/
+.runtime/
 
 .qa/
 *.jpg
@@ -16,3 +17,4 @@ data/processed/*
 assets/models/*.task
 CLAUDE.md
 hardware/esp32_cam/**/secrets.h
+dashboard/notification_state*.json

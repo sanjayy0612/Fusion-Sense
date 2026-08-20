@@ -1,0 +1,2751 @@
+{
+  "schema_version": 1,
+  "generated_at_utc": "2026-08-19T17:11:54.387329+00:00",
+  "result": "PASS",
+  "mode": "recorded_esp32",
+  "title": "FusionSense Recorded ESP32 Replay",
+  "disclosure": "Every prediction fuses real synchronized ESP32 IMU and ESP32-CAM pose data. Windows missing either input are withheld, not predicted.",
+  "model": {
+    "name": "FusionSense corrected masked IMU + camera fusion",
+    "checkpoint": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\checkpoints\\cmhad_step7_bimodal_dropout_fixed",
+    "classes": [
+      "stand_to_sit",
+      "sit_to_stand",
+      "sit_to_lie",
+      "lie_to_sit",
+      "lie_to_stand",
+      "stand_to_lie",
+      "stand_to_fall"
+    ],
+    "scope_note": "Four-subject research pilot; not a clinical or safety-certified device."
+  },
+  "input_contract": {
+    "window_seconds": 2.0,
+    "imu": {
+      "shape": [
+        100,
+        6
+      ],
+      "units": [
+        "m/s^2",
+        "m/s^2",
+        "m/s^2",
+        "deg/s",
+        "deg/s",
+        "deg/s"
+      ]
+    },
+    "camera_pose": {
+      "shape": [
+        20,
+        99
+      ],
+      "rate_fps": 10
+    },
+    "fusion_policy": "valid IMU and valid camera pose required",
+    "radar": {
+      "active": false,
+      "note": "Not an input to this project"
+    },
+    "live_esp32_conversion": {
+      "source_acceleration_unit": "g",
+      "source_angular_velocity_unit": "deg/s",
+      "target_units": [
+        "m/s^2",
+        "m/s^2",
+        "m/s^2",
+        "deg/s",
+        "deg/s",
+        "deg/s"
+      ],
+      "acceleration_formula": "m/s^2 = g * 9.80665",
+      "acceleration_scale": 9.80665,
+      "gyroscope_formula": "deg/s unchanged"
+    }
+  },
+  "session": {
+    "source": "recorded_esp32_session",
+    "session_id": "fusion_usb_step4_20260819",
+    "session_dir": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\data\\recordings\\fusion_usb_step4_20260819",
+    "window_seconds": 2.0,
+    "stride_seconds": 1.0,
+    "windows": 58,
+    "imu_input_validation": {
+      "valid": true,
+      "samples": 3000,
+      "acceleration_norm_median_mps2": 9.79652,
+      "acceleration_norm_p95_mps2": 10.85823,
+      "finite": true,
+      "canonical_units": [
+        "m/s^2",
+        "m/s^2",
+        "m/s^2",
+        "deg/s",
+        "deg/s",
+        "deg/s"
+      ],
+      "conversion": {
+        "source_acceleration_unit": "g",
+        "source_angular_velocity_unit": "deg/s",
+        "target_units": [
+          "m/s^2",
+          "m/s^2",
+          "m/s^2",
+          "deg/s",
+          "deg/s",
+          "deg/s"
+        ],
+        "acceleration_formula": "m/s^2 = g * 9.80665",
+        "acceleration_scale": 9.80665,
+        "gyroscope_formula": "deg/s unchanged"
+      }
+    },
+    "capture_validation": {
+      "alignment": {
+        "absolute_lag_ms": 0,
+        "best_camera_shift_ms": 0,
+        "best_correlation": 0.59719,
+        "camera_motion": {
+          "active_points_over_3z": 173,
+          "baseline": 0.011222,
+          "peak_z": 16.4116,
+          "robust_scale": 0.004855
+        },
+        "checks": {
+          "absolute_lag_at_most_50_ms": true,
+          "correlation_at_least_0_25": true,
+          "shared_motion_detected": true
+        },
+        "compared_camera_points": 598,
+        "imu_motion": {
+          "active_points_over_3z": 894,
+          "baseline": 4.32407,
+          "peak_z": 20.0,
+          "robust_scale": 6.05203
+        },
+        "lag_step_ms": 5,
+        "method": "shared_motion_cross_correlation",
+        "result": "PASS",
+        "search_range_ms": 500
+      },
+      "camera": {
+        "capture_interval_ms": {
+          "max": 108.154,
+          "mean": 99.9499,
+          "p95": 108.071
+        },
+        "checks": {
+          "camera_capture_errors_zero": true,
+          "device_fps_8_5_to_11_5": true,
+          "enough_frames": true,
+          "max_capture_interval_at_most_5x_target": true,
+          "monotonic_capture_timestamps": true,
+          "monotonic_sequence": true,
+          "no_sequence_gaps": true,
+          "p95_capture_interval_at_most_2x_target": true,
+          "qvga_320_by_240": true
+        },
+        "device_elapsed_s": 59.9699,
+        "device_fps": 10.005,
+        "device_timestamp_us": {
+          "first": 2390752,
+          "last": 62360662
+        },
+        "dimensions": [
+          [
+            320,
+            240
+          ]
+        ],
+        "dropped_frames": 0,
+        "frames": 601,
+        "health": {
+          "capture_errors": 0
+        },
+        "result": "PASS",
+        "sequence": {
+          "first": 2,
+          "last": 602
+        }
+      },
+      "camera_clock_offset_calibration": {
+        "applied_camera_shift_ms": -200.0,
+        "maximum_allowed_calibration_shift_ms": 400.0,
+        "method": "shared_motion_one_way_offset_calibration",
+        "raw_alignment": {
+          "absolute_lag_ms": 200,
+          "best_camera_shift_ms": -200,
+          "best_correlation": 0.59719,
+          "camera_motion": {
+            "active_points_over_3z": 173,
+            "baseline": 0.011222,
+            "peak_z": 16.4116,
+            "robust_scale": 0.004855
+          },
+          "checks": {
+            "absolute_lag_at_most_50_ms": false,
+            "correlation_at_least_0_25": true,
+            "shared_motion_detected": true
+          },
+          "compared_camera_points": 598,
+          "imu_motion": {
+            "active_points_over_3z": 894,
+            "baseline": 4.32407,
+            "peak_z": 20.0,
+            "robust_scale": 6.05203
+          },
+          "lag_step_ms": 5,
+          "method": "shared_motion_cross_correlation",
+          "result": "FAIL",
+          "search_range_ms": 500
+        },
+        "result": "PASS"
+      },
+      "clock_sync": {
+        "camera": {
+          "checks": {
+            "absolute_drift_at_most_2000_ppm": true,
+            "at_least_4_sync_points": true,
+            "fit_residual_p95_at_most_20_ms": true,
+            "selected_span_at_least_2_seconds": true
+          },
+          "mapping": {
+            "device_id": "cam01",
+            "drift_ppm": 105.8051,
+            "equation": "host_ns = scale * device_us * 1000 + offset_ns",
+            "fit_residual_ms": {
+              "max": 14.886115,
+              "median": 3.085735,
+              "min": 0.02776,
+              "p95": 14.886115
+            },
+            "offset_ns": 639127986868734,
+            "rtt_ms": {
+              "max": 0.0,
+              "median": 0.0,
+              "min": 0.0,
+              "p95": 0.0
+            },
+            "scale": 1.000105805066,
+            "selected_device_span_s": 59.573773,
+            "selected_low_rtt_points": 16,
+            "total_sync_points": 601
+          },
+          "result": "PASS"
+        },
+        "imu": {
+          "checks": {
+            "absolute_drift_at_most_2000_ppm": true,
+            "at_least_4_sync_points": true,
+            "fit_residual_p95_at_most_20_ms": true,
+            "selected_span_at_least_2_seconds": true
+          },
+          "mapping": {
+            "device_id": "imu01",
+            "drift_ppm": -46.667,
+            "equation": "host_ns = scale * device_us * 1000 + offset_ns",
+            "fit_residual_ms": {
+              "max": 7.609604,
+              "median": 1.253861,
+              "min": 0.263461,
+              "p95": 7.609604
+            },
+            "offset_ns": 639121744506246,
+            "rtt_ms": {
+              "max": 0.0,
+              "median": 0.0,
+              "min": 0.0,
+              "p95": 0.0
+            },
+            "scale": 0.999953332989,
+            "selected_device_span_s": 55.019996,
+            "selected_low_rtt_points": 16,
+            "total_sync_points": 35
+          },
+          "result": "PASS"
+        }
+      },
+      "errors": [],
+      "imu": {
+        "accel_magnitude_g": {
+          "mean": 1.00067,
+          "std": 0.08195
+        },
+        "checks": {
+          "missed_slot_ratio_at_most_0_1_percent": true,
+          "monotonic_device_timestamps": true,
+          "monotonic_sequence": true,
+          "no_invalid_rows": true,
+          "no_sequence_gaps": true,
+          "p95_interval_at_most_22_ms": true,
+          "rate_49_to_51_hz": true
+        },
+        "device_duration_s": 59.98,
+        "effective_hz": 50.0,
+        "estimated_missed_slots": 0,
+        "gyro_axis_mean_dps": {
+          "gx_dps": -0.49646,
+          "gy_dps": 1.21252,
+          "gz_dps": 0.29637
+        },
+        "gyro_magnitude_dps": {
+          "mean": 17.65698,
+          "std": 28.60951
+        },
+        "interval_ms": {
+          "max": 20.004,
+          "mean": 20.0,
+          "p95": 20.004
+        },
+        "invalid_rows": 0,
+        "missed_slot_ratio": 0.0,
+        "non_monotonic_timestamps": 0,
+        "result": "PASS",
+        "samples": 3000,
+        "sequence_gaps": 0
+      },
+      "nearest_sampling_diagnostic": {
+        "median_alignment_at_most_50_ms": true,
+        "nearest_imu_skew_ms": {
+          "max": 230.836872,
+          "median": 5.371638,
+          "min": 0.013679,
+          "p95": 9.592871
+        },
+        "pairs": 601,
+        "result": "PASS"
+      },
+      "result": "PASS",
+      "transport_checks": {
+        "camera_latency_max_at_most_1000_ms": true,
+        "camera_latency_p95_at_most_500_ms": true,
+        "imu_latency_max_at_most_250_ms": true,
+        "imu_latency_p95_at_most_50_ms": true
+      },
+      "transport_latency": {
+        "camera_ms": {
+          "max": 326.904384,
+          "median": 297.408335,
+          "min": 264.113885,
+          "p95": 315.925612
+        },
+        "imu_ms": {
+          "max": 16.925859,
+          "median": 7.945912,
+          "min": -0.710679,
+          "p95": 14.883044
+        }
+      }
+    },
+    "pose_cache": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\data\\recordings\\fusion_usb_step4_20260819\\pose_cache.npz"
+  },
+  "summary": {
+    "assembled_windows": 58,
+    "bimodal_inference_windows": 24,
+    "withheld_non_bimodal_windows": 34,
+    "alerts": 0,
+    "sensor_unavailable_windows": 0,
+    "capture_validation_result": "PASS"
+  },
+  "bimodal_checks": {
+    "capture_validation_passed": true,
+    "at_least_one_bimodal_window": true,
+    "both_sensors_valid_for_every_inference": true,
+    "radar_disabled_for_every_inference": true,
+    "positive_imu_trust_for_every_inference": true,
+    "positive_camera_trust_for_every_inference": true,
+    "zero_radar_trust_for_every_inference": true,
+    "no_sensor_unavailable_predictions": true
+  },
+  "withheld_windows": [
+    {
+      "window_start_s": 0.0,
+      "reasons": [
+        "camera_pose_invalid"
+      ]
+    },
+    {
+      "window_start_s": 1.0,
+      "reasons": [
+        "camera_pose_invalid"
+      ]
+    },
+    {
+      "window_start_s": 2.0,
+      "reasons": [
+        "camera_pose_invalid"
+      ]
+    },
+    {
+      "window_start_s": 3.0,
+      "reasons": [
+        "camera_pose_invalid"
+      ]
+    },
+    {
+      "window_start_s": 4.0,
+      "reasons": [
+        "camera_pose_invalid"
+      ]
+    },
+    {
+      "window_start_s": 5.0,
+      "reasons": [
+        "camera_pose_invalid"
+      ]
+    },
+    {
+      "window_start_s": 6.0,
+      "reasons": [
+        "camera_pose_invalid"
+      ]
+    },
+    {
+      "window_start_s": 7.0,
+      "reasons": [
+        "camera_pose_invalid"
+      ]
+    },
+    {
+      "window_start_s": 8.0,
+      "reasons": [
+        "camera_pose_invalid"
+      ]
+    },
+    {
+      "window_start_s": 9.0,
+      "reasons": [
+        "camera_pose_invalid"
+      ]
+    },
+    {
+      "window_start_s": 10.0,
+      "reasons": [
+        "camera_pose_invalid"
+      ]
+    },
+    {
+      "window_start_s": 11.0,
+      "reasons": [
+        "camera_pose_invalid"
+      ]
+    },
+    {
+      "window_start_s": 12.0,
+      "reasons": [
+        "camera_pose_invalid"
+      ]
+    },
+    {
+      "window_start_s": 13.0,
+      "reasons": [
+        "camera_pose_invalid"
+      ]
+    },
+    {
+      "window_start_s": 14.0,
+      "reasons": [
+        "camera_pose_invalid"
+      ]
+    },
+    {
+      "window_start_s": 15.0,
+      "reasons": [
+        "camera_pose_invalid"
+      ]
+    },
+    {
+      "window_start_s": 16.0,
+      "reasons": [
+        "camera_pose_invalid"
+      ]
+    },
+    {
+      "window_start_s": 17.0,
+      "reasons": [
+        "camera_pose_invalid"
+      ]
+    },
+    {
+      "window_start_s": 20.0,
+      "reasons": [
+        "camera_pose_invalid"
+      ]
+    },
+    {
+      "window_start_s": 21.0,
+      "reasons": [
+        "camera_pose_invalid"
+      ]
+    },
+    {
+      "window_start_s": 22.0,
+      "reasons": [
+        "camera_pose_invalid"
+      ]
+    },
+    {
+      "window_start_s": 23.0,
+      "reasons": [
+        "camera_pose_invalid"
+      ]
+    },
+    {
+      "window_start_s": 24.0,
+      "reasons": [
+        "camera_pose_invalid"
+      ]
+    },
+    {
+      "window_start_s": 25.0,
+      "reasons": [
+        "camera_pose_invalid"
+      ]
+    },
+    {
+      "window_start_s": 26.0,
+      "reasons": [
+        "camera_pose_invalid"
+      ]
+    },
+    {
+      "window_start_s": 29.0,
+      "reasons": [
+        "camera_pose_invalid"
+      ]
+    },
+    {
+      "window_start_s": 30.0,
+      "reasons": [
+        "camera_pose_invalid"
+      ]
+    },
+    {
+      "window_start_s": 31.0,
+      "reasons": [
+        "camera_pose_invalid"
+      ]
+    },
+    {
+      "window_start_s": 32.0,
+      "reasons": [
+        "camera_pose_invalid"
+      ]
+    },
+    {
+      "window_start_s": 33.0,
+      "reasons": [
+        "camera_pose_invalid"
+      ]
+    },
+    {
+      "window_start_s": 34.0,
+      "reasons": [
+        "camera_pose_invalid"
+      ]
+    },
+    {
+      "window_start_s": 35.0,
+      "reasons": [
+        "camera_pose_invalid"
+      ]
+    },
+    {
+      "window_start_s": 36.0,
+      "reasons": [
+        "camera_pose_invalid"
+      ]
+    },
+    {
+      "window_start_s": 37.0,
+      "reasons": [
+        "camera_pose_invalid"
+      ]
+    }
+  ],
+  "alert_policy": {
+    "class": "stand_to_fall",
+    "threshold": 0.6,
+    "required_modalities": [
+      "imu",
+      "camera_pose"
+    ]
+  },
+  "events": [
+    {
+      "model": "FusionSense corrected masked IMU + camera fusion",
+      "checkpoint": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\checkpoints\\cmhad_step7_bimodal_dropout_fixed",
+      "window_start": 639148.60871056,
+      "window_seconds": 2.0,
+      "recording_id": "fusion_usb_step4_20260819",
+      "subject_id": "live_esp32",
+      "input": {
+        "imu_shape": [
+          100,
+          6
+        ],
+        "imu_units": [
+          "m/s^2",
+          "m/s^2",
+          "m/s^2",
+          "deg/s",
+          "deg/s",
+          "deg/s"
+        ],
+        "vision_shape": [
+          20,
+          99
+        ],
+        "radar_shape": [
+          40,
+          8
+        ],
+        "valid_modalities": {
+          "imu": true,
+          "radar": false,
+          "camera_pose": true
+        },
+        "health": {
+          "imu": 1.0,
+          "radar": 0.0,
+          "camera": 0.403
+        },
+        "normalization": "training-subject per-channel mean/std"
+      },
+      "fall_threshold": 0.6,
+      "fusion_policy": "require_valid_imu_and_camera_pose",
+      "status": "monitoring",
+      "alert": false,
+      "predicted_label": "lie_to_stand",
+      "predicted_class_id": 4,
+      "confidence": 0.595705,
+      "fall_probability": 0.001097,
+      "class_probabilities": {
+        "stand_to_sit": 0.001814,
+        "sit_to_stand": 0.020643,
+        "sit_to_lie": 0.014189,
+        "lie_to_sit": 0.042294,
+        "lie_to_stand": 0.595705,
+        "stand_to_lie": 0.324259,
+        "stand_to_fall": 0.001097
+      },
+      "sensor_trust": {
+        "imu": 0.792275,
+        "radar": 0.0,
+        "camera": 0.207725
+      },
+      "inference_ms": 11.034,
+      "event_id": "recorded_esp32-001",
+      "sequence": 1,
+      "source_mode": "recorded_esp32",
+      "ground_truth": null,
+      "event_timestamp_utc": "2026-08-19T17:11:54.211665+00:00",
+      "window_diagnostics": {
+        "window_start_s": 18.0,
+        "window_end_s": 20.0,
+        "imu": {
+          "valid": true,
+          "coverage": 1.0,
+          "max_sampling_skew_ms": 0.931,
+          "nearest_source_samples": 100
+        },
+        "camera": {
+          "valid": true,
+          "sampling_coverage": 1.0,
+          "pose_valid_ratio": 0.9,
+          "max_sampling_skew_ms": 48.829,
+          "nearest_source_frames": 20
+        }
+      },
+      "demo_disclosure": "Fused inference using both real ESP32 IMU and ESP32-CAM pose data."
+    },
+    {
+      "model": "FusionSense corrected masked IMU + camera fusion",
+      "checkpoint": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\checkpoints\\cmhad_step7_bimodal_dropout_fixed",
+      "window_start": 639149.60871056,
+      "window_seconds": 2.0,
+      "recording_id": "fusion_usb_step4_20260819",
+      "subject_id": "live_esp32",
+      "input": {
+        "imu_shape": [
+          100,
+          6
+        ],
+        "imu_units": [
+          "m/s^2",
+          "m/s^2",
+          "m/s^2",
+          "deg/s",
+          "deg/s",
+          "deg/s"
+        ],
+        "vision_shape": [
+          20,
+          99
+        ],
+        "radar_shape": [
+          40,
+          8
+        ],
+        "valid_modalities": {
+          "imu": true,
+          "radar": false,
+          "camera_pose": true
+        },
+        "health": {
+          "imu": 1.0,
+          "radar": 0.0,
+          "camera": 0.4914
+        },
+        "normalization": "training-subject per-channel mean/std"
+      },
+      "fall_threshold": 0.6,
+      "fusion_policy": "require_valid_imu_and_camera_pose",
+      "status": "monitoring",
+      "alert": false,
+      "predicted_label": "lie_to_stand",
+      "predicted_class_id": 4,
+      "confidence": 0.502375,
+      "fall_probability": 0.000784,
+      "class_probabilities": {
+        "stand_to_sit": 0.002782,
+        "sit_to_stand": 0.028867,
+        "sit_to_lie": 0.015214,
+        "lie_to_sit": 0.035476,
+        "lie_to_stand": 0.502375,
+        "stand_to_lie": 0.414501,
+        "stand_to_fall": 0.000784
+      },
+      "sensor_trust": {
+        "imu": 0.785491,
+        "radar": 0.0,
+        "camera": 0.214509
+      },
+      "inference_ms": 7.692,
+      "event_id": "recorded_esp32-002",
+      "sequence": 2,
+      "source_mode": "recorded_esp32",
+      "ground_truth": null,
+      "event_timestamp_utc": "2026-08-19T17:11:54.219666+00:00",
+      "window_diagnostics": {
+        "window_start_s": 19.0,
+        "window_end_s": 21.0,
+        "imu": {
+          "valid": true,
+          "coverage": 1.0,
+          "max_sampling_skew_ms": 0.978,
+          "nearest_source_samples": 100
+        },
+        "camera": {
+          "valid": true,
+          "sampling_coverage": 1.0,
+          "pose_valid_ratio": 0.5,
+          "max_sampling_skew_ms": 53.693,
+          "nearest_source_frames": 20
+        }
+      },
+      "demo_disclosure": "Fused inference using both real ESP32 IMU and ESP32-CAM pose data."
+    },
+    {
+      "model": "FusionSense corrected masked IMU + camera fusion",
+      "checkpoint": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\checkpoints\\cmhad_step7_bimodal_dropout_fixed",
+      "window_start": 639157.60871056,
+      "window_seconds": 2.0,
+      "recording_id": "fusion_usb_step4_20260819",
+      "subject_id": "live_esp32",
+      "input": {
+        "imu_shape": [
+          100,
+          6
+        ],
+        "imu_units": [
+          "m/s^2",
+          "m/s^2",
+          "m/s^2",
+          "deg/s",
+          "deg/s",
+          "deg/s"
+        ],
+        "vision_shape": [
+          20,
+          99
+        ],
+        "radar_shape": [
+          40,
+          8
+        ],
+        "valid_modalities": {
+          "imu": true,
+          "radar": false,
+          "camera_pose": true
+        },
+        "health": {
+          "imu": 1.0,
+          "radar": 0.0,
+          "camera": 0.4898
+        },
+        "normalization": "training-subject per-channel mean/std"
+      },
+      "fall_threshold": 0.6,
+      "fusion_policy": "require_valid_imu_and_camera_pose",
+      "status": "monitoring",
+      "alert": false,
+      "predicted_label": "lie_to_stand",
+      "predicted_class_id": 4,
+      "confidence": 0.842879,
+      "fall_probability": 0.000306,
+      "class_probabilities": {
+        "stand_to_sit": 0.001815,
+        "sit_to_stand": 0.012395,
+        "sit_to_lie": 0.03335,
+        "lie_to_sit": 0.063169,
+        "lie_to_stand": 0.842879,
+        "stand_to_lie": 0.046086,
+        "stand_to_fall": 0.000306
+      },
+      "sensor_trust": {
+        "imu": 0.80827,
+        "radar": 0.0,
+        "camera": 0.19173
+      },
+      "inference_ms": 8.348,
+      "event_id": "recorded_esp32-003",
+      "sequence": 3,
+      "source_mode": "recorded_esp32",
+      "ground_truth": null,
+      "event_timestamp_utc": "2026-08-19T17:11:54.229669+00:00",
+      "window_diagnostics": {
+        "window_start_s": 27.0,
+        "window_end_s": 29.0,
+        "imu": {
+          "valid": true,
+          "coverage": 1.0,
+          "max_sampling_skew_ms": 1.351,
+          "nearest_source_samples": 100
+        },
+        "camera": {
+          "valid": true,
+          "sampling_coverage": 1.0,
+          "pose_valid_ratio": 0.5,
+          "max_sampling_skew_ms": 53.776,
+          "nearest_source_frames": 18
+        }
+      },
+      "demo_disclosure": "Fused inference using both real ESP32 IMU and ESP32-CAM pose data."
+    },
+    {
+      "model": "FusionSense corrected masked IMU + camera fusion",
+      "checkpoint": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\checkpoints\\cmhad_step7_bimodal_dropout_fixed",
+      "window_start": 639158.60871056,
+      "window_seconds": 2.0,
+      "recording_id": "fusion_usb_step4_20260819",
+      "subject_id": "live_esp32",
+      "input": {
+        "imu_shape": [
+          100,
+          6
+        ],
+        "imu_units": [
+          "m/s^2",
+          "m/s^2",
+          "m/s^2",
+          "deg/s",
+          "deg/s",
+          "deg/s"
+        ],
+        "vision_shape": [
+          20,
+          99
+        ],
+        "radar_shape": [
+          40,
+          8
+        ],
+        "valid_modalities": {
+          "imu": true,
+          "radar": false,
+          "camera_pose": true
+        },
+        "health": {
+          "imu": 1.0,
+          "radar": 0.0,
+          "camera": 0.4424
+        },
+        "normalization": "training-subject per-channel mean/std"
+      },
+      "fall_threshold": 0.6,
+      "fusion_policy": "require_valid_imu_and_camera_pose",
+      "status": "monitoring",
+      "alert": false,
+      "predicted_label": "lie_to_stand",
+      "predicted_class_id": 4,
+      "confidence": 0.813097,
+      "fall_probability": 0.000474,
+      "class_probabilities": {
+        "stand_to_sit": 0.00154,
+        "sit_to_stand": 0.013934,
+        "sit_to_lie": 0.042216,
+        "lie_to_sit": 0.077169,
+        "lie_to_stand": 0.813097,
+        "stand_to_lie": 0.051569,
+        "stand_to_fall": 0.000474
+      },
+      "sensor_trust": {
+        "imu": 0.877637,
+        "radar": 0.0,
+        "camera": 0.122363
+      },
+      "inference_ms": 8.119,
+      "event_id": "recorded_esp32-004",
+      "sequence": 4,
+      "source_mode": "recorded_esp32",
+      "ground_truth": null,
+      "event_timestamp_utc": "2026-08-19T17:11:54.238670+00:00",
+      "window_diagnostics": {
+        "window_start_s": 28.0,
+        "window_end_s": 30.0,
+        "imu": {
+          "valid": true,
+          "coverage": 1.0,
+          "max_sampling_skew_ms": 1.398,
+          "nearest_source_samples": 100
+        },
+        "camera": {
+          "valid": true,
+          "sampling_coverage": 1.0,
+          "pose_valid_ratio": 0.75,
+          "max_sampling_skew_ms": 53.776,
+          "nearest_source_frames": 17
+        }
+      },
+      "demo_disclosure": "Fused inference using both real ESP32 IMU and ESP32-CAM pose data."
+    },
+    {
+      "model": "FusionSense corrected masked IMU + camera fusion",
+      "checkpoint": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\checkpoints\\cmhad_step7_bimodal_dropout_fixed",
+      "window_start": 639168.60871056,
+      "window_seconds": 2.0,
+      "recording_id": "fusion_usb_step4_20260819",
+      "subject_id": "live_esp32",
+      "input": {
+        "imu_shape": [
+          100,
+          6
+        ],
+        "imu_units": [
+          "m/s^2",
+          "m/s^2",
+          "m/s^2",
+          "deg/s",
+          "deg/s",
+          "deg/s"
+        ],
+        "vision_shape": [
+          20,
+          99
+        ],
+        "radar_shape": [
+          40,
+          8
+        ],
+        "valid_modalities": {
+          "imu": true,
+          "radar": false,
+          "camera_pose": true
+        },
+        "health": {
+          "imu": 1.0,
+          "radar": 0.0,
+          "camera": 0.4409
+        },
+        "normalization": "training-subject per-channel mean/std"
+      },
+      "fall_threshold": 0.6,
+      "fusion_policy": "require_valid_imu_and_camera_pose",
+      "status": "monitoring",
+      "alert": false,
+      "predicted_label": "lie_to_stand",
+      "predicted_class_id": 4,
+      "confidence": 0.903807,
+      "fall_probability": 0.0002,
+      "class_probabilities": {
+        "stand_to_sit": 0.002465,
+        "sit_to_stand": 0.020866,
+        "sit_to_lie": 0.015584,
+        "lie_to_sit": 0.030115,
+        "lie_to_stand": 0.903807,
+        "stand_to_lie": 0.026963,
+        "stand_to_fall": 0.0002
+      },
+      "sensor_trust": {
+        "imu": 0.856503,
+        "radar": 0.0,
+        "camera": 0.143497
+      },
+      "inference_ms": 7.884,
+      "event_id": "recorded_esp32-005",
+      "sequence": 5,
+      "source_mode": "recorded_esp32",
+      "ground_truth": null,
+      "event_timestamp_utc": "2026-08-19T17:11:54.247307+00:00",
+      "window_diagnostics": {
+        "window_start_s": 38.0,
+        "window_end_s": 40.0,
+        "imu": {
+          "valid": true,
+          "coverage": 1.0,
+          "max_sampling_skew_ms": 1.865,
+          "nearest_source_samples": 100
+        },
+        "camera": {
+          "valid": true,
+          "sampling_coverage": 1.0,
+          "pose_valid_ratio": 0.8,
+          "max_sampling_skew_ms": 53.314,
+          "nearest_source_frames": 19
+        }
+      },
+      "demo_disclosure": "Fused inference using both real ESP32 IMU and ESP32-CAM pose data."
+    },
+    {
+      "model": "FusionSense corrected masked IMU + camera fusion",
+      "checkpoint": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\checkpoints\\cmhad_step7_bimodal_dropout_fixed",
+      "window_start": 639169.60871056,
+      "window_seconds": 2.0,
+      "recording_id": "fusion_usb_step4_20260819",
+      "subject_id": "live_esp32",
+      "input": {
+        "imu_shape": [
+          100,
+          6
+        ],
+        "imu_units": [
+          "m/s^2",
+          "m/s^2",
+          "m/s^2",
+          "deg/s",
+          "deg/s",
+          "deg/s"
+        ],
+        "vision_shape": [
+          20,
+          99
+        ],
+        "radar_shape": [
+          40,
+          8
+        ],
+        "valid_modalities": {
+          "imu": true,
+          "radar": false,
+          "camera_pose": true
+        },
+        "health": {
+          "imu": 1.0,
+          "radar": 0.0,
+          "camera": 0.4659
+        },
+        "normalization": "training-subject per-channel mean/std"
+      },
+      "fall_threshold": 0.6,
+      "fusion_policy": "require_valid_imu_and_camera_pose",
+      "status": "monitoring",
+      "alert": false,
+      "predicted_label": "lie_to_stand",
+      "predicted_class_id": 4,
+      "confidence": 0.900902,
+      "fall_probability": 0.000213,
+      "class_probabilities": {
+        "stand_to_sit": 0.00239,
+        "sit_to_stand": 0.017535,
+        "sit_to_lie": 0.016304,
+        "lie_to_sit": 0.035826,
+        "lie_to_stand": 0.900902,
+        "stand_to_lie": 0.02683,
+        "stand_to_fall": 0.000213
+      },
+      "sensor_trust": {
+        "imu": 0.859849,
+        "radar": 0.0,
+        "camera": 0.140151
+      },
+      "inference_ms": 7.054,
+      "event_id": "recorded_esp32-006",
+      "sequence": 6,
+      "source_mode": "recorded_esp32",
+      "ground_truth": null,
+      "event_timestamp_utc": "2026-08-19T17:11:54.254311+00:00",
+      "window_diagnostics": {
+        "window_start_s": 39.0,
+        "window_end_s": 41.0,
+        "imu": {
+          "valid": true,
+          "coverage": 1.0,
+          "max_sampling_skew_ms": 1.911,
+          "nearest_source_samples": 100
+        },
+        "camera": {
+          "valid": true,
+          "sampling_coverage": 1.0,
+          "pose_valid_ratio": 1.0,
+          "max_sampling_skew_ms": 53.865,
+          "nearest_source_frames": 19
+        }
+      },
+      "demo_disclosure": "Fused inference using both real ESP32 IMU and ESP32-CAM pose data."
+    },
+    {
+      "model": "FusionSense corrected masked IMU + camera fusion",
+      "checkpoint": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\checkpoints\\cmhad_step7_bimodal_dropout_fixed",
+      "window_start": 639170.60871056,
+      "window_seconds": 2.0,
+      "recording_id": "fusion_usb_step4_20260819",
+      "subject_id": "live_esp32",
+      "input": {
+        "imu_shape": [
+          100,
+          6
+        ],
+        "imu_units": [
+          "m/s^2",
+          "m/s^2",
+          "m/s^2",
+          "deg/s",
+          "deg/s",
+          "deg/s"
+        ],
+        "vision_shape": [
+          20,
+          99
+        ],
+        "radar_shape": [
+          40,
+          8
+        ],
+        "valid_modalities": {
+          "imu": true,
+          "radar": false,
+          "camera_pose": true
+        },
+        "health": {
+          "imu": 1.0,
+          "radar": 0.0,
+          "camera": 0.4747
+        },
+        "normalization": "training-subject per-channel mean/std"
+      },
+      "fall_threshold": 0.6,
+      "fusion_policy": "require_valid_imu_and_camera_pose",
+      "status": "monitoring",
+      "alert": false,
+      "predicted_label": "lie_to_stand",
+      "predicted_class_id": 4,
+      "confidence": 0.899749,
+      "fall_probability": 0.000216,
+      "class_probabilities": {
+        "stand_to_sit": 0.002354,
+        "sit_to_stand": 0.017294,
+        "sit_to_lie": 0.016859,
+        "lie_to_sit": 0.035109,
+        "lie_to_stand": 0.899749,
+        "stand_to_lie": 0.028418,
+        "stand_to_fall": 0.000216
+      },
+      "sensor_trust": {
+        "imu": 0.858972,
+        "radar": 0.0,
+        "camera": 0.141028
+      },
+      "inference_ms": 7.445,
+      "event_id": "recorded_esp32-007",
+      "sequence": 7,
+      "source_mode": "recorded_esp32",
+      "ground_truth": null,
+      "event_timestamp_utc": "2026-08-19T17:11:54.262310+00:00",
+      "window_diagnostics": {
+        "window_start_s": 40.0,
+        "window_end_s": 42.0,
+        "imu": {
+          "valid": true,
+          "coverage": 1.0,
+          "max_sampling_skew_ms": 1.958,
+          "nearest_source_samples": 100
+        },
+        "camera": {
+          "valid": true,
+          "sampling_coverage": 1.0,
+          "pose_valid_ratio": 1.0,
+          "max_sampling_skew_ms": 53.865,
+          "nearest_source_frames": 18
+        }
+      },
+      "demo_disclosure": "Fused inference using both real ESP32 IMU and ESP32-CAM pose data."
+    },
+    {
+      "model": "FusionSense corrected masked IMU + camera fusion",
+      "checkpoint": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\checkpoints\\cmhad_step7_bimodal_dropout_fixed",
+      "window_start": 639171.60871056,
+      "window_seconds": 2.0,
+      "recording_id": "fusion_usb_step4_20260819",
+      "subject_id": "live_esp32",
+      "input": {
+        "imu_shape": [
+          100,
+          6
+        ],
+        "imu_units": [
+          "m/s^2",
+          "m/s^2",
+          "m/s^2",
+          "deg/s",
+          "deg/s",
+          "deg/s"
+        ],
+        "vision_shape": [
+          20,
+          99
+        ],
+        "radar_shape": [
+          40,
+          8
+        ],
+        "valid_modalities": {
+          "imu": true,
+          "radar": false,
+          "camera_pose": true
+        },
+        "health": {
+          "imu": 1.0,
+          "radar": 0.0,
+          "camera": 0.4848
+        },
+        "normalization": "training-subject per-channel mean/std"
+      },
+      "fall_threshold": 0.6,
+      "fusion_policy": "require_valid_imu_and_camera_pose",
+      "status": "monitoring",
+      "alert": false,
+      "predicted_label": "lie_to_stand",
+      "predicted_class_id": 4,
+      "confidence": 0.900004,
+      "fall_probability": 0.000213,
+      "class_probabilities": {
+        "stand_to_sit": 0.00228,
+        "sit_to_stand": 0.01722,
+        "sit_to_lie": 0.01683,
+        "lie_to_sit": 0.034613,
+        "lie_to_stand": 0.900004,
+        "stand_to_lie": 0.028839,
+        "stand_to_fall": 0.000213
+      },
+      "sensor_trust": {
+        "imu": 0.854778,
+        "radar": 0.0,
+        "camera": 0.145222
+      },
+      "inference_ms": 8.687,
+      "event_id": "recorded_esp32-008",
+      "sequence": 8,
+      "source_mode": "recorded_esp32",
+      "ground_truth": null,
+      "event_timestamp_utc": "2026-08-19T17:11:54.271818+00:00",
+      "window_diagnostics": {
+        "window_start_s": 41.0,
+        "window_end_s": 43.0,
+        "imu": {
+          "valid": true,
+          "coverage": 1.0,
+          "max_sampling_skew_ms": 2.005,
+          "nearest_source_samples": 100
+        },
+        "camera": {
+          "valid": true,
+          "sampling_coverage": 1.0,
+          "pose_valid_ratio": 1.0,
+          "max_sampling_skew_ms": 53.652,
+          "nearest_source_frames": 16
+        }
+      },
+      "demo_disclosure": "Fused inference using both real ESP32 IMU and ESP32-CAM pose data."
+    },
+    {
+      "model": "FusionSense corrected masked IMU + camera fusion",
+      "checkpoint": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\checkpoints\\cmhad_step7_bimodal_dropout_fixed",
+      "window_start": 639172.60871056,
+      "window_seconds": 2.0,
+      "recording_id": "fusion_usb_step4_20260819",
+      "subject_id": "live_esp32",
+      "input": {
+        "imu_shape": [
+          100,
+          6
+        ],
+        "imu_units": [
+          "m/s^2",
+          "m/s^2",
+          "m/s^2",
+          "deg/s",
+          "deg/s",
+          "deg/s"
+        ],
+        "vision_shape": [
+          20,
+          99
+        ],
+        "radar_shape": [
+          40,
+          8
+        ],
+        "valid_modalities": {
+          "imu": true,
+          "radar": false,
+          "camera_pose": true
+        },
+        "health": {
+          "imu": 1.0,
+          "radar": 0.0,
+          "camera": 0.4739
+        },
+        "normalization": "training-subject per-channel mean/std"
+      },
+      "fall_threshold": 0.6,
+      "fusion_policy": "require_valid_imu_and_camera_pose",
+      "status": "monitoring",
+      "alert": false,
+      "predicted_label": "lie_to_stand",
+      "predicted_class_id": 4,
+      "confidence": 0.893413,
+      "fall_probability": 0.000226,
+      "class_probabilities": {
+        "stand_to_sit": 0.00233,
+        "sit_to_stand": 0.016806,
+        "sit_to_lie": 0.018364,
+        "lie_to_sit": 0.035546,
+        "lie_to_stand": 0.893413,
+        "stand_to_lie": 0.033314,
+        "stand_to_fall": 0.000226
+      },
+      "sensor_trust": {
+        "imu": 0.85992,
+        "radar": 0.0,
+        "camera": 0.14008
+      },
+      "inference_ms": 6.586,
+      "event_id": "recorded_esp32-009",
+      "sequence": 9,
+      "source_mode": "recorded_esp32",
+      "ground_truth": null,
+      "event_timestamp_utc": "2026-08-19T17:11:54.279818+00:00",
+      "window_diagnostics": {
+        "window_start_s": 42.0,
+        "window_end_s": 44.0,
+        "imu": {
+          "valid": true,
+          "coverage": 1.0,
+          "max_sampling_skew_ms": 2.051,
+          "nearest_source_samples": 100
+        },
+        "camera": {
+          "valid": true,
+          "sampling_coverage": 1.0,
+          "pose_valid_ratio": 1.0,
+          "max_sampling_skew_ms": 53.115,
+          "nearest_source_frames": 17
+        }
+      },
+      "demo_disclosure": "Fused inference using both real ESP32 IMU and ESP32-CAM pose data."
+    },
+    {
+      "model": "FusionSense corrected masked IMU + camera fusion",
+      "checkpoint": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\checkpoints\\cmhad_step7_bimodal_dropout_fixed",
+      "window_start": 639173.60871056,
+      "window_seconds": 2.0,
+      "recording_id": "fusion_usb_step4_20260819",
+      "subject_id": "live_esp32",
+      "input": {
+        "imu_shape": [
+          100,
+          6
+        ],
+        "imu_units": [
+          "m/s^2",
+          "m/s^2",
+          "m/s^2",
+          "deg/s",
+          "deg/s",
+          "deg/s"
+        ],
+        "vision_shape": [
+          20,
+          99
+        ],
+        "radar_shape": [
+          40,
+          8
+        ],
+        "valid_modalities": {
+          "imu": true,
+          "radar": false,
+          "camera_pose": true
+        },
+        "health": {
+          "imu": 1.0,
+          "radar": 0.0,
+          "camera": 0.4388
+        },
+        "normalization": "training-subject per-channel mean/std"
+      },
+      "fall_threshold": 0.6,
+      "fusion_policy": "require_valid_imu_and_camera_pose",
+      "status": "monitoring",
+      "alert": false,
+      "predicted_label": "lie_to_stand",
+      "predicted_class_id": 4,
+      "confidence": 0.901611,
+      "fall_probability": 0.000217,
+      "class_probabilities": {
+        "stand_to_sit": 0.002364,
+        "sit_to_stand": 0.018261,
+        "sit_to_lie": 0.016381,
+        "lie_to_sit": 0.032221,
+        "lie_to_stand": 0.901611,
+        "stand_to_lie": 0.028945,
+        "stand_to_fall": 0.000217
+      },
+      "sensor_trust": {
+        "imu": 0.868066,
+        "radar": 0.0,
+        "camera": 0.131934
+      },
+      "inference_ms": 5.702,
+      "event_id": "recorded_esp32-010",
+      "sequence": 10,
+      "source_mode": "recorded_esp32",
+      "ground_truth": null,
+      "event_timestamp_utc": "2026-08-19T17:11:54.285818+00:00",
+      "window_diagnostics": {
+        "window_start_s": 43.0,
+        "window_end_s": 45.0,
+        "imu": {
+          "valid": true,
+          "coverage": 1.0,
+          "max_sampling_skew_ms": 2.098,
+          "nearest_source_samples": 100
+        },
+        "camera": {
+          "valid": true,
+          "sampling_coverage": 1.0,
+          "pose_valid_ratio": 1.0,
+          "max_sampling_skew_ms": 52.56,
+          "nearest_source_frames": 18
+        }
+      },
+      "demo_disclosure": "Fused inference using both real ESP32 IMU and ESP32-CAM pose data."
+    },
+    {
+      "model": "FusionSense corrected masked IMU + camera fusion",
+      "checkpoint": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\checkpoints\\cmhad_step7_bimodal_dropout_fixed",
+      "window_start": 639174.60871056,
+      "window_seconds": 2.0,
+      "recording_id": "fusion_usb_step4_20260819",
+      "subject_id": "live_esp32",
+      "input": {
+        "imu_shape": [
+          100,
+          6
+        ],
+        "imu_units": [
+          "m/s^2",
+          "m/s^2",
+          "m/s^2",
+          "deg/s",
+          "deg/s",
+          "deg/s"
+        ],
+        "vision_shape": [
+          20,
+          99
+        ],
+        "radar_shape": [
+          40,
+          8
+        ],
+        "valid_modalities": {
+          "imu": true,
+          "radar": false,
+          "camera_pose": true
+        },
+        "health": {
+          "imu": 1.0,
+          "radar": 0.0,
+          "camera": 0.4376
+        },
+        "normalization": "training-subject per-channel mean/std"
+      },
+      "fall_threshold": 0.6,
+      "fusion_policy": "require_valid_imu_and_camera_pose",
+      "status": "monitoring",
+      "alert": false,
+      "predicted_label": "lie_to_stand",
+      "predicted_class_id": 4,
+      "confidence": 0.900936,
+      "fall_probability": 0.000224,
+      "class_probabilities": {
+        "stand_to_sit": 0.00222,
+        "sit_to_stand": 0.016726,
+        "sit_to_lie": 0.017075,
+        "lie_to_sit": 0.033215,
+        "lie_to_stand": 0.900936,
+        "stand_to_lie": 0.029605,
+        "stand_to_fall": 0.000224
+      },
+      "sensor_trust": {
+        "imu": 0.870517,
+        "radar": 0.0,
+        "camera": 0.129483
+      },
+      "inference_ms": 6.154,
+      "event_id": "recorded_esp32-011",
+      "sequence": 11,
+      "source_mode": "recorded_esp32",
+      "ground_truth": null,
+      "event_timestamp_utc": "2026-08-19T17:11:54.292818+00:00",
+      "window_diagnostics": {
+        "window_start_s": 44.0,
+        "window_end_s": 46.0,
+        "imu": {
+          "valid": true,
+          "coverage": 1.0,
+          "max_sampling_skew_ms": 2.145,
+          "nearest_source_samples": 100
+        },
+        "camera": {
+          "valid": true,
+          "sampling_coverage": 1.0,
+          "pose_valid_ratio": 1.0,
+          "max_sampling_skew_ms": 52.83,
+          "nearest_source_frames": 19
+        }
+      },
+      "demo_disclosure": "Fused inference using both real ESP32 IMU and ESP32-CAM pose data."
+    },
+    {
+      "model": "FusionSense corrected masked IMU + camera fusion",
+      "checkpoint": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\checkpoints\\cmhad_step7_bimodal_dropout_fixed",
+      "window_start": 639175.60871056,
+      "window_seconds": 2.0,
+      "recording_id": "fusion_usb_step4_20260819",
+      "subject_id": "live_esp32",
+      "input": {
+        "imu_shape": [
+          100,
+          6
+        ],
+        "imu_units": [
+          "m/s^2",
+          "m/s^2",
+          "m/s^2",
+          "deg/s",
+          "deg/s",
+          "deg/s"
+        ],
+        "vision_shape": [
+          20,
+          99
+        ],
+        "radar_shape": [
+          40,
+          8
+        ],
+        "valid_modalities": {
+          "imu": true,
+          "radar": false,
+          "camera_pose": true
+        },
+        "health": {
+          "imu": 1.0,
+          "radar": 0.0,
+          "camera": 0.4683
+        },
+        "normalization": "training-subject per-channel mean/std"
+      },
+      "fall_threshold": 0.6,
+      "fusion_policy": "require_valid_imu_and_camera_pose",
+      "status": "monitoring",
+      "alert": false,
+      "predicted_label": "lie_to_stand",
+      "predicted_class_id": 4,
+      "confidence": 0.897928,
+      "fall_probability": 0.000226,
+      "class_probabilities": {
+        "stand_to_sit": 0.002326,
+        "sit_to_stand": 0.017131,
+        "sit_to_lie": 0.017459,
+        "lie_to_sit": 0.032977,
+        "lie_to_stand": 0.897928,
+        "stand_to_lie": 0.031953,
+        "stand_to_fall": 0.000226
+      },
+      "sensor_trust": {
+        "imu": 0.861461,
+        "radar": 0.0,
+        "camera": 0.138539
+      },
+      "inference_ms": 6.593,
+      "event_id": "recorded_esp32-012",
+      "sequence": 12,
+      "source_mode": "recorded_esp32",
+      "ground_truth": null,
+      "event_timestamp_utc": "2026-08-19T17:11:54.299818+00:00",
+      "window_diagnostics": {
+        "window_start_s": 45.0,
+        "window_end_s": 47.0,
+        "imu": {
+          "valid": true,
+          "coverage": 1.0,
+          "max_sampling_skew_ms": 2.191,
+          "nearest_source_samples": 100
+        },
+        "camera": {
+          "valid": true,
+          "sampling_coverage": 1.0,
+          "pose_valid_ratio": 1.0,
+          "max_sampling_skew_ms": 53.381,
+          "nearest_source_frames": 18
+        }
+      },
+      "demo_disclosure": "Fused inference using both real ESP32 IMU and ESP32-CAM pose data."
+    },
+    {
+      "model": "FusionSense corrected masked IMU + camera fusion",
+      "checkpoint": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\checkpoints\\cmhad_step7_bimodal_dropout_fixed",
+      "window_start": 639176.60871056,
+      "window_seconds": 2.0,
+      "recording_id": "fusion_usb_step4_20260819",
+      "subject_id": "live_esp32",
+      "input": {
+        "imu_shape": [
+          100,
+          6
+        ],
+        "imu_units": [
+          "m/s^2",
+          "m/s^2",
+          "m/s^2",
+          "deg/s",
+          "deg/s",
+          "deg/s"
+        ],
+        "vision_shape": [
+          20,
+          99
+        ],
+        "radar_shape": [
+          40,
+          8
+        ],
+        "valid_modalities": {
+          "imu": true,
+          "radar": false,
+          "camera_pose": true
+        },
+        "health": {
+          "imu": 1.0,
+          "radar": 0.0,
+          "camera": 0.5032
+        },
+        "normalization": "training-subject per-channel mean/std"
+      },
+      "fall_threshold": 0.6,
+      "fusion_policy": "require_valid_imu_and_camera_pose",
+      "status": "monitoring",
+      "alert": false,
+      "predicted_label": "lie_to_stand",
+      "predicted_class_id": 4,
+      "confidence": 0.896664,
+      "fall_probability": 0.000224,
+      "class_probabilities": {
+        "stand_to_sit": 0.002217,
+        "sit_to_stand": 0.016579,
+        "sit_to_lie": 0.018265,
+        "lie_to_sit": 0.034352,
+        "lie_to_stand": 0.896664,
+        "stand_to_lie": 0.031698,
+        "stand_to_fall": 0.000224
+      },
+      "sensor_trust": {
+        "imu": 0.851674,
+        "radar": 0.0,
+        "camera": 0.148326
+      },
+      "inference_ms": 6.662,
+      "event_id": "recorded_esp32-013",
+      "sequence": 13,
+      "source_mode": "recorded_esp32",
+      "ground_truth": null,
+      "event_timestamp_utc": "2026-08-19T17:11:54.306818+00:00",
+      "window_diagnostics": {
+        "window_start_s": 46.0,
+        "window_end_s": 48.0,
+        "imu": {
+          "valid": true,
+          "coverage": 1.0,
+          "max_sampling_skew_ms": 2.238,
+          "nearest_source_samples": 100
+        },
+        "camera": {
+          "valid": true,
+          "sampling_coverage": 1.0,
+          "pose_valid_ratio": 1.0,
+          "max_sampling_skew_ms": 53.912,
+          "nearest_source_frames": 18
+        }
+      },
+      "demo_disclosure": "Fused inference using both real ESP32 IMU and ESP32-CAM pose data."
+    },
+    {
+      "model": "FusionSense corrected masked IMU + camera fusion",
+      "checkpoint": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\checkpoints\\cmhad_step7_bimodal_dropout_fixed",
+      "window_start": 639177.60871056,
+      "window_seconds": 2.0,
+      "recording_id": "fusion_usb_step4_20260819",
+      "subject_id": "live_esp32",
+      "input": {
+        "imu_shape": [
+          100,
+          6
+        ],
+        "imu_units": [
+          "m/s^2",
+          "m/s^2",
+          "m/s^2",
+          "deg/s",
+          "deg/s",
+          "deg/s"
+        ],
+        "vision_shape": [
+          20,
+          99
+        ],
+        "radar_shape": [
+          40,
+          8
+        ],
+        "valid_modalities": {
+          "imu": true,
+          "radar": false,
+          "camera_pose": true
+        },
+        "health": {
+          "imu": 1.0,
+          "radar": 0.0,
+          "camera": 0.513
+        },
+        "normalization": "training-subject per-channel mean/std"
+      },
+      "fall_threshold": 0.6,
+      "fusion_policy": "require_valid_imu_and_camera_pose",
+      "status": "monitoring",
+      "alert": false,
+      "predicted_label": "lie_to_stand",
+      "predicted_class_id": 4,
+      "confidence": 0.897334,
+      "fall_probability": 0.000226,
+      "class_probabilities": {
+        "stand_to_sit": 0.002179,
+        "sit_to_stand": 0.016164,
+        "sit_to_lie": 0.018062,
+        "lie_to_sit": 0.033628,
+        "lie_to_stand": 0.897334,
+        "stand_to_lie": 0.032407,
+        "stand_to_fall": 0.000226
+      },
+      "sensor_trust": {
+        "imu": 0.850596,
+        "radar": 0.0,
+        "camera": 0.149404
+      },
+      "inference_ms": 6.704,
+      "event_id": "recorded_esp32-014",
+      "sequence": 14,
+      "source_mode": "recorded_esp32",
+      "ground_truth": null,
+      "event_timestamp_utc": "2026-08-19T17:11:54.313818+00:00",
+      "window_diagnostics": {
+        "window_start_s": 47.0,
+        "window_end_s": 49.0,
+        "imu": {
+          "valid": true,
+          "coverage": 1.0,
+          "max_sampling_skew_ms": 2.285,
+          "nearest_source_samples": 100
+        },
+        "camera": {
+          "valid": true,
+          "sampling_coverage": 1.0,
+          "pose_valid_ratio": 1.0,
+          "max_sampling_skew_ms": 53.912,
+          "nearest_source_frames": 17
+        }
+      },
+      "demo_disclosure": "Fused inference using both real ESP32 IMU and ESP32-CAM pose data."
+    },
+    {
+      "model": "FusionSense corrected masked IMU + camera fusion",
+      "checkpoint": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\checkpoints\\cmhad_step7_bimodal_dropout_fixed",
+      "window_start": 639178.60871056,
+      "window_seconds": 2.0,
+      "recording_id": "fusion_usb_step4_20260819",
+      "subject_id": "live_esp32",
+      "input": {
+        "imu_shape": [
+          100,
+          6
+        ],
+        "imu_units": [
+          "m/s^2",
+          "m/s^2",
+          "m/s^2",
+          "deg/s",
+          "deg/s",
+          "deg/s"
+        ],
+        "vision_shape": [
+          20,
+          99
+        ],
+        "radar_shape": [
+          40,
+          8
+        ],
+        "valid_modalities": {
+          "imu": true,
+          "radar": false,
+          "camera_pose": true
+        },
+        "health": {
+          "imu": 1.0,
+          "radar": 0.0,
+          "camera": 0.5029
+        },
+        "normalization": "training-subject per-channel mean/std"
+      },
+      "fall_threshold": 0.6,
+      "fusion_policy": "require_valid_imu_and_camera_pose",
+      "status": "monitoring",
+      "alert": false,
+      "predicted_label": "lie_to_stand",
+      "predicted_class_id": 4,
+      "confidence": 0.900568,
+      "fall_probability": 0.00022,
+      "class_probabilities": {
+        "stand_to_sit": 0.002266,
+        "sit_to_stand": 0.017425,
+        "sit_to_lie": 0.017061,
+        "lie_to_sit": 0.032732,
+        "lie_to_stand": 0.900568,
+        "stand_to_lie": 0.029728,
+        "stand_to_fall": 0.00022
+      },
+      "sensor_trust": {
+        "imu": 0.854611,
+        "radar": 0.0,
+        "camera": 0.145389
+      },
+      "inference_ms": 6.744,
+      "event_id": "recorded_esp32-015",
+      "sequence": 15,
+      "source_mode": "recorded_esp32",
+      "ground_truth": null,
+      "event_timestamp_utc": "2026-08-19T17:11:54.321818+00:00",
+      "window_diagnostics": {
+        "window_start_s": 48.0,
+        "window_end_s": 50.0,
+        "imu": {
+          "valid": true,
+          "coverage": 1.0,
+          "max_sampling_skew_ms": 2.331,
+          "nearest_source_samples": 100
+        },
+        "camera": {
+          "valid": true,
+          "sampling_coverage": 1.0,
+          "pose_valid_ratio": 1.0,
+          "max_sampling_skew_ms": 53.6,
+          "nearest_source_frames": 16
+        }
+      },
+      "demo_disclosure": "Fused inference using both real ESP32 IMU and ESP32-CAM pose data."
+    },
+    {
+      "model": "FusionSense corrected masked IMU + camera fusion",
+      "checkpoint": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\checkpoints\\cmhad_step7_bimodal_dropout_fixed",
+      "window_start": 639179.60871056,
+      "window_seconds": 2.0,
+      "recording_id": "fusion_usb_step4_20260819",
+      "subject_id": "live_esp32",
+      "input": {
+        "imu_shape": [
+          100,
+          6
+        ],
+        "imu_units": [
+          "m/s^2",
+          "m/s^2",
+          "m/s^2",
+          "deg/s",
+          "deg/s",
+          "deg/s"
+        ],
+        "vision_shape": [
+          20,
+          99
+        ],
+        "radar_shape": [
+          40,
+          8
+        ],
+        "valid_modalities": {
+          "imu": true,
+          "radar": false,
+          "camera_pose": true
+        },
+        "health": {
+          "imu": 1.0,
+          "radar": 0.0,
+          "camera": 0.4997
+        },
+        "normalization": "training-subject per-channel mean/std"
+      },
+      "fall_threshold": 0.6,
+      "fusion_policy": "require_valid_imu_and_camera_pose",
+      "status": "monitoring",
+      "alert": false,
+      "predicted_label": "lie_to_stand",
+      "predicted_class_id": 4,
+      "confidence": 0.904418,
+      "fall_probability": 0.00022,
+      "class_probabilities": {
+        "stand_to_sit": 0.002281,
+        "sit_to_stand": 0.017495,
+        "sit_to_lie": 0.01615,
+        "lie_to_sit": 0.030591,
+        "lie_to_stand": 0.904418,
+        "stand_to_lie": 0.028845,
+        "stand_to_fall": 0.00022
+      },
+      "sensor_trust": {
+        "imu": 0.856658,
+        "radar": 0.0,
+        "camera": 0.143342
+      },
+      "inference_ms": 6.776,
+      "event_id": "recorded_esp32-016",
+      "sequence": 16,
+      "source_mode": "recorded_esp32",
+      "ground_truth": null,
+      "event_timestamp_utc": "2026-08-19T17:11:54.328818+00:00",
+      "window_diagnostics": {
+        "window_start_s": 49.0,
+        "window_end_s": 51.0,
+        "imu": {
+          "valid": true,
+          "coverage": 1.0,
+          "max_sampling_skew_ms": 2.378,
+          "nearest_source_samples": 100
+        },
+        "camera": {
+          "valid": true,
+          "sampling_coverage": 1.0,
+          "pose_valid_ratio": 1.0,
+          "max_sampling_skew_ms": 53.053,
+          "nearest_source_frames": 15
+        }
+      },
+      "demo_disclosure": "Fused inference using both real ESP32 IMU and ESP32-CAM pose data."
+    },
+    {
+      "model": "FusionSense corrected masked IMU + camera fusion",
+      "checkpoint": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\checkpoints\\cmhad_step7_bimodal_dropout_fixed",
+      "window_start": 639180.60871056,
+      "window_seconds": 2.0,
+      "recording_id": "fusion_usb_step4_20260819",
+      "subject_id": "live_esp32",
+      "input": {
+        "imu_shape": [
+          100,
+          6
+        ],
+        "imu_units": [
+          "m/s^2",
+          "m/s^2",
+          "m/s^2",
+          "deg/s",
+          "deg/s",
+          "deg/s"
+        ],
+        "vision_shape": [
+          20,
+          99
+        ],
+        "radar_shape": [
+          40,
+          8
+        ],
+        "valid_modalities": {
+          "imu": true,
+          "radar": false,
+          "camera_pose": true
+        },
+        "health": {
+          "imu": 1.0,
+          "radar": 0.0,
+          "camera": 0.5023
+        },
+        "normalization": "training-subject per-channel mean/std"
+      },
+      "fall_threshold": 0.6,
+      "fusion_policy": "require_valid_imu_and_camera_pose",
+      "status": "monitoring",
+      "alert": false,
+      "predicted_label": "lie_to_stand",
+      "predicted_class_id": 4,
+      "confidence": 0.90766,
+      "fall_probability": 0.000214,
+      "class_probabilities": {
+        "stand_to_sit": 0.002064,
+        "sit_to_stand": 0.015663,
+        "sit_to_lie": 0.015494,
+        "lie_to_sit": 0.032263,
+        "lie_to_stand": 0.90766,
+        "stand_to_lie": 0.026642,
+        "stand_to_fall": 0.000214
+      },
+      "sensor_trust": {
+        "imu": 0.854536,
+        "radar": 0.0,
+        "camera": 0.145463
+      },
+      "inference_ms": 6.689,
+      "event_id": "recorded_esp32-017",
+      "sequence": 17,
+      "source_mode": "recorded_esp32",
+      "ground_truth": null,
+      "event_timestamp_utc": "2026-08-19T17:11:54.335818+00:00",
+      "window_diagnostics": {
+        "window_start_s": 50.0,
+        "window_end_s": 52.0,
+        "imu": {
+          "valid": true,
+          "coverage": 1.0,
+          "max_sampling_skew_ms": 2.425,
+          "nearest_source_samples": 100
+        },
+        "camera": {
+          "valid": true,
+          "sampling_coverage": 1.0,
+          "pose_valid_ratio": 1.0,
+          "max_sampling_skew_ms": 52.501,
+          "nearest_source_frames": 17
+        }
+      },
+      "demo_disclosure": "Fused inference using both real ESP32 IMU and ESP32-CAM pose data."
+    },
+    {
+      "model": "FusionSense corrected masked IMU + camera fusion",
+      "checkpoint": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\checkpoints\\cmhad_step7_bimodal_dropout_fixed",
+      "window_start": 639181.60871056,
+      "window_seconds": 2.0,
+      "recording_id": "fusion_usb_step4_20260819",
+      "subject_id": "live_esp32",
+      "input": {
+        "imu_shape": [
+          100,
+          6
+        ],
+        "imu_units": [
+          "m/s^2",
+          "m/s^2",
+          "m/s^2",
+          "deg/s",
+          "deg/s",
+          "deg/s"
+        ],
+        "vision_shape": [
+          20,
+          99
+        ],
+        "radar_shape": [
+          40,
+          8
+        ],
+        "valid_modalities": {
+          "imu": true,
+          "radar": false,
+          "camera_pose": true
+        },
+        "health": {
+          "imu": 1.0,
+          "radar": 0.0,
+          "camera": 0.5058
+        },
+        "normalization": "training-subject per-channel mean/std"
+      },
+      "fall_threshold": 0.6,
+      "fusion_policy": "require_valid_imu_and_camera_pose",
+      "status": "monitoring",
+      "alert": false,
+      "predicted_label": "lie_to_stand",
+      "predicted_class_id": 4,
+      "confidence": 0.899596,
+      "fall_probability": 0.000226,
+      "class_probabilities": {
+        "stand_to_sit": 0.002224,
+        "sit_to_stand": 0.017916,
+        "sit_to_lie": 0.017745,
+        "lie_to_sit": 0.015512,
+        "lie_to_stand": 0.899596,
+        "stand_to_lie": 0.04678,
+        "stand_to_fall": 0.000226
+      },
+      "sensor_trust": {
+        "imu": 0.841446,
+        "radar": 0.0,
+        "camera": 0.158554
+      },
+      "inference_ms": 6.777,
+      "event_id": "recorded_esp32-018",
+      "sequence": 18,
+      "source_mode": "recorded_esp32",
+      "ground_truth": null,
+      "event_timestamp_utc": "2026-08-19T17:11:54.343818+00:00",
+      "window_diagnostics": {
+        "window_start_s": 51.0,
+        "window_end_s": 53.0,
+        "imu": {
+          "valid": true,
+          "coverage": 1.0,
+          "max_sampling_skew_ms": 2.471,
+          "nearest_source_samples": 100
+        },
+        "camera": {
+          "valid": true,
+          "sampling_coverage": 1.0,
+          "pose_valid_ratio": 1.0,
+          "max_sampling_skew_ms": 52.885,
+          "nearest_source_frames": 18
+        }
+      },
+      "demo_disclosure": "Fused inference using both real ESP32 IMU and ESP32-CAM pose data."
+    },
+    {
+      "model": "FusionSense corrected masked IMU + camera fusion",
+      "checkpoint": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\checkpoints\\cmhad_step7_bimodal_dropout_fixed",
+      "window_start": 639182.60871056,
+      "window_seconds": 2.0,
+      "recording_id": "fusion_usb_step4_20260819",
+      "subject_id": "live_esp32",
+      "input": {
+        "imu_shape": [
+          100,
+          6
+        ],
+        "imu_units": [
+          "m/s^2",
+          "m/s^2",
+          "m/s^2",
+          "deg/s",
+          "deg/s",
+          "deg/s"
+        ],
+        "vision_shape": [
+          20,
+          99
+        ],
+        "radar_shape": [
+          40,
+          8
+        ],
+        "valid_modalities": {
+          "imu": true,
+          "radar": false,
+          "camera_pose": true
+        },
+        "health": {
+          "imu": 1.0,
+          "radar": 0.0,
+          "camera": 0.511
+        },
+        "normalization": "training-subject per-channel mean/std"
+      },
+      "fall_threshold": 0.6,
+      "fusion_policy": "require_valid_imu_and_camera_pose",
+      "status": "monitoring",
+      "alert": false,
+      "predicted_label": "lie_to_stand",
+      "predicted_class_id": 4,
+      "confidence": 0.85411,
+      "fall_probability": 0.00025,
+      "class_probabilities": {
+        "stand_to_sit": 0.003604,
+        "sit_to_stand": 0.026565,
+        "sit_to_lie": 0.023925,
+        "lie_to_sit": 0.019732,
+        "lie_to_stand": 0.85411,
+        "stand_to_lie": 0.071813,
+        "stand_to_fall": 0.00025
+      },
+      "sensor_trust": {
+        "imu": 0.830034,
+        "radar": 0.0,
+        "camera": 0.169966
+      },
+      "inference_ms": 6.572,
+      "event_id": "recorded_esp32-019",
+      "sequence": 19,
+      "source_mode": "recorded_esp32",
+      "ground_truth": null,
+      "event_timestamp_utc": "2026-08-19T17:11:54.350821+00:00",
+      "window_diagnostics": {
+        "window_start_s": 52.0,
+        "window_end_s": 54.0,
+        "imu": {
+          "valid": true,
+          "coverage": 1.0,
+          "max_sampling_skew_ms": 2.518,
+          "nearest_source_samples": 100
+        },
+        "camera": {
+          "valid": true,
+          "sampling_coverage": 1.0,
+          "pose_valid_ratio": 1.0,
+          "max_sampling_skew_ms": 53.424,
+          "nearest_source_frames": 18
+        }
+      },
+      "demo_disclosure": "Fused inference using both real ESP32 IMU and ESP32-CAM pose data."
+    },
+    {
+      "model": "FusionSense corrected masked IMU + camera fusion",
+      "checkpoint": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\checkpoints\\cmhad_step7_bimodal_dropout_fixed",
+      "window_start": 639183.60871056,
+      "window_seconds": 2.0,
+      "recording_id": "fusion_usb_step4_20260819",
+      "subject_id": "live_esp32",
+      "input": {
+        "imu_shape": [
+          100,
+          6
+        ],
+        "imu_units": [
+          "m/s^2",
+          "m/s^2",
+          "m/s^2",
+          "deg/s",
+          "deg/s",
+          "deg/s"
+        ],
+        "vision_shape": [
+          20,
+          99
+        ],
+        "radar_shape": [
+          40,
+          8
+        ],
+        "valid_modalities": {
+          "imu": true,
+          "radar": false,
+          "camera_pose": true
+        },
+        "health": {
+          "imu": 1.0,
+          "radar": 0.0,
+          "camera": 0.499
+        },
+        "normalization": "training-subject per-channel mean/std"
+      },
+      "fall_threshold": 0.6,
+      "fusion_policy": "require_valid_imu_and_camera_pose",
+      "status": "monitoring",
+      "alert": false,
+      "predicted_label": "lie_to_stand",
+      "predicted_class_id": 4,
+      "confidence": 0.854731,
+      "fall_probability": 0.000247,
+      "class_probabilities": {
+        "stand_to_sit": 0.003641,
+        "sit_to_stand": 0.026921,
+        "sit_to_lie": 0.023409,
+        "lie_to_sit": 0.020587,
+        "lie_to_stand": 0.854731,
+        "stand_to_lie": 0.070463,
+        "stand_to_fall": 0.000247
+      },
+      "sensor_trust": {
+        "imu": 0.831477,
+        "radar": 0.0,
+        "camera": 0.168523
+      },
+      "inference_ms": 7.09,
+      "event_id": "recorded_esp32-020",
+      "sequence": 20,
+      "source_mode": "recorded_esp32",
+      "ground_truth": null,
+      "event_timestamp_utc": "2026-08-19T17:11:54.358822+00:00",
+      "window_diagnostics": {
+        "window_start_s": 53.0,
+        "window_end_s": 55.0,
+        "imu": {
+          "valid": true,
+          "coverage": 1.0,
+          "max_sampling_skew_ms": 2.565,
+          "nearest_source_samples": 100
+        },
+        "camera": {
+          "valid": true,
+          "sampling_coverage": 1.0,
+          "pose_valid_ratio": 1.0,
+          "max_sampling_skew_ms": 53.978,
+          "nearest_source_frames": 16
+        }
+      },
+      "demo_disclosure": "Fused inference using both real ESP32 IMU and ESP32-CAM pose data."
+    },
+    {
+      "model": "FusionSense corrected masked IMU + camera fusion",
+      "checkpoint": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\checkpoints\\cmhad_step7_bimodal_dropout_fixed",
+      "window_start": 639184.60871056,
+      "window_seconds": 2.0,
+      "recording_id": "fusion_usb_step4_20260819",
+      "subject_id": "live_esp32",
+      "input": {
+        "imu_shape": [
+          100,
+          6
+        ],
+        "imu_units": [
+          "m/s^2",
+          "m/s^2",
+          "m/s^2",
+          "deg/s",
+          "deg/s",
+          "deg/s"
+        ],
+        "vision_shape": [
+          20,
+          99
+        ],
+        "radar_shape": [
+          40,
+          8
+        ],
+        "valid_modalities": {
+          "imu": true,
+          "radar": false,
+          "camera_pose": true
+        },
+        "health": {
+          "imu": 1.0,
+          "radar": 0.0,
+          "camera": 0.4889
+        },
+        "normalization": "training-subject per-channel mean/std"
+      },
+      "fall_threshold": 0.6,
+      "fusion_policy": "require_valid_imu_and_camera_pose",
+      "status": "monitoring",
+      "alert": false,
+      "predicted_label": "lie_to_stand",
+      "predicted_class_id": 4,
+      "confidence": 0.851622,
+      "fall_probability": 0.000255,
+      "class_probabilities": {
+        "stand_to_sit": 0.003769,
+        "sit_to_stand": 0.026888,
+        "sit_to_lie": 0.023606,
+        "lie_to_sit": 0.019804,
+        "lie_to_stand": 0.851622,
+        "stand_to_lie": 0.074055,
+        "stand_to_fall": 0.000255
+      },
+      "sensor_trust": {
+        "imu": 0.839143,
+        "radar": 0.0,
+        "camera": 0.160857
+      },
+      "inference_ms": 6.67,
+      "event_id": "recorded_esp32-021",
+      "sequence": 21,
+      "source_mode": "recorded_esp32",
+      "ground_truth": null,
+      "event_timestamp_utc": "2026-08-19T17:11:54.365329+00:00",
+      "window_diagnostics": {
+        "window_start_s": 54.0,
+        "window_end_s": 56.0,
+        "imu": {
+          "valid": true,
+          "coverage": 1.0,
+          "max_sampling_skew_ms": 2.611,
+          "nearest_source_samples": 100
+        },
+        "camera": {
+          "valid": true,
+          "sampling_coverage": 1.0,
+          "pose_valid_ratio": 1.0,
+          "max_sampling_skew_ms": 53.978,
+          "nearest_source_frames": 16
+        }
+      },
+      "demo_disclosure": "Fused inference using both real ESP32 IMU and ESP32-CAM pose data."
+    },
+    {
+      "model": "FusionSense corrected masked IMU + camera fusion",
+      "checkpoint": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\checkpoints\\cmhad_step7_bimodal_dropout_fixed",
+      "window_start": 639185.60871056,
+      "window_seconds": 2.0,
+      "recording_id": "fusion_usb_step4_20260819",
+      "subject_id": "live_esp32",
+      "input": {
+        "imu_shape": [
+          100,
+          6
+        ],
+        "imu_units": [
+          "m/s^2",
+          "m/s^2",
+          "m/s^2",
+          "deg/s",
+          "deg/s",
+          "deg/s"
+        ],
+        "vision_shape": [
+          20,
+          99
+        ],
+        "radar_shape": [
+          40,
+          8
+        ],
+        "valid_modalities": {
+          "imu": true,
+          "radar": false,
+          "camera_pose": true
+        },
+        "health": {
+          "imu": 1.0,
+          "radar": 0.0,
+          "camera": 0.4983
+        },
+        "normalization": "training-subject per-channel mean/std"
+      },
+      "fall_threshold": 0.6,
+      "fusion_policy": "require_valid_imu_and_camera_pose",
+      "status": "monitoring",
+      "alert": false,
+      "predicted_label": "lie_to_stand",
+      "predicted_class_id": 4,
+      "confidence": 0.909043,
+      "fall_probability": 0.000204,
+      "class_probabilities": {
+        "stand_to_sit": 0.00203,
+        "sit_to_stand": 0.015472,
+        "sit_to_lie": 0.019124,
+        "lie_to_sit": 0.03073,
+        "lie_to_stand": 0.909043,
+        "stand_to_lie": 0.023398,
+        "stand_to_fall": 0.000204
+      },
+      "sensor_trust": {
+        "imu": 0.849362,
+        "radar": 0.0,
+        "camera": 0.150638
+      },
+      "inference_ms": 6.334,
+      "event_id": "recorded_esp32-022",
+      "sequence": 22,
+      "source_mode": "recorded_esp32",
+      "ground_truth": null,
+      "event_timestamp_utc": "2026-08-19T17:11:54.372329+00:00",
+      "window_diagnostics": {
+        "window_start_s": 55.0,
+        "window_end_s": 57.0,
+        "imu": {
+          "valid": true,
+          "coverage": 1.0,
+          "max_sampling_skew_ms": 2.658,
+          "nearest_source_samples": 100
+        },
+        "camera": {
+          "valid": true,
+          "sampling_coverage": 1.0,
+          "pose_valid_ratio": 1.0,
+          "max_sampling_skew_ms": 52.998,
+          "nearest_source_frames": 17
+        }
+      },
+      "demo_disclosure": "Fused inference using both real ESP32 IMU and ESP32-CAM pose data."
+    },
+    {
+      "model": "FusionSense corrected masked IMU + camera fusion",
+      "checkpoint": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\checkpoints\\cmhad_step7_bimodal_dropout_fixed",
+      "window_start": 639186.60871056,
+      "window_seconds": 2.0,
+      "recording_id": "fusion_usb_step4_20260819",
+      "subject_id": "live_esp32",
+      "input": {
+        "imu_shape": [
+          100,
+          6
+        ],
+        "imu_units": [
+          "m/s^2",
+          "m/s^2",
+          "m/s^2",
+          "deg/s",
+          "deg/s",
+          "deg/s"
+        ],
+        "vision_shape": [
+          20,
+          99
+        ],
+        "radar_shape": [
+          40,
+          8
+        ],
+        "valid_modalities": {
+          "imu": true,
+          "radar": false,
+          "camera_pose": true
+        },
+        "health": {
+          "imu": 1.0,
+          "radar": 0.0,
+          "camera": 0.5105
+        },
+        "normalization": "training-subject per-channel mean/std"
+      },
+      "fall_threshold": 0.6,
+      "fusion_policy": "require_valid_imu_and_camera_pose",
+      "status": "monitoring",
+      "alert": false,
+      "predicted_label": "lie_to_stand",
+      "predicted_class_id": 4,
+      "confidence": 0.69298,
+      "fall_probability": 0.000431,
+      "class_probabilities": {
+        "stand_to_sit": 0.002633,
+        "sit_to_stand": 0.014172,
+        "sit_to_lie": 0.052215,
+        "lie_to_sit": 0.02843,
+        "lie_to_stand": 0.69298,
+        "stand_to_lie": 0.209139,
+        "stand_to_fall": 0.000431
+      },
+      "sensor_trust": {
+        "imu": 0.829297,
+        "radar": 0.0,
+        "camera": 0.170703
+      },
+      "inference_ms": 6.667,
+      "event_id": "recorded_esp32-023",
+      "sequence": 23,
+      "source_mode": "recorded_esp32",
+      "ground_truth": null,
+      "event_timestamp_utc": "2026-08-19T17:11:54.379329+00:00",
+      "window_diagnostics": {
+        "window_start_s": 56.0,
+        "window_end_s": 58.0,
+        "imu": {
+          "valid": true,
+          "coverage": 1.0,
+          "max_sampling_skew_ms": 2.705,
+          "nearest_source_samples": 100
+        },
+        "camera": {
+          "valid": true,
+          "sampling_coverage": 1.0,
+          "pose_valid_ratio": 1.0,
+          "max_sampling_skew_ms": 52.452,
+          "nearest_source_frames": 17
+        }
+      },
+      "demo_disclosure": "Fused inference using both real ESP32 IMU and ESP32-CAM pose data."
+    },
+    {
+      "model": "FusionSense corrected masked IMU + camera fusion",
+      "checkpoint": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\checkpoints\\cmhad_step7_bimodal_dropout_fixed",
+      "window_start": 639187.60871056,
+      "window_seconds": 2.0,
+      "recording_id": "fusion_usb_step4_20260819",
+      "subject_id": "live_esp32",
+      "input": {
+        "imu_shape": [
+          100,
+          6
+        ],
+        "imu_units": [
+          "m/s^2",
+          "m/s^2",
+          "m/s^2",
+          "deg/s",
+          "deg/s",
+          "deg/s"
+        ],
+        "vision_shape": [
+          20,
+          99
+        ],
+        "radar_shape": [
+          40,
+          8
+        ],
+        "valid_modalities": {
+          "imu": true,
+          "radar": false,
+          "camera_pose": true
+        },
+        "health": {
+          "imu": 1.0,
+          "radar": 0.0,
+          "camera": 0.5184
+        },
+        "normalization": "training-subject per-channel mean/std"
+      },
+      "fall_threshold": 0.6,
+      "fusion_policy": "require_valid_imu_and_camera_pose",
+      "status": "monitoring",
+      "alert": false,
+      "predicted_label": "lie_to_stand",
+      "predicted_class_id": 4,
+      "confidence": 0.754517,
+      "fall_probability": 0.000359,
+      "class_probabilities": {
+        "stand_to_sit": 0.00262,
+        "sit_to_stand": 0.016061,
+        "sit_to_lie": 0.046011,
+        "lie_to_sit": 0.03317,
+        "lie_to_stand": 0.754517,
+        "stand_to_lie": 0.14726,
+        "stand_to_fall": 0.000359
+      },
+      "sensor_trust": {
+        "imu": 0.814998,
+        "radar": 0.0,
+        "camera": 0.185002
+      },
+      "inference_ms": 6.767,
+      "event_id": "recorded_esp32-024",
+      "sequence": 24,
+      "source_mode": "recorded_esp32",
+      "ground_truth": null,
+      "event_timestamp_utc": "2026-08-19T17:11:54.387329+00:00",
+      "window_diagnostics": {
+        "window_start_s": 57.0,
+        "window_end_s": 59.0,
+        "imu": {
+          "valid": true,
+          "coverage": 1.0,
+          "max_sampling_skew_ms": 2.751,
+          "nearest_source_samples": 100
+        },
+        "camera": {
+          "valid": true,
+          "sampling_coverage": 1.0,
+          "pose_valid_ratio": 1.0,
+          "max_sampling_skew_ms": 52.944,
+          "nearest_source_frames": 19
+        }
+      },
+      "demo_disclosure": "Fused inference using both real ESP32 IMU and ESP32-CAM pose data."
+    }
+  ],
+  "current_event": {
+    "model": "FusionSense corrected masked IMU + camera fusion",
+    "checkpoint": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\checkpoints\\cmhad_step7_bimodal_dropout_fixed",
+    "window_start": 639187.60871056,
+    "window_seconds": 2.0,
+    "recording_id": "fusion_usb_step4_20260819",
+    "subject_id": "live_esp32",
+    "input": {
+      "imu_shape": [
+        100,
+        6
+      ],
+      "imu_units": [
+        "m/s^2",
+        "m/s^2",
+        "m/s^2",
+        "deg/s",
+        "deg/s",
+        "deg/s"
+      ],
+      "vision_shape": [
+        20,
+        99
+      ],
+      "radar_shape": [
+        40,
+        8
+      ],
+      "valid_modalities": {
+        "imu": true,
+        "radar": false,
+        "camera_pose": true
+      },
+      "health": {
+        "imu": 1.0,
+        "radar": 0.0,
+        "camera": 0.5184
+      },
+      "normalization": "training-subject per-channel mean/std"
+    },
+    "fall_threshold": 0.6,
+    "fusion_policy": "require_valid_imu_and_camera_pose",
+    "status": "monitoring",
+    "alert": false,
+    "predicted_label": "lie_to_stand",
+    "predicted_class_id": 4,
+    "confidence": 0.754517,
+    "fall_probability": 0.000359,
+    "class_probabilities": {
+      "stand_to_sit": 0.00262,
+      "sit_to_stand": 0.016061,
+      "sit_to_lie": 0.046011,
+      "lie_to_sit": 0.03317,
+      "lie_to_stand": 0.754517,
+      "stand_to_lie": 0.14726,
+      "stand_to_fall": 0.000359
+    },
+    "sensor_trust": {
+      "imu": 0.814998,
+      "radar": 0.0,
+      "camera": 0.185002
+    },
+    "inference_ms": 6.767,
+    "event_id": "recorded_esp32-024",
+    "sequence": 24,
+    "source_mode": "recorded_esp32",
+    "ground_truth": null,
+    "event_timestamp_utc": "2026-08-19T17:11:54.387329+00:00",
+    "window_diagnostics": {
+      "window_start_s": 57.0,
+      "window_end_s": 59.0,
+      "imu": {
+        "valid": true,
+        "coverage": 1.0,
+        "max_sampling_skew_ms": 2.751,
+        "nearest_source_samples": 100
+      },
+      "camera": {
+        "valid": true,
+        "sampling_coverage": 1.0,
+        "pose_valid_ratio": 1.0,
+        "max_sampling_skew_ms": 52.944,
+        "nearest_source_frames": 19
+      }
+    },
+    "demo_disclosure": "Fused inference using both real ESP32 IMU and ESP32-CAM pose data."
+  }
+}

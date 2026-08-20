@@ -1,0 +1,308 @@
+{
+  "acceptance_mode": "shared_motion",
+  "artifacts": {
+    "camera": "camera_manifest.csv",
+    "camera_frames": "frames",
+    "clock_sync": "clock_sync.csv",
+    "device_status": "device_status.csv",
+    "imu": "imu.csv",
+    "malformed_imu": "malformed_imu.csv"
+  },
+  "camera_clock_offset_calibration": {
+    "applied_camera_shift_ms": -200.0,
+    "maximum_allowed_calibration_shift_ms": 400.0,
+    "method": "shared_motion_one_way_offset_calibration",
+    "raw_alignment": {
+      "absolute_lag_ms": 200,
+      "best_camera_shift_ms": -200,
+      "best_correlation": 0.59719,
+      "camera_motion": {
+        "active_points_over_3z": 173,
+        "baseline": 0.011222,
+        "peak_z": 16.4116,
+        "robust_scale": 0.004855
+      },
+      "checks": {
+        "absolute_lag_at_most_50_ms": false,
+        "correlation_at_least_0_25": true,
+        "shared_motion_detected": true
+      },
+      "compared_camera_points": 598,
+      "imu_motion": {
+        "active_points_over_3z": 894,
+        "baseline": 4.32407,
+        "peak_z": 20.0,
+        "robust_scale": 6.05203
+      },
+      "lag_step_ms": 5,
+      "method": "shared_motion_cross_correlation",
+      "result": "FAIL",
+      "search_range_ms": 500
+    },
+    "result": "PASS"
+  },
+  "counts": {
+    "camera_frames": 601,
+    "camera_sync_points": 601,
+    "imu_samples": 3000,
+    "imu_sync_points": 35,
+    "malformed_imu_rows": 0
+  },
+  "host_elapsed_s": 60.063,
+  "requested_duration_s": 60.0,
+  "revalidated_utc": "2026-08-19T13:58:42.634650+00:00",
+  "schema_version": 1,
+  "session_id": "fusion_usb_step4_20260819",
+  "session_started_utc": "2026-08-19T13:52:14.650894+00:00",
+  "sources": {
+    "camera": {
+      "baud": 921600,
+      "clock_observation": "fixed_frame_header_arrival",
+      "device_id": "cam01",
+      "port": "COM14",
+      "transport": "usb_serial"
+    },
+    "imu": {
+      "baud": 115200,
+      "device_id": "imu01",
+      "port": "COM17"
+    }
+  },
+  "validation": {
+    "alignment": {
+      "absolute_lag_ms": 0,
+      "best_camera_shift_ms": 0,
+      "best_correlation": 0.59719,
+      "camera_motion": {
+        "active_points_over_3z": 173,
+        "baseline": 0.011222,
+        "peak_z": 16.4116,
+        "robust_scale": 0.004855
+      },
+      "checks": {
+        "absolute_lag_at_most_50_ms": true,
+        "correlation_at_least_0_25": true,
+        "shared_motion_detected": true
+      },
+      "compared_camera_points": 598,
+      "imu_motion": {
+        "active_points_over_3z": 894,
+        "baseline": 4.32407,
+        "peak_z": 20.0,
+        "robust_scale": 6.05203
+      },
+      "lag_step_ms": 5,
+      "method": "shared_motion_cross_correlation",
+      "result": "PASS",
+      "search_range_ms": 500
+    },
+    "camera": {
+      "capture_interval_ms": {
+        "max": 108.154,
+        "mean": 99.9499,
+        "p95": 108.071
+      },
+      "checks": {
+        "camera_capture_errors_zero": true,
+        "device_fps_8_5_to_11_5": true,
+        "enough_frames": true,
+        "max_capture_interval_at_most_5x_target": true,
+        "monotonic_capture_timestamps": true,
+        "monotonic_sequence": true,
+        "no_sequence_gaps": true,
+        "p95_capture_interval_at_most_2x_target": true,
+        "qvga_320_by_240": true
+      },
+      "device_elapsed_s": 59.9699,
+      "device_fps": 10.005,
+      "device_timestamp_us": {
+        "first": 2390752,
+        "last": 62360662
+      },
+      "dimensions": [
+        [
+          320,
+          240
+        ]
+      ],
+      "dropped_frames": 0,
+      "frames": 601,
+      "health": {
+        "capture_errors": 0
+      },
+      "result": "PASS",
+      "sequence": {
+        "first": 2,
+        "last": 602
+      }
+    },
+    "camera_clock_offset_calibration": {
+      "applied_camera_shift_ms": -200.0,
+      "maximum_allowed_calibration_shift_ms": 400.0,
+      "method": "shared_motion_one_way_offset_calibration",
+      "raw_alignment": {
+        "absolute_lag_ms": 200,
+        "best_camera_shift_ms": -200,
+        "best_correlation": 0.59719,
+        "camera_motion": {
+          "active_points_over_3z": 173,
+          "baseline": 0.011222,
+          "peak_z": 16.4116,
+          "robust_scale": 0.004855
+        },
+        "checks": {
+          "absolute_lag_at_most_50_ms": false,
+          "correlation_at_least_0_25": true,
+          "shared_motion_detected": true
+        },
+        "compared_camera_points": 598,
+        "imu_motion": {
+          "active_points_over_3z": 894,
+          "baseline": 4.32407,
+          "peak_z": 20.0,
+          "robust_scale": 6.05203
+        },
+        "lag_step_ms": 5,
+        "method": "shared_motion_cross_correlation",
+        "result": "FAIL",
+        "search_range_ms": 500
+      },
+      "result": "PASS"
+    },
+    "clock_sync": {
+      "camera": {
+        "checks": {
+          "absolute_drift_at_most_2000_ppm": true,
+          "at_least_4_sync_points": true,
+          "fit_residual_p95_at_most_20_ms": true,
+          "selected_span_at_least_2_seconds": true
+        },
+        "mapping": {
+          "device_id": "cam01",
+          "drift_ppm": 105.8051,
+          "equation": "host_ns = scale * device_us * 1000 + offset_ns",
+          "fit_residual_ms": {
+            "max": 14.886115,
+            "median": 3.085735,
+            "min": 0.02776,
+            "p95": 14.886115
+          },
+          "offset_ns": 639127986868734,
+          "rtt_ms": {
+            "max": 0.0,
+            "median": 0.0,
+            "min": 0.0,
+            "p95": 0.0
+          },
+          "scale": 1.000105805066,
+          "selected_device_span_s": 59.573773,
+          "selected_low_rtt_points": 16,
+          "total_sync_points": 601
+        },
+        "result": "PASS"
+      },
+      "imu": {
+        "checks": {
+          "absolute_drift_at_most_2000_ppm": true,
+          "at_least_4_sync_points": true,
+          "fit_residual_p95_at_most_20_ms": true,
+          "selected_span_at_least_2_seconds": true
+        },
+        "mapping": {
+          "device_id": "imu01",
+          "drift_ppm": -46.667,
+          "equation": "host_ns = scale * device_us * 1000 + offset_ns",
+          "fit_residual_ms": {
+            "max": 7.609604,
+            "median": 1.253861,
+            "min": 0.263461,
+            "p95": 7.609604
+          },
+          "offset_ns": 639121744506246,
+          "rtt_ms": {
+            "max": 0.0,
+            "median": 0.0,
+            "min": 0.0,
+            "p95": 0.0
+          },
+          "scale": 0.999953332989,
+          "selected_device_span_s": 55.019996,
+          "selected_low_rtt_points": 16,
+          "total_sync_points": 35
+        },
+        "result": "PASS"
+      }
+    },
+    "errors": [],
+    "imu": {
+      "accel_magnitude_g": {
+        "mean": 1.00067,
+        "std": 0.08195
+      },
+      "checks": {
+        "missed_slot_ratio_at_most_0_1_percent": true,
+        "monotonic_device_timestamps": true,
+        "monotonic_sequence": true,
+        "no_invalid_rows": true,
+        "no_sequence_gaps": true,
+        "p95_interval_at_most_22_ms": true,
+        "rate_49_to_51_hz": true
+      },
+      "device_duration_s": 59.98,
+      "effective_hz": 50.0,
+      "estimated_missed_slots": 0,
+      "gyro_axis_mean_dps": {
+        "gx_dps": -0.49646,
+        "gy_dps": 1.21252,
+        "gz_dps": 0.29637
+      },
+      "gyro_magnitude_dps": {
+        "mean": 17.65698,
+        "std": 28.60951
+      },
+      "interval_ms": {
+        "max": 20.004,
+        "mean": 20.0,
+        "p95": 20.004
+      },
+      "invalid_rows": 0,
+      "missed_slot_ratio": 0.0,
+      "non_monotonic_timestamps": 0,
+      "result": "PASS",
+      "samples": 3000,
+      "sequence_gaps": 0
+    },
+    "nearest_sampling_diagnostic": {
+      "median_alignment_at_most_50_ms": true,
+      "nearest_imu_skew_ms": {
+        "max": 230.836872,
+        "median": 5.371638,
+        "min": 0.013679,
+        "p95": 9.592871
+      },
+      "pairs": 601,
+      "result": "PASS"
+    },
+    "result": "PASS",
+    "transport_checks": {
+      "camera_latency_max_at_most_1000_ms": true,
+      "camera_latency_p95_at_most_500_ms": true,
+      "imu_latency_max_at_most_250_ms": true,
+      "imu_latency_p95_at_most_50_ms": true
+    },
+    "transport_latency": {
+      "camera_ms": {
+        "max": 326.904384,
+        "median": 297.408335,
+        "min": 264.113885,
+        "p95": 315.925612
+      },
+      "imu_ms": {
+        "max": 16.925859,
+        "median": 7.945912,
+        "min": -0.710679,
+        "p95": 14.883044
+      }
+    }
+  }
+}

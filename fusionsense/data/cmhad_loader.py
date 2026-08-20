@@ -11,12 +11,14 @@ from __future__ import annotations
 from collections import defaultdict
 from dataclasses import replace
 from pathlib import Path
+import csv
 import re
 
 import numpy as np
 
 from ..config import CFG, DATA_ROOT
 from ..contract import ACTIVITIES, FusionWindow
+from .imu_units import CANONICAL_IMU_UNITS, validate_canonical_imu, validate_imu_unit_row
 
 PROCESSED_ROOT = DATA_ROOT.parent / "processed"
 DEFAULT_CACHE = PROCESSED_ROOT / "cmhad_windows.npz"
@@ -80,6 +82,12 @@ def read_imu_stream(path: str | Path, expected_samples=EXPECTED_STREAM_SAMPLES) 
     The release documents a Bluetooth delay of roughly 30--40 samples.  Its
     reader restores alignment by left-padding each stream to 6001 samples.
     """
+    with open(path, newline="", encoding="utf-8-sig") as handle:
+        header_rows = [next(csv.reader(handle), []) for _ in range(3)]
+    if len(header_rows[2]) < 7:
+        raise ValueError(f"Missing C-MHAD unit row in {path}")
+    validate_imu_unit_row(header_rows[2][1:7])
+
     array = np.genfromtxt(path, delimiter=",", skip_header=3, dtype=np.float32)
     if array.ndim != 2 or array.shape[1] < 7:
         raise ValueError(f"Expected timestamp + six IMU columns in {path}, got {array.shape}")
@@ -175,8 +183,9 @@ def save_cmhad_windows(windows, cache_path: str | Path = DEFAULT_CACHE, cfg=CFG)
     cache_path.parent.mkdir(parents=True, exist_ok=True)
     np.savez_compressed(
         cache_path,
-        version=np.array([1], dtype=np.int32),
+        version=np.array([2], dtype=np.int32),
         activities=np.array(ACTIVITIES),
+        imu_units=np.array(CANONICAL_IMU_UNITS),
         t_start=np.array([w.t_start for w in windows], dtype=np.float32),
         imu=np.stack([w.imu for w in windows]).astype(np.float32),
         vision=np.stack([w.vision for w in windows]).astype(np.float32),
@@ -202,6 +211,14 @@ def load_cmhad_windows(cache_path: str | Path = DEFAULT_CACHE, cfg=CFG) -> list[
         raise ValueError(
             f"C-MHAD cache labels {cached_activities} do not match code labels {ACTIVITIES}; "
             "re-run preparation."
+        )
+    if "imu_units" in data.files:
+        validate_imu_unit_row(list(data["imu_units"].astype(str)))
+    unit_validation = validate_canonical_imu(data["imu"].reshape(-1, cfg.imu_ch))
+    if not unit_validation.valid:
+        raise ValueError(
+            f"C-MHAD cache does not match the canonical m/s^2 IMU scale: "
+            f"{unit_validation.as_dict()}. Re-run preparation."
         )
     windows = []
     for index in range(len(data["labels"])):

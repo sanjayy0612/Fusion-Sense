@@ -1,0 +1,1348 @@
+{
+  "artifacts": {
+    "pose_cache": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\data\\recordings\\fusion_usb_step4_20260819\\pose_cache.npz",
+    "windows": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\data\\recordings\\fusion_usb_step4_20260819\\step5_windows.npz"
+  },
+  "schema_version": 1,
+  "session": {
+    "capture_validation": {
+      "alignment": {
+        "absolute_lag_ms": 0,
+        "best_camera_shift_ms": 0,
+        "best_correlation": 0.59719,
+        "camera_motion": {
+          "active_points_over_3z": 173,
+          "baseline": 0.011222,
+          "peak_z": 16.4116,
+          "robust_scale": 0.004855
+        },
+        "checks": {
+          "absolute_lag_at_most_50_ms": true,
+          "correlation_at_least_0_25": true,
+          "shared_motion_detected": true
+        },
+        "compared_camera_points": 598,
+        "imu_motion": {
+          "active_points_over_3z": 894,
+          "baseline": 4.32407,
+          "peak_z": 20.0,
+          "robust_scale": 6.05203
+        },
+        "lag_step_ms": 5,
+        "method": "shared_motion_cross_correlation",
+        "result": "PASS",
+        "search_range_ms": 500
+      },
+      "camera": {
+        "capture_interval_ms": {
+          "max": 108.154,
+          "mean": 99.9499,
+          "p95": 108.071
+        },
+        "checks": {
+          "camera_capture_errors_zero": true,
+          "device_fps_8_5_to_11_5": true,
+          "enough_frames": true,
+          "max_capture_interval_at_most_5x_target": true,
+          "monotonic_capture_timestamps": true,
+          "monotonic_sequence": true,
+          "no_sequence_gaps": true,
+          "p95_capture_interval_at_most_2x_target": true,
+          "qvga_320_by_240": true
+        },
+        "device_elapsed_s": 59.9699,
+        "device_fps": 10.005,
+        "device_timestamp_us": {
+          "first": 2390752,
+          "last": 62360662
+        },
+        "dimensions": [
+          [
+            320,
+            240
+          ]
+        ],
+        "dropped_frames": 0,
+        "frames": 601,
+        "health": {
+          "capture_errors": 0
+        },
+        "result": "PASS",
+        "sequence": {
+          "first": 2,
+          "last": 602
+        }
+      },
+      "camera_clock_offset_calibration": {
+        "applied_camera_shift_ms": -200.0,
+        "maximum_allowed_calibration_shift_ms": 400.0,
+        "method": "shared_motion_one_way_offset_calibration",
+        "raw_alignment": {
+          "absolute_lag_ms": 200,
+          "best_camera_shift_ms": -200,
+          "best_correlation": 0.59719,
+          "camera_motion": {
+            "active_points_over_3z": 173,
+            "baseline": 0.011222,
+            "peak_z": 16.4116,
+            "robust_scale": 0.004855
+          },
+          "checks": {
+            "absolute_lag_at_most_50_ms": false,
+            "correlation_at_least_0_25": true,
+            "shared_motion_detected": true
+          },
+          "compared_camera_points": 598,
+          "imu_motion": {
+            "active_points_over_3z": 894,
+            "baseline": 4.32407,
+            "peak_z": 20.0,
+            "robust_scale": 6.05203
+          },
+          "lag_step_ms": 5,
+          "method": "shared_motion_cross_correlation",
+          "result": "FAIL",
+          "search_range_ms": 500
+        },
+        "result": "PASS"
+      },
+      "clock_sync": {
+        "camera": {
+          "checks": {
+            "absolute_drift_at_most_2000_ppm": true,
+            "at_least_4_sync_points": true,
+            "fit_residual_p95_at_most_20_ms": true,
+            "selected_span_at_least_2_seconds": true
+          },
+          "mapping": {
+            "device_id": "cam01",
+            "drift_ppm": 105.8051,
+            "equation": "host_ns = scale * device_us * 1000 + offset_ns",
+            "fit_residual_ms": {
+              "max": 14.886115,
+              "median": 3.085735,
+              "min": 0.02776,
+              "p95": 14.886115
+            },
+            "offset_ns": 639127986868734,
+            "rtt_ms": {
+              "max": 0.0,
+              "median": 0.0,
+              "min": 0.0,
+              "p95": 0.0
+            },
+            "scale": 1.000105805066,
+            "selected_device_span_s": 59.573773,
+            "selected_low_rtt_points": 16,
+            "total_sync_points": 601
+          },
+          "result": "PASS"
+        },
+        "imu": {
+          "checks": {
+            "absolute_drift_at_most_2000_ppm": true,
+            "at_least_4_sync_points": true,
+            "fit_residual_p95_at_most_20_ms": true,
+            "selected_span_at_least_2_seconds": true
+          },
+          "mapping": {
+            "device_id": "imu01",
+            "drift_ppm": -46.667,
+            "equation": "host_ns = scale * device_us * 1000 + offset_ns",
+            "fit_residual_ms": {
+              "max": 7.609604,
+              "median": 1.253861,
+              "min": 0.263461,
+              "p95": 7.609604
+            },
+            "offset_ns": 639121744506246,
+            "rtt_ms": {
+              "max": 0.0,
+              "median": 0.0,
+              "min": 0.0,
+              "p95": 0.0
+            },
+            "scale": 0.999953332989,
+            "selected_device_span_s": 55.019996,
+            "selected_low_rtt_points": 16,
+            "total_sync_points": 35
+          },
+          "result": "PASS"
+        }
+      },
+      "errors": [],
+      "imu": {
+        "accel_magnitude_g": {
+          "mean": 1.00067,
+          "std": 0.08195
+        },
+        "checks": {
+          "missed_slot_ratio_at_most_0_1_percent": true,
+          "monotonic_device_timestamps": true,
+          "monotonic_sequence": true,
+          "no_invalid_rows": true,
+          "no_sequence_gaps": true,
+          "p95_interval_at_most_22_ms": true,
+          "rate_49_to_51_hz": true
+        },
+        "device_duration_s": 59.98,
+        "effective_hz": 50.0,
+        "estimated_missed_slots": 0,
+        "gyro_axis_mean_dps": {
+          "gx_dps": -0.49646,
+          "gy_dps": 1.21252,
+          "gz_dps": 0.29637
+        },
+        "gyro_magnitude_dps": {
+          "mean": 17.65698,
+          "std": 28.60951
+        },
+        "interval_ms": {
+          "max": 20.004,
+          "mean": 20.0,
+          "p95": 20.004
+        },
+        "invalid_rows": 0,
+        "missed_slot_ratio": 0.0,
+        "non_monotonic_timestamps": 0,
+        "result": "PASS",
+        "samples": 3000,
+        "sequence_gaps": 0
+      },
+      "nearest_sampling_diagnostic": {
+        "median_alignment_at_most_50_ms": true,
+        "nearest_imu_skew_ms": {
+          "max": 230.836872,
+          "median": 5.371638,
+          "min": 0.013679,
+          "p95": 9.592871
+        },
+        "pairs": 601,
+        "result": "PASS"
+      },
+      "result": "PASS",
+      "transport_checks": {
+        "camera_latency_max_at_most_1000_ms": true,
+        "camera_latency_p95_at_most_500_ms": true,
+        "imu_latency_max_at_most_250_ms": true,
+        "imu_latency_p95_at_most_50_ms": true
+      },
+      "transport_latency": {
+        "camera_ms": {
+          "max": 326.904384,
+          "median": 297.408335,
+          "min": 264.113885,
+          "p95": 315.925612
+        },
+        "imu_ms": {
+          "max": 16.925859,
+          "median": 7.945912,
+          "min": -0.710679,
+          "p95": 14.883044
+        }
+      }
+    },
+    "imu_input_validation": {
+      "acceleration_norm_median_mps2": 9.79652,
+      "acceleration_norm_p95_mps2": 10.85823,
+      "canonical_units": [
+        "m/s^2",
+        "m/s^2",
+        "m/s^2",
+        "deg/s",
+        "deg/s",
+        "deg/s"
+      ],
+      "conversion": {
+        "acceleration_formula": "m/s^2 = g * 9.80665",
+        "acceleration_scale": 9.80665,
+        "gyroscope_formula": "deg/s unchanged",
+        "source_acceleration_unit": "g",
+        "source_angular_velocity_unit": "deg/s",
+        "target_units": [
+          "m/s^2",
+          "m/s^2",
+          "m/s^2",
+          "deg/s",
+          "deg/s",
+          "deg/s"
+        ]
+      },
+      "finite": true,
+      "samples": 3000,
+      "valid": true
+    },
+    "pose_cache": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\data\\recordings\\fusion_usb_step4_20260819\\pose_cache.npz",
+    "session_dir": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\data\\recordings\\fusion_usb_step4_20260819",
+    "session_id": "fusion_usb_step4_20260819",
+    "source": "recorded_esp32_session",
+    "stride_seconds": 1.0,
+    "window_seconds": 2.0,
+    "windows": 58
+  },
+  "step": 5,
+  "validation": {
+    "capture_validation_result": "PASS",
+    "checks": {
+      "all_imu_shapes_100_by_6": true,
+      "all_vision_shapes_20_by_99": true,
+      "all_windows_have_a_usable_modality": true,
+      "all_windows_have_valid_imu": true,
+      "at_least_one_window": true,
+      "canonical_imu_units_valid": true,
+      "step4_capture_passed": true
+    },
+    "diagnostics": {
+      "camera_max_sampling_skew_ms": {
+        "max": 53.993,
+        "median": 53.273,
+        "min": 48.294
+      },
+      "camera_sampling_coverage": {
+        "max": 1.0,
+        "median": 1.0,
+        "min": 1.0
+      },
+      "imu_coverage": {
+        "max": 1.0,
+        "median": 1.0,
+        "min": 1.0
+      },
+      "imu_max_sampling_skew_ms": {
+        "max": 2.751,
+        "median": 1.4215,
+        "min": 0.091
+      },
+      "pose_valid_ratio": {
+        "max": 1.0,
+        "median": 0.3,
+        "min": 0.0
+      }
+    },
+    "imu_input_validation": {
+      "acceleration_norm_median_mps2": 9.79652,
+      "acceleration_norm_p95_mps2": 10.85823,
+      "canonical_units": [
+        "m/s^2",
+        "m/s^2",
+        "m/s^2",
+        "deg/s",
+        "deg/s",
+        "deg/s"
+      ],
+      "conversion": {
+        "acceleration_formula": "m/s^2 = g * 9.80665",
+        "acceleration_scale": 9.80665,
+        "gyroscope_formula": "deg/s unchanged",
+        "source_acceleration_unit": "g",
+        "source_angular_velocity_unit": "deg/s",
+        "target_units": [
+          "m/s^2",
+          "m/s^2",
+          "m/s^2",
+          "deg/s",
+          "deg/s",
+          "deg/s"
+        ]
+      },
+      "finite": true,
+      "samples": 3000,
+      "valid": true
+    },
+    "result": "PASS",
+    "validity": {
+      "imu_valid_windows": 58,
+      "usable_modality_windows": 58,
+      "vision_valid_windows": 24
+    },
+    "windows": 58
+  },
+  "window_diagnostics": [
+    {
+      "camera": {
+        "max_sampling_skew_ms": 53.993,
+        "nearest_source_frames": 19,
+        "pose_valid_ratio": 0.0,
+        "sampling_coverage": 1.0,
+        "valid": false
+      },
+      "imu": {
+        "coverage": 1.0,
+        "max_sampling_skew_ms": 0.091,
+        "nearest_source_samples": 100,
+        "valid": true
+      },
+      "window_end_s": 2.0,
+      "window_start_s": 0.0
+    },
+    {
+      "camera": {
+        "max_sampling_skew_ms": 53.993,
+        "nearest_source_frames": 19,
+        "pose_valid_ratio": 0.0,
+        "sampling_coverage": 1.0,
+        "valid": false
+      },
+      "imu": {
+        "coverage": 1.0,
+        "max_sampling_skew_ms": 0.138,
+        "nearest_source_samples": 100,
+        "valid": true
+      },
+      "window_end_s": 3.0,
+      "window_start_s": 1.0
+    },
+    {
+      "camera": {
+        "max_sampling_skew_ms": 51.409,
+        "nearest_source_frames": 20,
+        "pose_valid_ratio": 0.0,
+        "sampling_coverage": 1.0,
+        "valid": false
+      },
+      "imu": {
+        "coverage": 1.0,
+        "max_sampling_skew_ms": 0.185,
+        "nearest_source_samples": 100,
+        "valid": true
+      },
+      "window_end_s": 4.0,
+      "window_start_s": 2.0
+    },
+    {
+      "camera": {
+        "max_sampling_skew_ms": 51.956,
+        "nearest_source_frames": 20,
+        "pose_valid_ratio": 0.0,
+        "sampling_coverage": 1.0,
+        "valid": false
+      },
+      "imu": {
+        "coverage": 1.0,
+        "max_sampling_skew_ms": 0.231,
+        "nearest_source_samples": 100,
+        "valid": true
+      },
+      "window_end_s": 5.0,
+      "window_start_s": 3.0
+    },
+    {
+      "camera": {
+        "max_sampling_skew_ms": 52.488,
+        "nearest_source_frames": 20,
+        "pose_valid_ratio": 0.0,
+        "sampling_coverage": 1.0,
+        "valid": false
+      },
+      "imu": {
+        "coverage": 1.0,
+        "max_sampling_skew_ms": 0.278,
+        "nearest_source_samples": 100,
+        "valid": true
+      },
+      "window_end_s": 6.0,
+      "window_start_s": 4.0
+    },
+    {
+      "camera": {
+        "max_sampling_skew_ms": 53.04,
+        "nearest_source_frames": 20,
+        "pose_valid_ratio": 0.0,
+        "sampling_coverage": 1.0,
+        "valid": false
+      },
+      "imu": {
+        "coverage": 1.0,
+        "max_sampling_skew_ms": 0.325,
+        "nearest_source_samples": 100,
+        "valid": true
+      },
+      "window_end_s": 7.0,
+      "window_start_s": 5.0
+    },
+    {
+      "camera": {
+        "max_sampling_skew_ms": 53.583,
+        "nearest_source_frames": 20,
+        "pose_valid_ratio": 0.0,
+        "sampling_coverage": 1.0,
+        "valid": false
+      },
+      "imu": {
+        "coverage": 1.0,
+        "max_sampling_skew_ms": 0.371,
+        "nearest_source_samples": 100,
+        "valid": true
+      },
+      "window_end_s": 8.0,
+      "window_start_s": 6.0
+    },
+    {
+      "camera": {
+        "max_sampling_skew_ms": 53.941,
+        "nearest_source_frames": 18,
+        "pose_valid_ratio": 0.0,
+        "sampling_coverage": 1.0,
+        "valid": false
+      },
+      "imu": {
+        "coverage": 1.0,
+        "max_sampling_skew_ms": 0.418,
+        "nearest_source_samples": 100,
+        "valid": true
+      },
+      "window_end_s": 9.0,
+      "window_start_s": 7.0
+    },
+    {
+      "camera": {
+        "max_sampling_skew_ms": 53.941,
+        "nearest_source_frames": 19,
+        "pose_valid_ratio": 0.0,
+        "sampling_coverage": 1.0,
+        "valid": false
+      },
+      "imu": {
+        "coverage": 1.0,
+        "max_sampling_skew_ms": 0.465,
+        "nearest_source_samples": 100,
+        "valid": true
+      },
+      "window_end_s": 10.0,
+      "window_start_s": 8.0
+    },
+    {
+      "camera": {
+        "max_sampling_skew_ms": 51.46,
+        "nearest_source_frames": 20,
+        "pose_valid_ratio": 0.0,
+        "sampling_coverage": 1.0,
+        "valid": false
+      },
+      "imu": {
+        "coverage": 1.0,
+        "max_sampling_skew_ms": 0.511,
+        "nearest_source_samples": 100,
+        "valid": true
+      },
+      "window_end_s": 11.0,
+      "window_start_s": 9.0
+    },
+    {
+      "camera": {
+        "max_sampling_skew_ms": 52.04,
+        "nearest_source_frames": 20,
+        "pose_valid_ratio": 0.0,
+        "sampling_coverage": 1.0,
+        "valid": false
+      },
+      "imu": {
+        "coverage": 1.0,
+        "max_sampling_skew_ms": 0.558,
+        "nearest_source_samples": 100,
+        "valid": true
+      },
+      "window_end_s": 12.0,
+      "window_start_s": 10.0
+    },
+    {
+      "camera": {
+        "max_sampling_skew_ms": 53.091,
+        "nearest_source_frames": 20,
+        "pose_valid_ratio": 0.0,
+        "sampling_coverage": 1.0,
+        "valid": false
+      },
+      "imu": {
+        "coverage": 1.0,
+        "max_sampling_skew_ms": 0.605,
+        "nearest_source_samples": 100,
+        "valid": true
+      },
+      "window_end_s": 13.0,
+      "window_start_s": 11.0
+    },
+    {
+      "camera": {
+        "max_sampling_skew_ms": 53.644,
+        "nearest_source_frames": 20,
+        "pose_valid_ratio": 0.0,
+        "sampling_coverage": 1.0,
+        "valid": false
+      },
+      "imu": {
+        "coverage": 1.0,
+        "max_sampling_skew_ms": 0.651,
+        "nearest_source_samples": 100,
+        "valid": true
+      },
+      "window_end_s": 14.0,
+      "window_start_s": 12.0
+    },
+    {
+      "camera": {
+        "max_sampling_skew_ms": 53.879,
+        "nearest_source_frames": 19,
+        "pose_valid_ratio": 0.0,
+        "sampling_coverage": 1.0,
+        "valid": false
+      },
+      "imu": {
+        "coverage": 1.0,
+        "max_sampling_skew_ms": 0.698,
+        "nearest_source_samples": 100,
+        "valid": true
+      },
+      "window_end_s": 15.0,
+      "window_start_s": 13.0
+    },
+    {
+      "camera": {
+        "max_sampling_skew_ms": 53.879,
+        "nearest_source_frames": 18,
+        "pose_valid_ratio": 0.0,
+        "sampling_coverage": 1.0,
+        "valid": false
+      },
+      "imu": {
+        "coverage": 1.0,
+        "max_sampling_skew_ms": 0.745,
+        "nearest_source_samples": 100,
+        "valid": true
+      },
+      "window_end_s": 16.0,
+      "window_start_s": 14.0
+    },
+    {
+      "camera": {
+        "max_sampling_skew_ms": 53.341,
+        "nearest_source_frames": 18,
+        "pose_valid_ratio": 0.0,
+        "sampling_coverage": 1.0,
+        "valid": false
+      },
+      "imu": {
+        "coverage": 1.0,
+        "max_sampling_skew_ms": 0.791,
+        "nearest_source_samples": 100,
+        "valid": true
+      },
+      "window_end_s": 17.0,
+      "window_start_s": 15.0
+    },
+    {
+      "camera": {
+        "max_sampling_skew_ms": 52.788,
+        "nearest_source_frames": 19,
+        "pose_valid_ratio": 0.0,
+        "sampling_coverage": 1.0,
+        "valid": false
+      },
+      "imu": {
+        "coverage": 1.0,
+        "max_sampling_skew_ms": 0.838,
+        "nearest_source_samples": 100,
+        "valid": true
+      },
+      "window_end_s": 18.0,
+      "window_start_s": 16.0
+    },
+    {
+      "camera": {
+        "max_sampling_skew_ms": 48.294,
+        "nearest_source_frames": 20,
+        "pose_valid_ratio": 0.4,
+        "sampling_coverage": 1.0,
+        "valid": false
+      },
+      "imu": {
+        "coverage": 1.0,
+        "max_sampling_skew_ms": 0.885,
+        "nearest_source_samples": 100,
+        "valid": true
+      },
+      "window_end_s": 19.0,
+      "window_start_s": 17.0
+    },
+    {
+      "camera": {
+        "max_sampling_skew_ms": 48.829,
+        "nearest_source_frames": 20,
+        "pose_valid_ratio": 0.9,
+        "sampling_coverage": 1.0,
+        "valid": true
+      },
+      "imu": {
+        "coverage": 1.0,
+        "max_sampling_skew_ms": 0.931,
+        "nearest_source_samples": 100,
+        "valid": true
+      },
+      "window_end_s": 20.0,
+      "window_start_s": 18.0
+    },
+    {
+      "camera": {
+        "max_sampling_skew_ms": 53.693,
+        "nearest_source_frames": 20,
+        "pose_valid_ratio": 0.5,
+        "sampling_coverage": 1.0,
+        "valid": true
+      },
+      "imu": {
+        "coverage": 1.0,
+        "max_sampling_skew_ms": 0.978,
+        "nearest_source_samples": 100,
+        "valid": true
+      },
+      "window_end_s": 21.0,
+      "window_start_s": 19.0
+    },
+    {
+      "camera": {
+        "max_sampling_skew_ms": 53.828,
+        "nearest_source_frames": 19,
+        "pose_valid_ratio": 0.0,
+        "sampling_coverage": 1.0,
+        "valid": false
+      },
+      "imu": {
+        "coverage": 1.0,
+        "max_sampling_skew_ms": 1.025,
+        "nearest_source_samples": 100,
+        "valid": true
+      },
+      "window_end_s": 22.0,
+      "window_start_s": 20.0
+    },
+    {
+      "camera": {
+        "max_sampling_skew_ms": 53.828,
+        "nearest_source_frames": 19,
+        "pose_valid_ratio": 0.3,
+        "sampling_coverage": 1.0,
+        "valid": false
+      },
+      "imu": {
+        "coverage": 1.0,
+        "max_sampling_skew_ms": 1.071,
+        "nearest_source_samples": 100,
+        "valid": true
+      },
+      "window_end_s": 23.0,
+      "window_start_s": 21.0
+    },
+    {
+      "camera": {
+        "max_sampling_skew_ms": 51.572,
+        "nearest_source_frames": 20,
+        "pose_valid_ratio": 0.3,
+        "sampling_coverage": 1.0,
+        "valid": false
+      },
+      "imu": {
+        "coverage": 1.0,
+        "max_sampling_skew_ms": 1.118,
+        "nearest_source_samples": 100,
+        "valid": true
+      },
+      "window_end_s": 24.0,
+      "window_start_s": 22.0
+    },
+    {
+      "camera": {
+        "max_sampling_skew_ms": 52.108,
+        "nearest_source_frames": 20,
+        "pose_valid_ratio": 0.25,
+        "sampling_coverage": 1.0,
+        "valid": false
+      },
+      "imu": {
+        "coverage": 1.0,
+        "max_sampling_skew_ms": 1.165,
+        "nearest_source_samples": 100,
+        "valid": true
+      },
+      "window_end_s": 25.0,
+      "window_start_s": 23.0
+    },
+    {
+      "camera": {
+        "max_sampling_skew_ms": 52.667,
+        "nearest_source_frames": 19,
+        "pose_valid_ratio": 0.45,
+        "sampling_coverage": 1.0,
+        "valid": false
+      },
+      "imu": {
+        "coverage": 1.0,
+        "max_sampling_skew_ms": 1.211,
+        "nearest_source_samples": 100,
+        "valid": true
+      },
+      "window_end_s": 26.0,
+      "window_start_s": 24.0
+    },
+    {
+      "camera": {
+        "max_sampling_skew_ms": 52.667,
+        "nearest_source_frames": 19,
+        "pose_valid_ratio": 0.3,
+        "sampling_coverage": 1.0,
+        "valid": false
+      },
+      "imu": {
+        "coverage": 1.0,
+        "max_sampling_skew_ms": 1.258,
+        "nearest_source_samples": 100,
+        "valid": true
+      },
+      "window_end_s": 27.0,
+      "window_start_s": 25.0
+    },
+    {
+      "camera": {
+        "max_sampling_skew_ms": 53.736,
+        "nearest_source_frames": 18,
+        "pose_valid_ratio": 0.1,
+        "sampling_coverage": 1.0,
+        "valid": false
+      },
+      "imu": {
+        "coverage": 1.0,
+        "max_sampling_skew_ms": 1.305,
+        "nearest_source_samples": 100,
+        "valid": true
+      },
+      "window_end_s": 28.0,
+      "window_start_s": 26.0
+    },
+    {
+      "camera": {
+        "max_sampling_skew_ms": 53.776,
+        "nearest_source_frames": 18,
+        "pose_valid_ratio": 0.5,
+        "sampling_coverage": 1.0,
+        "valid": true
+      },
+      "imu": {
+        "coverage": 1.0,
+        "max_sampling_skew_ms": 1.351,
+        "nearest_source_samples": 100,
+        "valid": true
+      },
+      "window_end_s": 29.0,
+      "window_start_s": 27.0
+    },
+    {
+      "camera": {
+        "max_sampling_skew_ms": 53.776,
+        "nearest_source_frames": 17,
+        "pose_valid_ratio": 0.75,
+        "sampling_coverage": 1.0,
+        "valid": true
+      },
+      "imu": {
+        "coverage": 1.0,
+        "max_sampling_skew_ms": 1.398,
+        "nearest_source_samples": 100,
+        "valid": true
+      },
+      "window_end_s": 30.0,
+      "window_start_s": 28.0
+    },
+    {
+      "camera": {
+        "max_sampling_skew_ms": 53.232,
+        "nearest_source_frames": 17,
+        "pose_valid_ratio": 0.25,
+        "sampling_coverage": 1.0,
+        "valid": false
+      },
+      "imu": {
+        "coverage": 1.0,
+        "max_sampling_skew_ms": 1.445,
+        "nearest_source_samples": 100,
+        "valid": true
+      },
+      "window_end_s": 31.0,
+      "window_start_s": 29.0
+    },
+    {
+      "camera": {
+        "max_sampling_skew_ms": 52.164,
+        "nearest_source_frames": 16,
+        "pose_valid_ratio": 0.2,
+        "sampling_coverage": 1.0,
+        "valid": false
+      },
+      "imu": {
+        "coverage": 1.0,
+        "max_sampling_skew_ms": 1.491,
+        "nearest_source_samples": 100,
+        "valid": true
+      },
+      "window_end_s": 32.0,
+      "window_start_s": 30.0
+    },
+    {
+      "camera": {
+        "max_sampling_skew_ms": 52.72,
+        "nearest_source_frames": 17,
+        "pose_valid_ratio": 0.25,
+        "sampling_coverage": 1.0,
+        "valid": false
+      },
+      "imu": {
+        "coverage": 1.0,
+        "max_sampling_skew_ms": 1.538,
+        "nearest_source_samples": 100,
+        "valid": true
+      },
+      "window_end_s": 33.0,
+      "window_start_s": 31.0
+    },
+    {
+      "camera": {
+        "max_sampling_skew_ms": 53.8,
+        "nearest_source_frames": 18,
+        "pose_valid_ratio": 0.2,
+        "sampling_coverage": 1.0,
+        "valid": false
+      },
+      "imu": {
+        "coverage": 1.0,
+        "max_sampling_skew_ms": 1.585,
+        "nearest_source_samples": 100,
+        "valid": true
+      },
+      "window_end_s": 34.0,
+      "window_start_s": 32.0
+    },
+    {
+      "camera": {
+        "max_sampling_skew_ms": 53.8,
+        "nearest_source_frames": 17,
+        "pose_valid_ratio": 0.25,
+        "sampling_coverage": 1.0,
+        "valid": false
+      },
+      "imu": {
+        "coverage": 1.0,
+        "max_sampling_skew_ms": 1.631,
+        "nearest_source_samples": 100,
+        "valid": true
+      },
+      "window_end_s": 35.0,
+      "window_start_s": 33.0
+    },
+    {
+      "camera": {
+        "max_sampling_skew_ms": 53.706,
+        "nearest_source_frames": 17,
+        "pose_valid_ratio": 0.1,
+        "sampling_coverage": 1.0,
+        "valid": false
+      },
+      "imu": {
+        "coverage": 1.0,
+        "max_sampling_skew_ms": 1.678,
+        "nearest_source_samples": 100,
+        "valid": true
+      },
+      "window_end_s": 36.0,
+      "window_start_s": 34.0
+    },
+    {
+      "camera": {
+        "max_sampling_skew_ms": 53.171,
+        "nearest_source_frames": 17,
+        "pose_valid_ratio": 0.0,
+        "sampling_coverage": 1.0,
+        "valid": false
+      },
+      "imu": {
+        "coverage": 1.0,
+        "max_sampling_skew_ms": 1.725,
+        "nearest_source_samples": 100,
+        "valid": true
+      },
+      "window_end_s": 37.0,
+      "window_start_s": 35.0
+    },
+    {
+      "camera": {
+        "max_sampling_skew_ms": 52.624,
+        "nearest_source_frames": 18,
+        "pose_valid_ratio": 0.0,
+        "sampling_coverage": 1.0,
+        "valid": false
+      },
+      "imu": {
+        "coverage": 1.0,
+        "max_sampling_skew_ms": 1.771,
+        "nearest_source_samples": 100,
+        "valid": true
+      },
+      "window_end_s": 38.0,
+      "window_start_s": 36.0
+    },
+    {
+      "camera": {
+        "max_sampling_skew_ms": 52.793,
+        "nearest_source_frames": 20,
+        "pose_valid_ratio": 0.3,
+        "sampling_coverage": 1.0,
+        "valid": false
+      },
+      "imu": {
+        "coverage": 1.0,
+        "max_sampling_skew_ms": 1.818,
+        "nearest_source_samples": 100,
+        "valid": true
+      },
+      "window_end_s": 39.0,
+      "window_start_s": 37.0
+    },
+    {
+      "camera": {
+        "max_sampling_skew_ms": 53.314,
+        "nearest_source_frames": 19,
+        "pose_valid_ratio": 0.8,
+        "sampling_coverage": 1.0,
+        "valid": true
+      },
+      "imu": {
+        "coverage": 1.0,
+        "max_sampling_skew_ms": 1.865,
+        "nearest_source_samples": 100,
+        "valid": true
+      },
+      "window_end_s": 40.0,
+      "window_start_s": 38.0
+    },
+    {
+      "camera": {
+        "max_sampling_skew_ms": 53.865,
+        "nearest_source_frames": 19,
+        "pose_valid_ratio": 1.0,
+        "sampling_coverage": 1.0,
+        "valid": true
+      },
+      "imu": {
+        "coverage": 1.0,
+        "max_sampling_skew_ms": 1.911,
+        "nearest_source_samples": 100,
+        "valid": true
+      },
+      "window_end_s": 41.0,
+      "window_start_s": 39.0
+    },
+    {
+      "camera": {
+        "max_sampling_skew_ms": 53.865,
+        "nearest_source_frames": 18,
+        "pose_valid_ratio": 1.0,
+        "sampling_coverage": 1.0,
+        "valid": true
+      },
+      "imu": {
+        "coverage": 1.0,
+        "max_sampling_skew_ms": 1.958,
+        "nearest_source_samples": 100,
+        "valid": true
+      },
+      "window_end_s": 42.0,
+      "window_start_s": 40.0
+    },
+    {
+      "camera": {
+        "max_sampling_skew_ms": 53.652,
+        "nearest_source_frames": 16,
+        "pose_valid_ratio": 1.0,
+        "sampling_coverage": 1.0,
+        "valid": true
+      },
+      "imu": {
+        "coverage": 1.0,
+        "max_sampling_skew_ms": 2.005,
+        "nearest_source_samples": 100,
+        "valid": true
+      },
+      "window_end_s": 43.0,
+      "window_start_s": 41.0
+    },
+    {
+      "camera": {
+        "max_sampling_skew_ms": 53.115,
+        "nearest_source_frames": 17,
+        "pose_valid_ratio": 1.0,
+        "sampling_coverage": 1.0,
+        "valid": true
+      },
+      "imu": {
+        "coverage": 1.0,
+        "max_sampling_skew_ms": 2.051,
+        "nearest_source_samples": 100,
+        "valid": true
+      },
+      "window_end_s": 44.0,
+      "window_start_s": 42.0
+    },
+    {
+      "camera": {
+        "max_sampling_skew_ms": 52.56,
+        "nearest_source_frames": 18,
+        "pose_valid_ratio": 1.0,
+        "sampling_coverage": 1.0,
+        "valid": true
+      },
+      "imu": {
+        "coverage": 1.0,
+        "max_sampling_skew_ms": 2.098,
+        "nearest_source_samples": 100,
+        "valid": true
+      },
+      "window_end_s": 45.0,
+      "window_start_s": 43.0
+    },
+    {
+      "camera": {
+        "max_sampling_skew_ms": 52.83,
+        "nearest_source_frames": 19,
+        "pose_valid_ratio": 1.0,
+        "sampling_coverage": 1.0,
+        "valid": true
+      },
+      "imu": {
+        "coverage": 1.0,
+        "max_sampling_skew_ms": 2.145,
+        "nearest_source_samples": 100,
+        "valid": true
+      },
+      "window_end_s": 46.0,
+      "window_start_s": 44.0
+    },
+    {
+      "camera": {
+        "max_sampling_skew_ms": 53.381,
+        "nearest_source_frames": 18,
+        "pose_valid_ratio": 1.0,
+        "sampling_coverage": 1.0,
+        "valid": true
+      },
+      "imu": {
+        "coverage": 1.0,
+        "max_sampling_skew_ms": 2.191,
+        "nearest_source_samples": 100,
+        "valid": true
+      },
+      "window_end_s": 47.0,
+      "window_start_s": 45.0
+    },
+    {
+      "camera": {
+        "max_sampling_skew_ms": 53.912,
+        "nearest_source_frames": 18,
+        "pose_valid_ratio": 1.0,
+        "sampling_coverage": 1.0,
+        "valid": true
+      },
+      "imu": {
+        "coverage": 1.0,
+        "max_sampling_skew_ms": 2.238,
+        "nearest_source_samples": 100,
+        "valid": true
+      },
+      "window_end_s": 48.0,
+      "window_start_s": 46.0
+    },
+    {
+      "camera": {
+        "max_sampling_skew_ms": 53.912,
+        "nearest_source_frames": 17,
+        "pose_valid_ratio": 1.0,
+        "sampling_coverage": 1.0,
+        "valid": true
+      },
+      "imu": {
+        "coverage": 1.0,
+        "max_sampling_skew_ms": 2.285,
+        "nearest_source_samples": 100,
+        "valid": true
+      },
+      "window_end_s": 49.0,
+      "window_start_s": 47.0
+    },
+    {
+      "camera": {
+        "max_sampling_skew_ms": 53.6,
+        "nearest_source_frames": 16,
+        "pose_valid_ratio": 1.0,
+        "sampling_coverage": 1.0,
+        "valid": true
+      },
+      "imu": {
+        "coverage": 1.0,
+        "max_sampling_skew_ms": 2.331,
+        "nearest_source_samples": 100,
+        "valid": true
+      },
+      "window_end_s": 50.0,
+      "window_start_s": 48.0
+    },
+    {
+      "camera": {
+        "max_sampling_skew_ms": 53.053,
+        "nearest_source_frames": 15,
+        "pose_valid_ratio": 1.0,
+        "sampling_coverage": 1.0,
+        "valid": true
+      },
+      "imu": {
+        "coverage": 1.0,
+        "max_sampling_skew_ms": 2.378,
+        "nearest_source_samples": 100,
+        "valid": true
+      },
+      "window_end_s": 51.0,
+      "window_start_s": 49.0
+    },
+    {
+      "camera": {
+        "max_sampling_skew_ms": 52.501,
+        "nearest_source_frames": 17,
+        "pose_valid_ratio": 1.0,
+        "sampling_coverage": 1.0,
+        "valid": true
+      },
+      "imu": {
+        "coverage": 1.0,
+        "max_sampling_skew_ms": 2.425,
+        "nearest_source_samples": 100,
+        "valid": true
+      },
+      "window_end_s": 52.0,
+      "window_start_s": 50.0
+    },
+    {
+      "camera": {
+        "max_sampling_skew_ms": 52.885,
+        "nearest_source_frames": 18,
+        "pose_valid_ratio": 1.0,
+        "sampling_coverage": 1.0,
+        "valid": true
+      },
+      "imu": {
+        "coverage": 1.0,
+        "max_sampling_skew_ms": 2.471,
+        "nearest_source_samples": 100,
+        "valid": true
+      },
+      "window_end_s": 53.0,
+      "window_start_s": 51.0
+    },
+    {
+      "camera": {
+        "max_sampling_skew_ms": 53.424,
+        "nearest_source_frames": 18,
+        "pose_valid_ratio": 1.0,
+        "sampling_coverage": 1.0,
+        "valid": true
+      },
+      "imu": {
+        "coverage": 1.0,
+        "max_sampling_skew_ms": 2.518,
+        "nearest_source_samples": 100,
+        "valid": true
+      },
+      "window_end_s": 54.0,
+      "window_start_s": 52.0
+    },
+    {
+      "camera": {
+        "max_sampling_skew_ms": 53.978,
+        "nearest_source_frames": 16,
+        "pose_valid_ratio": 1.0,
+        "sampling_coverage": 1.0,
+        "valid": true
+      },
+      "imu": {
+        "coverage": 1.0,
+        "max_sampling_skew_ms": 2.565,
+        "nearest_source_samples": 100,
+        "valid": true
+      },
+      "window_end_s": 55.0,
+      "window_start_s": 53.0
+    },
+    {
+      "camera": {
+        "max_sampling_skew_ms": 53.978,
+        "nearest_source_frames": 16,
+        "pose_valid_ratio": 1.0,
+        "sampling_coverage": 1.0,
+        "valid": true
+      },
+      "imu": {
+        "coverage": 1.0,
+        "max_sampling_skew_ms": 2.611,
+        "nearest_source_samples": 100,
+        "valid": true
+      },
+      "window_end_s": 56.0,
+      "window_start_s": 54.0
+    },
+    {
+      "camera": {
+        "max_sampling_skew_ms": 52.998,
+        "nearest_source_frames": 17,
+        "pose_valid_ratio": 1.0,
+        "sampling_coverage": 1.0,
+        "valid": true
+      },
+      "imu": {
+        "coverage": 1.0,
+        "max_sampling_skew_ms": 2.658,
+        "nearest_source_samples": 100,
+        "valid": true
+      },
+      "window_end_s": 57.0,
+      "window_start_s": 55.0
+    },
+    {
+      "camera": {
+        "max_sampling_skew_ms": 52.452,
+        "nearest_source_frames": 17,
+        "pose_valid_ratio": 1.0,
+        "sampling_coverage": 1.0,
+        "valid": true
+      },
+      "imu": {
+        "coverage": 1.0,
+        "max_sampling_skew_ms": 2.705,
+        "nearest_source_samples": 100,
+        "valid": true
+      },
+      "window_end_s": 58.0,
+      "window_start_s": 56.0
+    },
+    {
+      "camera": {
+        "max_sampling_skew_ms": 52.944,
+        "nearest_source_frames": 19,
+        "pose_valid_ratio": 1.0,
+        "sampling_coverage": 1.0,
+        "valid": true
+      },
+      "imu": {
+        "coverage": 1.0,
+        "max_sampling_skew_ms": 2.751,
+        "nearest_source_samples": 100,
+        "valid": true
+      },
+      "window_end_s": 59.0,
+      "window_start_s": 57.0
+    }
+  ]
+}
