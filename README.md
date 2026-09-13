@@ -1,5 +1,7 @@
 # FusionSense
 
+![FusionSense Edge AI Human Activity Recognition](assets/fusion-sense.png)
+
 Lightweight, **sensor-health-aware** multimodal Human Activity Recognition (HAR)
 for edge devices. The practical V1 fuses **third-person MediaPipe pose + a
 waist-worn IMU** with merged-token cross-modal attention. It recognizes seven
