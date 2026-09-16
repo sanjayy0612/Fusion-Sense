@@ -1,0 +1,246 @@
+{
+  "acceptance_mode": "shared_motion",
+  "artifacts": {
+    "camera": "camera_manifest.csv",
+    "camera_frames": "frames",
+    "clock_sync": "clock_sync.csv",
+    "device_status": "device_status.csv",
+    "imu": "imu.csv",
+    "malformed_imu": "malformed_imu.csv"
+  },
+  "counts": {
+    "camera_frames": 341,
+    "camera_sync_points": 29,
+    "imu_samples": 2800,
+    "imu_sync_points": 35,
+    "malformed_imu_rows": 0
+  },
+  "host_elapsed_s": 60.016,
+  "requested_duration_s": 60.0,
+  "schema_version": 1,
+  "session_id": "fusion_20260817T192552Z",
+  "session_started_utc": "2026-08-17T19:25:52.325257+00:00",
+  "sources": {
+    "camera": {
+      "device_id": "cam01",
+      "stream": "http://192.168.1.8:81/stream"
+    },
+    "imu": {
+      "baud": 115200,
+      "device_id": "imu01",
+      "port": "COM16"
+    }
+  },
+  "validation": {
+    "alignment": {
+      "absolute_lag_ms": 230,
+      "best_camera_shift_ms": -230,
+      "best_correlation": 0.407484,
+      "camera_motion": {
+        "active_points_over_3z": 43,
+        "baseline": 0.017021,
+        "peak_z": 10.973,
+        "robust_scale": 0.008953
+      },
+      "checks": {
+        "absolute_lag_at_most_50_ms": false,
+        "correlation_at_least_0_25": true,
+        "shared_motion_detected": true
+      },
+      "compared_camera_points": 337,
+      "imu_motion": {
+        "active_points_over_3z": 202,
+        "baseline": 11.795567,
+        "peak_z": 11.5862,
+        "robust_scale": 12.92691
+      },
+      "lag_step_ms": 5,
+      "method": "shared_motion_cross_correlation",
+      "result": "FAIL",
+      "search_range_ms": 500
+    },
+    "camera": {
+      "capture_interval_ms": {
+        "max": 7779.82,
+        "mean": 176.4875,
+        "p95": 432.242
+      },
+      "checks": {
+        "camera_capture_errors_zero": true,
+        "device_fps_8_5_to_11_5": false,
+        "enough_frames": false,
+        "max_capture_interval_at_most_5x_target": false,
+        "monotonic_capture_timestamps": true,
+        "monotonic_sequence": true,
+        "no_sequence_gaps": true,
+        "p95_capture_interval_at_most_2x_target": false,
+        "qvga_320_by_240": true
+      },
+      "device_elapsed_s": 60.0057,
+      "device_fps": 5.6661,
+      "device_timestamp_us": {
+        "first": 3698307748,
+        "last": 3758313493
+      },
+      "dimensions": [
+        [
+          320,
+          240
+        ]
+      ],
+      "dropped_frames": 0,
+      "frames": 341,
+      "health": {
+        "capture_errors": 0,
+        "device_id": "cam01",
+        "frames": 1431,
+        "schema_version": 1,
+        "session_id": "fusion_20260817T192552Z",
+        "status": "ok",
+        "stream_disconnects": 2,
+        "target_fps": 10,
+        "uptime_us": 3758523358
+      },
+      "result": "FAIL",
+      "sequence": {
+        "first": 1090,
+        "last": 1430
+      }
+    },
+    "clock_sync": {
+      "camera": {
+        "checks": {
+          "absolute_drift_at_most_2000_ppm": true,
+          "at_least_4_sync_points": true,
+          "fit_residual_p95_at_most_20_ms": true,
+          "selected_span_at_least_2_seconds": true
+        },
+        "mapping": {
+          "device_id": "cam01",
+          "drift_ppm": 132.9397,
+          "equation": "host_ns = scale * device_us * 1000 + offset_ns",
+          "fit_residual_ms": {
+            "max": 15.903618,
+            "median": 7.096555,
+            "min": 1.552948,
+            "p95": 15.903618
+          },
+          "offset_ns": 482648771694058,
+          "rtt_ms": {
+            "max": 141.0,
+            "median": 85.5,
+            "min": 47.0,
+            "p95": 141.0
+          },
+          "scale": 1.000132939708,
+          "selected_device_span_s": 59.269182,
+          "selected_low_rtt_points": 16,
+          "total_sync_points": 29
+        },
+        "result": "PASS"
+      },
+      "imu": {
+        "checks": {
+          "absolute_drift_at_most_2000_ppm": true,
+          "at_least_4_sync_points": true,
+          "fit_residual_p95_at_most_20_ms": true,
+          "selected_span_at_least_2_seconds": true
+        },
+        "mapping": {
+          "device_id": "imu01",
+          "drift_ppm": -38.1288,
+          "equation": "host_ns = scale * device_us * 1000 + offset_ns",
+          "fit_residual_ms": {
+            "max": 1.607821,
+            "median": 0.766277,
+            "min": 0.001201,
+            "p95": 1.607821
+          },
+          "offset_ns": 486341690811900,
+          "rtt_ms": {
+            "max": 0.0,
+            "median": 0.0,
+            "min": 0.0,
+            "p95": 0.0
+          },
+          "scale": 0.999961871222,
+          "selected_device_span_s": 55.078997,
+          "selected_low_rtt_points": 16,
+          "total_sync_points": 35
+        },
+        "result": "PASS"
+      }
+    },
+    "errors": [],
+    "imu": {
+      "accel_magnitude_g": {
+        "mean": 1.00002,
+        "std": 0.0736
+      },
+      "checks": {
+        "missed_slot_ratio_at_most_0_1_percent": false,
+        "monotonic_device_timestamps": true,
+        "monotonic_sequence": true,
+        "no_invalid_rows": true,
+        "no_sequence_gaps": false,
+        "p95_interval_at_most_22_ms": true,
+        "rate_49_to_51_hz": false
+      },
+      "device_duration_s": 59.98,
+      "effective_hz": 46.6656,
+      "estimated_missed_slots": 200,
+      "gyro_axis_mean_dps": {
+        "gx_dps": 0.59292,
+        "gy_dps": -1.39221,
+        "gz_dps": -0.97831
+      },
+      "gyro_magnitude_dps": {
+        "mean": 16.36108,
+        "std": 18.72937
+      },
+      "interval_ms": {
+        "max": 1779.996,
+        "mean": 21.4291,
+        "p95": 20.004
+      },
+      "invalid_rows": 0,
+      "missed_slot_ratio": 0.066667,
+      "non_monotonic_timestamps": 0,
+      "result": "FAIL",
+      "samples": 2800,
+      "sequence_gaps": 200
+    },
+    "nearest_sampling_diagnostic": {
+      "median_alignment_at_most_50_ms": true,
+      "nearest_imu_skew_ms": {
+        "max": 163.788427,
+        "median": 5.164178,
+        "min": 0.006696,
+        "p95": 9.386262
+      },
+      "pairs": 341,
+      "result": "PASS"
+    },
+    "result": "FAIL",
+    "transport_checks": {
+      "camera_latency_max_at_most_1000_ms": false,
+      "camera_latency_p95_at_most_500_ms": false,
+      "imu_latency_max_at_most_250_ms": true,
+      "imu_latency_p95_at_most_50_ms": true
+    },
+    "transport_latency": {
+      "camera_ms": {
+        "max": 7889.223298,
+        "median": 154.179278,
+        "min": 33.634575,
+        "p95": 688.541483
+      },
+      "imu_ms": {
+        "max": 16.83262,
+        "median": 7.988529,
+        "min": -0.19312,
+        "p95": 15.144437
+      }
+    }
+  }
+}

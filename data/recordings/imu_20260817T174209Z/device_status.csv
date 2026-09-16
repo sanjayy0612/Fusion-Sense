@@ -1,0 +1,25 @@
+host_received_monotonic_ns,message
+480118968000000,# FusionSense timestamped IMU USB stream
+480118984000000,"# format=IMU,1,device_id,session_id,seq,t_device_us,ax_g,ay_g,az_g,gx_dps,gy_dps,gz_dps"
+480118984000000,"# configured_hz=50,accel_range_g=2,gyro_range_dps=250"
+480119000000000,"# i2c_scan,pins=21|22,addresses=0x68"
+480119203000000,# mpu_who_am_i=0x70
+480119203000000,# mpu_i2c_address=0x68
+480119203000000,# mpu_model=MPU-6500
+480119218000000,"# calibration,keep_sensor_stationary,seconds=5"
+480124218000000,"# calibration_ok,accel_bias_g=0.00062|0.00002|0.00085,gyro_bias_dps=-0.6252|1.0573|0.0564"
+480124218000000,# acquisition_started
+480124218000000,"# session_set,id=imu_20260817T174209Z"
+480124218000000,"# session_set,id=imu_20260817T174209Z"
+480124218000000,"# session_set,id=imu_20260817T174209Z"
+480129218000000,"# health,t_ms=10744,samples=250,read_errors_total=0,read_errors_window=0,missed_slots_total=0,missed_slots_window=0,effective_hz=50.00"
+480134218000000,"# health,t_ms=15744,samples=500,read_errors_total=0,read_errors_window=0,missed_slots_total=0,missed_slots_window=0,effective_hz=50.00"
+480139218000000,"# health,t_ms=20744,samples=750,read_errors_total=0,read_errors_window=0,missed_slots_total=0,missed_slots_window=0,effective_hz=50.00"
+480144218000000,"# health,t_ms=25744,samples=1000,read_errors_total=0,read_errors_window=0,missed_slots_total=0,missed_slots_window=0,effective_hz=50.00"
+480149218000000,"# health,t_ms=30744,samples=1250,read_errors_total=0,read_errors_window=0,missed_slots_total=0,missed_slots_window=0,effective_hz=50.00"
+480154218000000,"# health,t_ms=35744,samples=1500,read_errors_total=0,read_errors_window=0,missed_slots_total=0,missed_slots_window=0,effective_hz=50.00"
+480159218000000,"# health,t_ms=40744,samples=1750,read_errors_total=0,read_errors_window=0,missed_slots_total=0,missed_slots_window=0,effective_hz=50.00"
+480164218000000,"# health,t_ms=45744,samples=2000,read_errors_total=0,read_errors_window=0,missed_slots_total=0,missed_slots_window=0,effective_hz=50.00"
+480169218000000,"# health,t_ms=50744,samples=2250,read_errors_total=0,read_errors_window=0,missed_slots_total=0,missed_slots_window=0,effective_hz=50.00"
+480174218000000,"# health,t_ms=55744,samples=2500,read_errors_total=0,read_errors_window=0,missed_slots_total=0,missed_slots_window=0,effective_hz=50.00"
+480179218000000,"# health,t_ms=60744,samples=2750,read_errors_total=0,read_errors_window=0,missed_slots_total=0,missed_slots_window=0,effective_hz=50.00"

@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="FusionSense IMU and camera fall-detection dashboard">
+  <title>FusionSense · Fall Detection</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="./" aria-label="FusionSense dashboard home">
+      <span class="brand-mark" aria-hidden="true">FS</span>
+      <span>
+        <strong>FusionSense</strong>
+        <small>IMU + camera fall detection</small>
+      </span>
+    </a>
+    <div class="header-meta">
+      <span id="mode-badge" class="badge">LOADING</span>
+      <span id="generated-at" class="muted">Preparing model output…</span>
+    </div>
+  </header>
+
+  <main>
+    <section id="disclosure" class="disclosure" aria-label="Demonstration disclosure"></section>
+
+    <section id="alert-panel" class="alert-panel" aria-live="assertive">
+      <div>
+        <p id="alert-kicker" class="eyebrow">SYSTEM STATUS</p>
+        <h1 id="alert-title">Loading pipeline output</h1>
+        <p id="alert-copy">Reading the latest synchronized inference window.</p>
+      </div>
+      <div class="fall-score" aria-label="Fall probability">
+        <span id="fall-score">—</span>
+        <small>fall probability</small>
+      </div>
+    </section>
+
+    <section id="control-strip" class="control-strip" aria-label="Replay controls">
+      <div class="controls">
+        <button id="previous" type="button">Previous</button>
+        <button id="play" class="primary" type="button">Play replay</button>
+        <button id="next" type="button">Next</button>
+      </div>
+      <div class="event-position">
+        <span id="event-position">Event — of —</span>
+        <span id="event-id" class="mono muted"></span>
+      </div>
+    </section>
+
+    <section class="metric-row" aria-label="Model evaluation">
+      <article>
+        <span class="metric-label">Held-out accuracy</span>
+        <strong id="metric-accuracy">—</strong>
+      </article>
+      <article>
+        <span class="metric-label">Macro F1</span>
+        <strong id="metric-f1">—</strong>
+      </article>
+      <article>
+        <span class="metric-label">Fall recall</span>
+        <strong id="metric-fall-recall">—</strong>
+      </article>
+      <article>
+        <span class="metric-label">Inference</span>
+        <strong id="metric-inference">—</strong>
+      </article>
+    </section>
+
+    <div class="content-grid">
+      <div class="main-column">
+        <section class="panel" aria-labelledby="prediction-title">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">CURRENT WINDOW</p>
+              <h2 id="prediction-title">Model prediction</h2>
+            </div>
+            <span id="prediction-confidence" class="confidence">—</span>
+          </div>
+          <div class="prediction-summary">
+            <div>
+              <span class="muted">Predicted</span>
+              <strong id="predicted-label">—</strong>
+            </div>
+            <div>
+              <span class="muted">Ground truth</span>
+              <strong id="truth-label">—</strong>
+            </div>
+            <div>
+              <span class="muted">Window timestamp</span>
+              <strong id="event-time">—</strong>
+            </div>
+          </div>
+          <div id="probabilities" class="probability-list"></div>
+        </section>
+
+        <section class="panel" aria-labelledby="timeline-title">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">EVENT LOG</p>
+              <h2 id="timeline-title">Replay timeline</h2>
+            </div>
+          </div>
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr><th>#</th><th>Time</th><th>Ground truth</th><th>Prediction</th><th>Fall probability</th><th>Status</th></tr>
+              </thead>
+              <tbody id="events-table"></tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+
+      <aside class="side-column">
+        <section class="panel" aria-labelledby="sensors-title">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">MODALITY HEALTH</p>
+              <h2 id="sensors-title">Sensor inputs</h2>
+            </div>
+          </div>
+          <div id="sensor-list" class="sensor-list"></div>
+        </section>
+
+        <section class="panel method" aria-labelledby="contract-title">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">INPUT CONTRACT</p>
+              <h2 id="contract-title">Pipeline checks</h2>
+            </div>
+          </div>
+          <dl>
+            <div><dt>Window</dt><dd id="contract-window">—</dd></div>
+            <div><dt>IMU tensor</dt><dd id="contract-imu">—</dd></div>
+            <div><dt>Camera tensor</dt><dd id="contract-camera">—</dd></div>
+            <div><dt>Live conversion</dt><dd id="contract-conversion">—</dd></div>
+            <div><dt>Scale validation</dt><dd id="contract-validation">—</dd></div>
+          </dl>
+        </section>
+
+        <section class="scope-note">
+          <strong>Research scope</strong>
+          <p id="scope-note">Loading model scope…</p>
+        </section>
+      </aside>
+    </div>
+  </main>
+
+  <footer>
+    <span>FusionSense laptop inference pipeline</span>
+    <span id="footer-source">Local checkpoint output</span>
+  </footer>
+  <script src="app.js"></script>
+</body>
+</html>

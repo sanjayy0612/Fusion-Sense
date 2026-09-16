@@ -5,6 +5,7 @@ checkpoints/
 *.png
 !assets/fusion-sense.png
 .venv/
+.runtime/
 
 .qa/
 *.jpg
@@ -16,3 +17,5 @@ data/processed/*
 !data/processed/.gitkeep
 assets/models/*.task
 CLAUDE.md
+hardware/esp32_cam/**/secrets.h
+dashboard/notification_state*.json

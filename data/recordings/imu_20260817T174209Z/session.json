@@ -1,0 +1,58 @@
+{
+  "baud": 115200,
+  "device_id": "imu01",
+  "device_status": "device_status.csv",
+  "imu_manifest": "imu.csv",
+  "port": "COM16",
+  "requested_duration_s": 60.0,
+  "samples_saved": 3000,
+  "schema_version": 1,
+  "session_id": "imu_20260817T174209Z",
+  "units": {
+    "acceleration": "g",
+    "angular_velocity": "degrees_per_second",
+    "device_timestamp": "microseconds_since_esp32_boot",
+    "host_received_timestamp": "monotonic_nanoseconds"
+  },
+  "validation": {
+    "accel_magnitude_g": {
+      "mean": 0.99962,
+      "std": 0.00443
+    },
+    "checks": {
+      "missed_slot_ratio_at_most_0_1_percent": true,
+      "monotonic_device_timestamps": true,
+      "monotonic_sequence": true,
+      "no_invalid_rows": true,
+      "no_sequence_gaps": true,
+      "p95_interval_at_most_22_ms": true,
+      "rate_49_to_51_hz": true,
+      "stationary_accel_mean_0_95_to_1_05_g": true,
+      "stationary_accel_std_at_most_0_03_g": true,
+      "stationary_gyro_axis_bias_at_most_1_5_dps": true
+    },
+    "device_duration_s": 59.98,
+    "effective_hz": 50.0,
+    "estimated_missed_slots": 0,
+    "gyro_axis_mean_dps": {
+      "gx_dps": 0.00343,
+      "gy_dps": -0.02511,
+      "gz_dps": -0.00414
+    },
+    "gyro_magnitude_dps": {
+      "mean": 0.12035,
+      "std": 0.0546
+    },
+    "interval_ms": {
+      "max": 20.003,
+      "mean": 20.0,
+      "p95": 20.003
+    },
+    "invalid_rows": 0,
+    "missed_slot_ratio": 0.0,
+    "non_monotonic_timestamps": 0,
+    "result": "PASS",
+    "samples": 3000,
+    "sequence_gaps": 0
+  }
+}

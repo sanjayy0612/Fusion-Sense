@@ -1,0 +1,4481 @@
+{
+  "schema_version": 2,
+  "generated_at_utc": "2026-08-19T18:20:14.823958+00:00",
+  "result": "ERROR",
+  "mode": "live_esp32",
+  "title": "FusionSense Live Fall Detection",
+  "disclosure": "Live research-prototype inference from synchronized ESP32 IMU and ESP32-CAM pose. It is not a clinical or emergency-response device.",
+  "model": {
+    "name": "FusionSense corrected masked IMU + camera fusion",
+    "classes": [
+      "stand_to_sit",
+      "sit_to_stand",
+      "sit_to_lie",
+      "lie_to_sit",
+      "lie_to_stand",
+      "stand_to_lie",
+      "stand_to_fall"
+    ],
+    "checkpoint": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\checkpoints\\cmhad_step7_bimodal_dropout_fixed",
+    "scope_note": "Step 8 pilot checkpoint; strict IMU + camera validity is required."
+  },
+  "input_contract": {
+    "window_seconds": 2.0,
+    "stride_seconds": 1.0,
+    "imu": {
+      "shape": [
+        100,
+        6
+      ],
+      "units": [
+        "m/s^2",
+        "m/s^2",
+        "m/s^2",
+        "deg/s",
+        "deg/s",
+        "deg/s"
+      ]
+    },
+    "camera_pose": {
+      "shape": [
+        20,
+        99
+      ],
+      "rate_fps": 10
+    },
+    "fusion_policy": "valid IMU and valid full-body camera pose required",
+    "radar": {
+      "active": false,
+      "note": "Not an input to this project"
+    },
+    "live_esp32_conversion": {
+      "source_acceleration_unit": "g",
+      "source_angular_velocity_unit": "deg/s",
+      "target_units": [
+        "m/s^2",
+        "m/s^2",
+        "m/s^2",
+        "deg/s",
+        "deg/s",
+        "deg/s"
+      ],
+      "acceleration_formula": "m/s^2 = g * 9.80665",
+      "acceleration_scale": 9.80665,
+      "gyroscope_formula": "deg/s unchanged"
+    }
+  },
+  "evaluation": {
+    "accuracy": 0.8491,
+    "macro_f1": 0.8221,
+    "fall_recall": 1.0,
+    "fall_precision": 1.0,
+    "validation_falls": 9,
+    "scope": "four-subject pilot; Subject3 validation has been observed during tuning"
+  },
+  "alert_policy": {
+    "class": "stand_to_fall",
+    "threshold": 0.6,
+    "condition": "both modalities valid and stand_to_fall probability >= threshold",
+    "required_modalities": [
+      "imu",
+      "camera_pose"
+    ]
+  },
+  "live": {
+    "session_id": "live_20260819T181919Z",
+    "imu_port": "COM16",
+    "camera_port": "COM14",
+    "state": "error",
+    "uptime_seconds": 52.6,
+    "transport_compensation_ms": {
+      "imu": 7.945912,
+      "camera": 297.408335
+    },
+    "imu_rows": 2178,
+    "invalid_imu_rows": 0,
+    "camera_frames": 432,
+    "pose_valid_frames": 285,
+    "camera_transport_errors": 1,
+    "last_camera_transport_error": "camera JPEG CRC mismatch: expected 0x20d3062c, got 0x707f931e",
+    "errors": [
+      "IMU reader failed: ReadFile failed (OSError(9, 'The handle is invalid.', None, 6))"
+    ]
+  },
+  "summary": {
+    "inference_windows": 40,
+    "alerts": 1,
+    "degraded_windows": 11
+  },
+  "events": [
+    {
+      "model": "FusionSense corrected masked IMU + camera fusion",
+      "checkpoint": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\checkpoints\\cmhad_step7_bimodal_dropout_fixed",
+      "window_start": 655156.820566665,
+      "window_seconds": 2.0,
+      "recording_id": "live_20260819T181919Z",
+      "subject_id": "live_esp32",
+      "input": {
+        "imu_shape": [
+          100,
+          6
+        ],
+        "imu_units": [
+          "m/s^2",
+          "m/s^2",
+          "m/s^2",
+          "deg/s",
+          "deg/s",
+          "deg/s"
+        ],
+        "vision_shape": [
+          20,
+          99
+        ],
+        "radar_shape": [
+          40,
+          8
+        ],
+        "valid_modalities": {
+          "imu": true,
+          "radar": false,
+          "camera_pose": true
+        },
+        "health": {
+          "imu": 0.99,
+          "radar": 0.0,
+          "camera": 0.4375
+        },
+        "normalization": "training-subject per-channel mean/std"
+      },
+      "fall_threshold": 0.6,
+      "fusion_policy": "require_valid_imu_and_camera_pose",
+      "status": "monitoring",
+      "alert": false,
+      "predicted_label": "stand_to_lie",
+      "predicted_class_id": 5,
+      "confidence": 0.957995,
+      "fall_probability": 0.00185,
+      "class_probabilities": {
+        "stand_to_sit": 0.000699,
+        "sit_to_stand": 0.002213,
+        "sit_to_lie": 0.012124,
+        "lie_to_sit": 0.004055,
+        "lie_to_stand": 0.021065,
+        "stand_to_lie": 0.957995,
+        "stand_to_fall": 0.00185
+      },
+      "sensor_trust": {
+        "imu": 0.776925,
+        "radar": 0.0,
+        "camera": 0.223075
+      },
+      "inference_ms": 25.332,
+      "event_id": "live-000001",
+      "sequence": 1,
+      "source_mode": "live_esp32",
+      "ground_truth": null,
+      "event_timestamp_utc": "2026-08-19T18:19:34.074427+00:00",
+      "window_diagnostics": {
+        "window_start_monotonic_ns": 655156820566665,
+        "window_end_monotonic_ns": 655158820566665,
+        "imu": {
+          "valid": true,
+          "coverage": 1.0,
+          "health": 0.99,
+          "clipping_ratio": 0.01,
+          "max_sampling_skew_ms": 0.516,
+          "source_samples": 100,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 0,
+          "unit_validation": {
+            "valid": true,
+            "samples": 100,
+            "acceleration_norm_median_mps2": 10.02038,
+            "acceleration_norm_p95_mps2": 12.86447,
+            "finite": true,
+            "canonical_units": [
+              "m/s^2",
+              "m/s^2",
+              "m/s^2",
+              "deg/s",
+              "deg/s",
+              "deg/s"
+            ]
+          }
+        },
+        "camera": {
+          "valid": true,
+          "sampling_coverage": 1.0,
+          "pose_valid_ratio": 0.65,
+          "health": 0.4375,
+          "max_sampling_skew_ms": 27.953,
+          "source_frames": 20,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 1
+        }
+      },
+      "alert_state": "MONITORING"
+    },
+    {
+      "model": "FusionSense corrected masked IMU + camera fusion",
+      "checkpoint": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\checkpoints\\cmhad_step7_bimodal_dropout_fixed",
+      "window_start": 655157.829057665,
+      "window_seconds": 2.0,
+      "recording_id": "live_20260819T181919Z",
+      "subject_id": "live_esp32",
+      "input": {
+        "imu_shape": [
+          100,
+          6
+        ],
+        "imu_units": [
+          "m/s^2",
+          "m/s^2",
+          "m/s^2",
+          "deg/s",
+          "deg/s",
+          "deg/s"
+        ],
+        "vision_shape": [
+          20,
+          99
+        ],
+        "radar_shape": [
+          40,
+          8
+        ],
+        "valid_modalities": {
+          "imu": true,
+          "radar": false,
+          "camera_pose": true
+        },
+        "health": {
+          "imu": 0.99,
+          "radar": 0.0,
+          "camera": 0.4634
+        },
+        "normalization": "training-subject per-channel mean/std"
+      },
+      "fall_threshold": 0.6,
+      "fusion_policy": "require_valid_imu_and_camera_pose",
+      "status": "monitoring",
+      "alert": false,
+      "predicted_label": "stand_to_lie",
+      "predicted_class_id": 5,
+      "confidence": 0.81084,
+      "fall_probability": 0.00123,
+      "class_probabilities": {
+        "stand_to_sit": 0.001233,
+        "sit_to_stand": 0.006751,
+        "sit_to_lie": 0.024318,
+        "lie_to_sit": 0.033833,
+        "lie_to_stand": 0.121795,
+        "stand_to_lie": 0.81084,
+        "stand_to_fall": 0.00123
+      },
+      "sensor_trust": {
+        "imu": 0.827346,
+        "radar": 0.0,
+        "camera": 0.172654
+      },
+      "inference_ms": 12.421,
+      "event_id": "live-000002",
+      "sequence": 2,
+      "source_mode": "live_esp32",
+      "ground_truth": null,
+      "event_timestamp_utc": "2026-08-19T18:19:35.082918+00:00",
+      "window_diagnostics": {
+        "window_start_monotonic_ns": 655157829057665,
+        "window_end_monotonic_ns": 655159829057665,
+        "imu": {
+          "valid": true,
+          "coverage": 1.0,
+          "health": 0.99,
+          "clipping_ratio": 0.01,
+          "max_sampling_skew_ms": 9.007,
+          "source_samples": 100,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 0,
+          "unit_validation": {
+            "valid": true,
+            "samples": 100,
+            "acceleration_norm_median_mps2": 9.87429,
+            "acceleration_norm_p95_mps2": 11.70156,
+            "finite": true,
+            "canonical_units": [
+              "m/s^2",
+              "m/s^2",
+              "m/s^2",
+              "deg/s",
+              "deg/s",
+              "deg/s"
+            ]
+          }
+        },
+        "camera": {
+          "valid": true,
+          "sampling_coverage": 1.0,
+          "pose_valid_ratio": 1.0,
+          "health": 0.4634,
+          "max_sampling_skew_ms": 19.462,
+          "source_frames": 20,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 1
+        }
+      },
+      "alert_state": "MONITORING"
+    },
+    {
+      "model": "FusionSense corrected masked IMU + camera fusion",
+      "checkpoint": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\checkpoints\\cmhad_step7_bimodal_dropout_fixed",
+      "window_start": 655158.837556665,
+      "window_seconds": 2.0,
+      "recording_id": "live_20260819T181919Z",
+      "subject_id": "live_esp32",
+      "input": {
+        "imu_shape": [
+          100,
+          6
+        ],
+        "imu_units": [
+          "m/s^2",
+          "m/s^2",
+          "m/s^2",
+          "deg/s",
+          "deg/s",
+          "deg/s"
+        ],
+        "vision_shape": [
+          20,
+          99
+        ],
+        "radar_shape": [
+          40,
+          8
+        ],
+        "valid_modalities": {
+          "imu": true,
+          "radar": false,
+          "camera_pose": true
+        },
+        "health": {
+          "imu": 0.99,
+          "radar": 0.0,
+          "camera": 0.4314
+        },
+        "normalization": "training-subject per-channel mean/std"
+      },
+      "fall_threshold": 0.6,
+      "fusion_policy": "require_valid_imu_and_camera_pose",
+      "status": "fall_alert",
+      "alert": true,
+      "predicted_label": "stand_to_fall",
+      "predicted_class_id": 6,
+      "confidence": 0.709864,
+      "fall_probability": 0.709864,
+      "class_probabilities": {
+        "stand_to_sit": 0.002897,
+        "sit_to_stand": 0.017014,
+        "sit_to_lie": 0.003546,
+        "lie_to_sit": 0.114486,
+        "lie_to_stand": 0.140684,
+        "stand_to_lie": 0.011508,
+        "stand_to_fall": 0.709864
+      },
+      "sensor_trust": {
+        "imu": 0.728795,
+        "radar": 0.0,
+        "camera": 0.271205
+      },
+      "inference_ms": 14.158,
+      "event_id": "live-000003",
+      "sequence": 3,
+      "source_mode": "live_esp32",
+      "ground_truth": null,
+      "event_timestamp_utc": "2026-08-19T18:19:36.091417+00:00",
+      "window_diagnostics": {
+        "window_start_monotonic_ns": 655158837556665,
+        "window_end_monotonic_ns": 655160837556665,
+        "imu": {
+          "valid": true,
+          "coverage": 1.0,
+          "health": 0.99,
+          "clipping_ratio": 0.01,
+          "max_sampling_skew_ms": 2.497,
+          "source_samples": 100,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 0,
+          "unit_validation": {
+            "valid": true,
+            "samples": 100,
+            "acceleration_norm_median_mps2": 9.71004,
+            "acceleration_norm_p95_mps2": 11.79727,
+            "finite": true,
+            "canonical_units": [
+              "m/s^2",
+              "m/s^2",
+              "m/s^2",
+              "deg/s",
+              "deg/s",
+              "deg/s"
+            ]
+          }
+        },
+        "camera": {
+          "valid": true,
+          "sampling_coverage": 1.0,
+          "pose_valid_ratio": 1.0,
+          "health": 0.4314,
+          "max_sampling_skew_ms": 32.222,
+          "source_frames": 20,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 1
+        }
+      },
+      "alert_state": "FALL_ALERT"
+    },
+    {
+      "model": "FusionSense corrected masked IMU + camera fusion",
+      "checkpoint": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\checkpoints\\cmhad_step7_bimodal_dropout_fixed",
+      "window_start": 655159.846057665,
+      "window_seconds": 2.0,
+      "recording_id": "live_20260819T181919Z",
+      "subject_id": "live_esp32",
+      "input": {
+        "imu_shape": [
+          100,
+          6
+        ],
+        "imu_units": [
+          "m/s^2",
+          "m/s^2",
+          "m/s^2",
+          "deg/s",
+          "deg/s",
+          "deg/s"
+        ],
+        "vision_shape": [
+          20,
+          99
+        ],
+        "radar_shape": [
+          40,
+          8
+        ],
+        "valid_modalities": {
+          "imu": true,
+          "radar": false,
+          "camera_pose": true
+        },
+        "health": {
+          "imu": 1.0,
+          "radar": 0.0,
+          "camera": 0.4869
+        },
+        "normalization": "training-subject per-channel mean/std"
+      },
+      "fall_threshold": 0.6,
+      "fusion_policy": "require_valid_imu_and_camera_pose",
+      "status": "monitoring",
+      "alert": false,
+      "predicted_label": "stand_to_lie",
+      "predicted_class_id": 5,
+      "confidence": 0.953477,
+      "fall_probability": 0.001554,
+      "class_probabilities": {
+        "stand_to_sit": 0.001039,
+        "sit_to_stand": 0.003733,
+        "sit_to_lie": 0.007342,
+        "lie_to_sit": 0.008201,
+        "lie_to_stand": 0.024653,
+        "stand_to_lie": 0.953477,
+        "stand_to_fall": 0.001554
+      },
+      "sensor_trust": {
+        "imu": 0.767924,
+        "radar": 0.0,
+        "camera": 0.232076
+      },
+      "inference_ms": 13.412,
+      "event_id": "live-000004",
+      "sequence": 4,
+      "source_mode": "live_esp32",
+      "ground_truth": null,
+      "event_timestamp_utc": "2026-08-19T18:19:37.099918+00:00",
+      "window_diagnostics": {
+        "window_start_monotonic_ns": 655159846057665,
+        "window_end_monotonic_ns": 655161846057665,
+        "imu": {
+          "valid": true,
+          "coverage": 1.0,
+          "health": 1.0,
+          "clipping_ratio": 0.0,
+          "max_sampling_skew_ms": 6.007,
+          "source_samples": 100,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 0,
+          "unit_validation": {
+            "valid": true,
+            "samples": 100,
+            "acceleration_norm_median_mps2": 9.69351,
+            "acceleration_norm_p95_mps2": 10.95037,
+            "finite": true,
+            "canonical_units": [
+              "m/s^2",
+              "m/s^2",
+              "m/s^2",
+              "deg/s",
+              "deg/s",
+              "deg/s"
+            ]
+          }
+        },
+        "camera": {
+          "valid": true,
+          "sampling_coverage": 1.0,
+          "pose_valid_ratio": 0.6,
+          "health": 0.4869,
+          "max_sampling_skew_ms": 40.723,
+          "source_frames": 20,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 1
+        }
+      },
+      "alert_state": "MONITORING"
+    },
+    {
+      "model": "FusionSense corrected masked IMU + camera fusion",
+      "checkpoint": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\checkpoints\\cmhad_step7_bimodal_dropout_fixed",
+      "window_start": 655160.926594665,
+      "window_seconds": 2.0,
+      "recording_id": "live_20260819T181919Z",
+      "subject_id": "live_esp32",
+      "input": {
+        "imu_shape": [
+          100,
+          6
+        ],
+        "imu_units": [
+          "m/s^2",
+          "m/s^2",
+          "m/s^2",
+          "deg/s",
+          "deg/s",
+          "deg/s"
+        ],
+        "vision_shape": [
+          20,
+          99
+        ],
+        "radar_shape": [
+          40,
+          8
+        ],
+        "valid_modalities": {
+          "imu": true,
+          "radar": false,
+          "camera_pose": false
+        },
+        "health": {
+          "imu": 1.0,
+          "radar": 0.0,
+          "camera": 0.5441
+        },
+        "normalization": "training-subject per-channel mean/std"
+      },
+      "fall_threshold": 0.6,
+      "fusion_policy": "require_valid_imu_and_camera_pose",
+      "status": "degraded",
+      "alert": false,
+      "reason": "Bimodal inference requires valid IMU and camera pose, with radar disabled",
+      "predicted_label": null,
+      "confidence": 0.0,
+      "fall_probability": 0.0,
+      "class_probabilities": {},
+      "sensor_trust": {
+        "imu": 0.0,
+        "radar": 0.0,
+        "camera": 0.0
+      },
+      "event_id": "live-000005",
+      "sequence": 5,
+      "source_mode": "live_esp32",
+      "ground_truth": null,
+      "event_timestamp_utc": "2026-08-19T18:19:38.180455+00:00",
+      "window_diagnostics": {
+        "window_start_monotonic_ns": 655160926594665,
+        "window_end_monotonic_ns": 655162926594665,
+        "imu": {
+          "valid": true,
+          "coverage": 1.0,
+          "health": 1.0,
+          "clipping_ratio": 0.0,
+          "max_sampling_skew_ms": 6.544,
+          "source_samples": 100,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 0,
+          "unit_validation": {
+            "valid": true,
+            "samples": 100,
+            "acceleration_norm_median_mps2": 9.71534,
+            "acceleration_norm_p95_mps2": 9.98189,
+            "finite": true,
+            "canonical_units": [
+              "m/s^2",
+              "m/s^2",
+              "m/s^2",
+              "deg/s",
+              "deg/s",
+              "deg/s"
+            ]
+          }
+        },
+        "camera": {
+          "valid": false,
+          "sampling_coverage": 1.0,
+          "pose_valid_ratio": 0.05,
+          "health": 0.5441,
+          "max_sampling_skew_ms": 27.067,
+          "source_frames": 20,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 1
+        }
+      },
+      "alert_state": "DEGRADED"
+    },
+    {
+      "model": "FusionSense corrected masked IMU + camera fusion",
+      "checkpoint": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\checkpoints\\cmhad_step7_bimodal_dropout_fixed",
+      "window_start": 655161.935100665,
+      "window_seconds": 2.0,
+      "recording_id": "live_20260819T181919Z",
+      "subject_id": "live_esp32",
+      "input": {
+        "imu_shape": [
+          100,
+          6
+        ],
+        "imu_units": [
+          "m/s^2",
+          "m/s^2",
+          "m/s^2",
+          "deg/s",
+          "deg/s",
+          "deg/s"
+        ],
+        "vision_shape": [
+          20,
+          99
+        ],
+        "radar_shape": [
+          40,
+          8
+        ],
+        "valid_modalities": {
+          "imu": true,
+          "radar": false,
+          "camera_pose": false
+        },
+        "health": {
+          "imu": 1.0,
+          "radar": 0.0,
+          "camera": 0.5217
+        },
+        "normalization": "training-subject per-channel mean/std"
+      },
+      "fall_threshold": 0.6,
+      "fusion_policy": "require_valid_imu_and_camera_pose",
+      "status": "degraded",
+      "alert": false,
+      "reason": "Bimodal inference requires valid IMU and camera pose, with radar disabled",
+      "predicted_label": null,
+      "confidence": 0.0,
+      "fall_probability": 0.0,
+      "class_probabilities": {},
+      "sensor_trust": {
+        "imu": 0.0,
+        "radar": 0.0,
+        "camera": 0.0
+      },
+      "event_id": "live-000006",
+      "sequence": 6,
+      "source_mode": "live_esp32",
+      "ground_truth": null,
+      "event_timestamp_utc": "2026-08-19T18:19:39.188961+00:00",
+      "window_diagnostics": {
+        "window_start_monotonic_ns": 655161935100665,
+        "window_end_monotonic_ns": 655163935100665,
+        "imu": {
+          "valid": true,
+          "coverage": 1.0,
+          "health": 1.0,
+          "clipping_ratio": 0.0,
+          "max_sampling_skew_ms": 4.953,
+          "source_samples": 100,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 0,
+          "unit_validation": {
+            "valid": true,
+            "samples": 100,
+            "acceleration_norm_median_mps2": 9.7136,
+            "acceleration_norm_p95_mps2": 9.91838,
+            "finite": true,
+            "canonical_units": [
+              "m/s^2",
+              "m/s^2",
+              "m/s^2",
+              "deg/s",
+              "deg/s",
+              "deg/s"
+            ]
+          }
+        },
+        "camera": {
+          "valid": false,
+          "sampling_coverage": 1.0,
+          "pose_valid_ratio": 0.0,
+          "health": 0.5217,
+          "max_sampling_skew_ms": 16.562,
+          "source_frames": 20,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 1
+        }
+      },
+      "alert_state": "DEGRADED"
+    },
+    {
+      "model": "FusionSense corrected masked IMU + camera fusion",
+      "checkpoint": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\checkpoints\\cmhad_step7_bimodal_dropout_fixed",
+      "window_start": 655162.943601665,
+      "window_seconds": 2.0,
+      "recording_id": "live_20260819T181919Z",
+      "subject_id": "live_esp32",
+      "input": {
+        "imu_shape": [
+          100,
+          6
+        ],
+        "imu_units": [
+          "m/s^2",
+          "m/s^2",
+          "m/s^2",
+          "deg/s",
+          "deg/s",
+          "deg/s"
+        ],
+        "vision_shape": [
+          20,
+          99
+        ],
+        "radar_shape": [
+          40,
+          8
+        ],
+        "valid_modalities": {
+          "imu": true,
+          "radar": false,
+          "camera_pose": false
+        },
+        "health": {
+          "imu": 1.0,
+          "radar": 0.0,
+          "camera": 0.5136
+        },
+        "normalization": "training-subject per-channel mean/std"
+      },
+      "fall_threshold": 0.6,
+      "fusion_policy": "require_valid_imu_and_camera_pose",
+      "status": "degraded",
+      "alert": false,
+      "reason": "Bimodal inference requires valid IMU and camera pose, with radar disabled",
+      "predicted_label": null,
+      "confidence": 0.0,
+      "fall_probability": 0.0,
+      "class_probabilities": {},
+      "sensor_trust": {
+        "imu": 0.0,
+        "radar": 0.0,
+        "camera": 0.0
+      },
+      "event_id": "live-000007",
+      "sequence": 7,
+      "source_mode": "live_esp32",
+      "ground_truth": null,
+      "event_timestamp_utc": "2026-08-19T18:19:40.197462+00:00",
+      "window_diagnostics": {
+        "window_start_monotonic_ns": 655162943601665,
+        "window_end_monotonic_ns": 655164943601665,
+        "imu": {
+          "valid": true,
+          "coverage": 1.0,
+          "health": 1.0,
+          "clipping_ratio": 0.0,
+          "max_sampling_skew_ms": 3.551,
+          "source_samples": 100,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 0,
+          "unit_validation": {
+            "valid": true,
+            "samples": 100,
+            "acceleration_norm_median_mps2": 9.69102,
+            "acceleration_norm_p95_mps2": 9.94215,
+            "finite": true,
+            "canonical_units": [
+              "m/s^2",
+              "m/s^2",
+              "m/s^2",
+              "deg/s",
+              "deg/s",
+              "deg/s"
+            ]
+          }
+        },
+        "camera": {
+          "valid": false,
+          "sampling_coverage": 1.0,
+          "pose_valid_ratio": 0.0,
+          "health": 0.5136,
+          "max_sampling_skew_ms": 24.621,
+          "source_frames": 20,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 1
+        }
+      },
+      "alert_state": "DEGRADED"
+    },
+    {
+      "model": "FusionSense corrected masked IMU + camera fusion",
+      "checkpoint": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\checkpoints\\cmhad_step7_bimodal_dropout_fixed",
+      "window_start": 655164.024136665,
+      "window_seconds": 2.0,
+      "recording_id": "live_20260819T181919Z",
+      "subject_id": "live_esp32",
+      "input": {
+        "imu_shape": [
+          100,
+          6
+        ],
+        "imu_units": [
+          "m/s^2",
+          "m/s^2",
+          "m/s^2",
+          "deg/s",
+          "deg/s",
+          "deg/s"
+        ],
+        "vision_shape": [
+          20,
+          99
+        ],
+        "radar_shape": [
+          40,
+          8
+        ],
+        "valid_modalities": {
+          "imu": true,
+          "radar": false,
+          "camera_pose": false
+        },
+        "health": {
+          "imu": 1.0,
+          "radar": 0.0,
+          "camera": 0.4431
+        },
+        "normalization": "training-subject per-channel mean/std"
+      },
+      "fall_threshold": 0.6,
+      "fusion_policy": "require_valid_imu_and_camera_pose",
+      "status": "degraded",
+      "alert": false,
+      "reason": "Bimodal inference requires valid IMU and camera pose, with radar disabled",
+      "predicted_label": null,
+      "confidence": 0.0,
+      "fall_probability": 0.0,
+      "class_probabilities": {},
+      "sensor_trust": {
+        "imu": 0.0,
+        "radar": 0.0,
+        "camera": 0.0
+      },
+      "event_id": "live-000008",
+      "sequence": 8,
+      "source_mode": "live_esp32",
+      "ground_truth": null,
+      "event_timestamp_utc": "2026-08-19T18:19:41.277997+00:00",
+      "window_diagnostics": {
+        "window_start_monotonic_ns": 655164024136665,
+        "window_end_monotonic_ns": 655166024136665,
+        "imu": {
+          "valid": true,
+          "coverage": 1.0,
+          "health": 1.0,
+          "clipping_ratio": 0.0,
+          "max_sampling_skew_ms": 4.086,
+          "source_samples": 100,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 0,
+          "unit_validation": {
+            "valid": true,
+            "samples": 100,
+            "acceleration_norm_median_mps2": 9.62543,
+            "acceleration_norm_p95_mps2": 10.31442,
+            "finite": true,
+            "canonical_units": [
+              "m/s^2",
+              "m/s^2",
+              "m/s^2",
+              "deg/s",
+              "deg/s",
+              "deg/s"
+            ]
+          }
+        },
+        "camera": {
+          "valid": false,
+          "sampling_coverage": 1.0,
+          "pose_valid_ratio": 0.25,
+          "health": 0.4431,
+          "max_sampling_skew_ms": 27.534,
+          "source_frames": 20,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 1
+        }
+      },
+      "alert_state": "DEGRADED"
+    },
+    {
+      "model": "FusionSense corrected masked IMU + camera fusion",
+      "checkpoint": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\checkpoints\\cmhad_step7_bimodal_dropout_fixed",
+      "window_start": 655165.032652665,
+      "window_seconds": 2.0,
+      "recording_id": "live_20260819T181919Z",
+      "subject_id": "live_esp32",
+      "input": {
+        "imu_shape": [
+          100,
+          6
+        ],
+        "imu_units": [
+          "m/s^2",
+          "m/s^2",
+          "m/s^2",
+          "deg/s",
+          "deg/s",
+          "deg/s"
+        ],
+        "vision_shape": [
+          20,
+          99
+        ],
+        "radar_shape": [
+          40,
+          8
+        ],
+        "valid_modalities": {
+          "imu": true,
+          "radar": false,
+          "camera_pose": true
+        },
+        "health": {
+          "imu": 1.0,
+          "radar": 0.0,
+          "camera": 0.3977
+        },
+        "normalization": "training-subject per-channel mean/std"
+      },
+      "fall_threshold": 0.6,
+      "fusion_policy": "require_valid_imu_and_camera_pose",
+      "status": "monitoring",
+      "alert": false,
+      "predicted_label": "lie_to_stand",
+      "predicted_class_id": 4,
+      "confidence": 0.614213,
+      "fall_probability": 0.000829,
+      "class_probabilities": {
+        "stand_to_sit": 0.004212,
+        "sit_to_stand": 0.32311,
+        "sit_to_lie": 0.0042,
+        "lie_to_sit": 0.022569,
+        "lie_to_stand": 0.614213,
+        "stand_to_lie": 0.030867,
+        "stand_to_fall": 0.000829
+      },
+      "sensor_trust": {
+        "imu": 0.71345,
+        "radar": 0.0,
+        "camera": 0.28655
+      },
+      "inference_ms": 16.591,
+      "event_id": "live-000009",
+      "sequence": 9,
+      "source_mode": "live_esp32",
+      "ground_truth": null,
+      "event_timestamp_utc": "2026-08-19T18:19:42.286513+00:00",
+      "window_diagnostics": {
+        "window_start_monotonic_ns": 655165032652665,
+        "window_end_monotonic_ns": 655167032652665,
+        "imu": {
+          "valid": true,
+          "coverage": 1.0,
+          "health": 1.0,
+          "clipping_ratio": 0.0,
+          "max_sampling_skew_ms": 7.401,
+          "source_samples": 100,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 0,
+          "unit_validation": {
+            "valid": true,
+            "samples": 100,
+            "acceleration_norm_median_mps2": 9.67128,
+            "acceleration_norm_p95_mps2": 10.98215,
+            "finite": true,
+            "canonical_units": [
+              "m/s^2",
+              "m/s^2",
+              "m/s^2",
+              "deg/s",
+              "deg/s",
+              "deg/s"
+            ]
+          }
+        },
+        "camera": {
+          "valid": true,
+          "sampling_coverage": 1.0,
+          "pose_valid_ratio": 0.75,
+          "health": 0.3977,
+          "max_sampling_skew_ms": 24.619,
+          "source_frames": 20,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 1
+        }
+      },
+      "alert_state": "MONITORING"
+    },
+    {
+      "model": "FusionSense corrected masked IMU + camera fusion",
+      "checkpoint": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\checkpoints\\cmhad_step7_bimodal_dropout_fixed",
+      "window_start": 655166.041156665,
+      "window_seconds": 2.0,
+      "recording_id": "live_20260819T181919Z",
+      "subject_id": "live_esp32",
+      "input": {
+        "imu_shape": [
+          100,
+          6
+        ],
+        "imu_units": [
+          "m/s^2",
+          "m/s^2",
+          "m/s^2",
+          "deg/s",
+          "deg/s",
+          "deg/s"
+        ],
+        "vision_shape": [
+          20,
+          99
+        ],
+        "radar_shape": [
+          40,
+          8
+        ],
+        "valid_modalities": {
+          "imu": true,
+          "radar": false,
+          "camera_pose": true
+        },
+        "health": {
+          "imu": 1.0,
+          "radar": 0.0,
+          "camera": 0.4328
+        },
+        "normalization": "training-subject per-channel mean/std"
+      },
+      "fall_threshold": 0.6,
+      "fusion_policy": "require_valid_imu_and_camera_pose",
+      "status": "monitoring",
+      "alert": false,
+      "predicted_label": "sit_to_stand",
+      "predicted_class_id": 1,
+      "confidence": 0.64134,
+      "fall_probability": 0.000616,
+      "class_probabilities": {
+        "stand_to_sit": 0.00466,
+        "sit_to_stand": 0.64134,
+        "sit_to_lie": 0.004046,
+        "lie_to_sit": 0.014944,
+        "lie_to_stand": 0.315876,
+        "stand_to_lie": 0.018518,
+        "stand_to_fall": 0.000616
+      },
+      "sensor_trust": {
+        "imu": 0.619882,
+        "radar": 0.0,
+        "camera": 0.380118
+      },
+      "inference_ms": 16.91,
+      "event_id": "live-000010",
+      "sequence": 10,
+      "source_mode": "live_esp32",
+      "ground_truth": null,
+      "event_timestamp_utc": "2026-08-19T18:19:43.295017+00:00",
+      "window_diagnostics": {
+        "window_start_monotonic_ns": 655166041156665,
+        "window_end_monotonic_ns": 655168041156665,
+        "imu": {
+          "valid": true,
+          "coverage": 1.0,
+          "health": 1.0,
+          "clipping_ratio": 0.0,
+          "max_sampling_skew_ms": 1.106,
+          "source_samples": 100,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 0,
+          "unit_validation": {
+            "valid": true,
+            "samples": 100,
+            "acceleration_norm_median_mps2": 9.75699,
+            "acceleration_norm_p95_mps2": 10.86665,
+            "finite": true,
+            "canonical_units": [
+              "m/s^2",
+              "m/s^2",
+              "m/s^2",
+              "deg/s",
+              "deg/s",
+              "deg/s"
+            ]
+          }
+        },
+        "camera": {
+          "valid": true,
+          "sampling_coverage": 1.0,
+          "pose_valid_ratio": 1.0,
+          "health": 0.4328,
+          "max_sampling_skew_ms": 32.673,
+          "source_frames": 20,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 1
+        }
+      },
+      "alert_state": "MONITORING"
+    },
+    {
+      "model": "FusionSense corrected masked IMU + camera fusion",
+      "checkpoint": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\checkpoints\\cmhad_step7_bimodal_dropout_fixed",
+      "window_start": 655167.121742665,
+      "window_seconds": 2.0,
+      "recording_id": "live_20260819T181919Z",
+      "subject_id": "live_esp32",
+      "input": {
+        "imu_shape": [
+          100,
+          6
+        ],
+        "imu_units": [
+          "m/s^2",
+          "m/s^2",
+          "m/s^2",
+          "deg/s",
+          "deg/s",
+          "deg/s"
+        ],
+        "vision_shape": [
+          20,
+          99
+        ],
+        "radar_shape": [
+          40,
+          8
+        ],
+        "valid_modalities": {
+          "imu": true,
+          "radar": false,
+          "camera_pose": true
+        },
+        "health": {
+          "imu": 1.0,
+          "radar": 0.0,
+          "camera": 0.4494
+        },
+        "normalization": "training-subject per-channel mean/std"
+      },
+      "fall_threshold": 0.6,
+      "fusion_policy": "require_valid_imu_and_camera_pose",
+      "status": "monitoring",
+      "alert": false,
+      "predicted_label": "stand_to_lie",
+      "predicted_class_id": 5,
+      "confidence": 0.948509,
+      "fall_probability": 0.001157,
+      "class_probabilities": {
+        "stand_to_sit": 0.00109,
+        "sit_to_stand": 0.006218,
+        "sit_to_lie": 0.008539,
+        "lie_to_sit": 0.004216,
+        "lie_to_stand": 0.030271,
+        "stand_to_lie": 0.948509,
+        "stand_to_fall": 0.001157
+      },
+      "sensor_trust": {
+        "imu": 0.755362,
+        "radar": 0.0,
+        "camera": 0.244638
+      },
+      "inference_ms": 11.087,
+      "event_id": "live-000011",
+      "sequence": 11,
+      "source_mode": "live_esp32",
+      "ground_truth": null,
+      "event_timestamp_utc": "2026-08-19T18:19:44.375603+00:00",
+      "window_diagnostics": {
+        "window_start_monotonic_ns": 655167121742665,
+        "window_end_monotonic_ns": 655169121742665,
+        "imu": {
+          "valid": true,
+          "coverage": 1.0,
+          "health": 1.0,
+          "clipping_ratio": 0.0,
+          "max_sampling_skew_ms": 1.692,
+          "source_samples": 100,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 0,
+          "unit_validation": {
+            "valid": true,
+            "samples": 100,
+            "acceleration_norm_median_mps2": 9.72281,
+            "acceleration_norm_p95_mps2": 9.91872,
+            "finite": true,
+            "canonical_units": [
+              "m/s^2",
+              "m/s^2",
+              "m/s^2",
+              "deg/s",
+              "deg/s",
+              "deg/s"
+            ]
+          }
+        },
+        "camera": {
+          "valid": true,
+          "sampling_coverage": 1.0,
+          "pose_valid_ratio": 0.95,
+          "health": 0.4494,
+          "max_sampling_skew_ms": 27.458,
+          "source_frames": 20,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 1
+        }
+      },
+      "alert_state": "MONITORING"
+    },
+    {
+      "model": "FusionSense corrected masked IMU + camera fusion",
+      "checkpoint": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\checkpoints\\cmhad_step7_bimodal_dropout_fixed",
+      "window_start": 655168.130193665,
+      "window_seconds": 2.0,
+      "recording_id": "live_20260819T181919Z",
+      "subject_id": "live_esp32",
+      "input": {
+        "imu_shape": [
+          100,
+          6
+        ],
+        "imu_units": [
+          "m/s^2",
+          "m/s^2",
+          "m/s^2",
+          "deg/s",
+          "deg/s",
+          "deg/s"
+        ],
+        "vision_shape": [
+          20,
+          99
+        ],
+        "radar_shape": [
+          40,
+          8
+        ],
+        "valid_modalities": {
+          "imu": true,
+          "radar": false,
+          "camera_pose": true
+        },
+        "health": {
+          "imu": 1.0,
+          "radar": 0.0,
+          "camera": 0.4854
+        },
+        "normalization": "training-subject per-channel mean/std"
+      },
+      "fall_threshold": 0.6,
+      "fusion_policy": "require_valid_imu_and_camera_pose",
+      "status": "monitoring",
+      "alert": false,
+      "predicted_label": "stand_to_lie",
+      "predicted_class_id": 5,
+      "confidence": 0.940044,
+      "fall_probability": 0.001272,
+      "class_probabilities": {
+        "stand_to_sit": 0.000918,
+        "sit_to_stand": 0.003938,
+        "sit_to_lie": 0.01048,
+        "lie_to_sit": 0.006396,
+        "lie_to_stand": 0.036952,
+        "stand_to_lie": 0.940044,
+        "stand_to_fall": 0.001272
+      },
+      "sensor_trust": {
+        "imu": 0.77534,
+        "radar": 0.0,
+        "camera": 0.22466
+      },
+      "inference_ms": 24.095,
+      "event_id": "live-000012",
+      "sequence": 12,
+      "source_mode": "live_esp32",
+      "ground_truth": null,
+      "event_timestamp_utc": "2026-08-19T18:19:45.384054+00:00",
+      "window_diagnostics": {
+        "window_start_monotonic_ns": 655168130193665,
+        "window_end_monotonic_ns": 655170130193665,
+        "imu": {
+          "valid": true,
+          "coverage": 1.0,
+          "health": 1.0,
+          "clipping_ratio": 0.0,
+          "max_sampling_skew_ms": 9.86,
+          "source_samples": 100,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 0,
+          "unit_validation": {
+            "valid": true,
+            "samples": 100,
+            "acceleration_norm_median_mps2": 9.726,
+            "acceleration_norm_p95_mps2": 9.8467,
+            "finite": true,
+            "canonical_units": [
+              "m/s^2",
+              "m/s^2",
+              "m/s^2",
+              "deg/s",
+              "deg/s",
+              "deg/s"
+            ]
+          }
+        },
+        "camera": {
+          "valid": true,
+          "sampling_coverage": 1.0,
+          "pose_valid_ratio": 0.95,
+          "health": 0.4854,
+          "max_sampling_skew_ms": 19.905,
+          "source_frames": 20,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 1
+        }
+      },
+      "alert_state": "MONITORING"
+    },
+    {
+      "model": "FusionSense corrected masked IMU + camera fusion",
+      "checkpoint": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\checkpoints\\cmhad_step7_bimodal_dropout_fixed",
+      "window_start": 655169.138699665,
+      "window_seconds": 2.0,
+      "recording_id": "live_20260819T181919Z",
+      "subject_id": "live_esp32",
+      "input": {
+        "imu_shape": [
+          100,
+          6
+        ],
+        "imu_units": [
+          "m/s^2",
+          "m/s^2",
+          "m/s^2",
+          "deg/s",
+          "deg/s",
+          "deg/s"
+        ],
+        "vision_shape": [
+          20,
+          99
+        ],
+        "radar_shape": [
+          40,
+          8
+        ],
+        "valid_modalities": {
+          "imu": true,
+          "radar": false,
+          "camera_pose": true
+        },
+        "health": {
+          "imu": 1.0,
+          "radar": 0.0,
+          "camera": 0.5217
+        },
+        "normalization": "training-subject per-channel mean/std"
+      },
+      "fall_threshold": 0.6,
+      "fusion_policy": "require_valid_imu_and_camera_pose",
+      "status": "monitoring",
+      "alert": false,
+      "predicted_label": "stand_to_lie",
+      "predicted_class_id": 5,
+      "confidence": 0.932796,
+      "fall_probability": 0.001483,
+      "class_probabilities": {
+        "stand_to_sit": 0.000854,
+        "sit_to_stand": 0.002456,
+        "sit_to_lie": 0.013828,
+        "lie_to_sit": 0.010787,
+        "lie_to_stand": 0.037797,
+        "stand_to_lie": 0.932796,
+        "stand_to_fall": 0.001483
+      },
+      "sensor_trust": {
+        "imu": 0.794345,
+        "radar": 0.0,
+        "camera": 0.205655
+      },
+      "inference_ms": 19.807,
+      "event_id": "live-000013",
+      "sequence": 13,
+      "source_mode": "live_esp32",
+      "ground_truth": null,
+      "event_timestamp_utc": "2026-08-19T18:19:46.392560+00:00",
+      "window_diagnostics": {
+        "window_start_monotonic_ns": 655169138699665,
+        "window_end_monotonic_ns": 655171138699665,
+        "imu": {
+          "valid": true,
+          "coverage": 1.0,
+          "health": 1.0,
+          "clipping_ratio": 0.0,
+          "max_sampling_skew_ms": 1.354,
+          "source_samples": 100,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 0,
+          "unit_validation": {
+            "valid": true,
+            "samples": 100,
+            "acceleration_norm_median_mps2": 9.73518,
+            "acceleration_norm_p95_mps2": 9.86394,
+            "finite": true,
+            "canonical_units": [
+              "m/s^2",
+              "m/s^2",
+              "m/s^2",
+              "deg/s",
+              "deg/s",
+              "deg/s"
+            ]
+          }
+        },
+        "camera": {
+          "valid": true,
+          "sampling_coverage": 1.0,
+          "pose_valid_ratio": 1.0,
+          "health": 0.5217,
+          "max_sampling_skew_ms": 24.162,
+          "source_frames": 20,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 1
+        }
+      },
+      "alert_state": "MONITORING"
+    },
+    {
+      "model": "FusionSense corrected masked IMU + camera fusion",
+      "checkpoint": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\checkpoints\\cmhad_step7_bimodal_dropout_fixed",
+      "window_start": 655170.147250665,
+      "window_seconds": 2.0,
+      "recording_id": "live_20260819T181919Z",
+      "subject_id": "live_esp32",
+      "input": {
+        "imu_shape": [
+          100,
+          6
+        ],
+        "imu_units": [
+          "m/s^2",
+          "m/s^2",
+          "m/s^2",
+          "deg/s",
+          "deg/s",
+          "deg/s"
+        ],
+        "vision_shape": [
+          20,
+          99
+        ],
+        "radar_shape": [
+          40,
+          8
+        ],
+        "valid_modalities": {
+          "imu": true,
+          "radar": false,
+          "camera_pose": true
+        },
+        "health": {
+          "imu": 1.0,
+          "radar": 0.0,
+          "camera": 0.5161
+        },
+        "normalization": "training-subject per-channel mean/std"
+      },
+      "fall_threshold": 0.6,
+      "fusion_policy": "require_valid_imu_and_camera_pose",
+      "status": "monitoring",
+      "alert": false,
+      "predicted_label": "stand_to_lie",
+      "predicted_class_id": 5,
+      "confidence": 0.917646,
+      "fall_probability": 0.001418,
+      "class_probabilities": {
+        "stand_to_sit": 0.000898,
+        "sit_to_stand": 0.002891,
+        "sit_to_lie": 0.01483,
+        "lie_to_sit": 0.011868,
+        "lie_to_stand": 0.05045,
+        "stand_to_lie": 0.917646,
+        "stand_to_fall": 0.001418
+      },
+      "sensor_trust": {
+        "imu": 0.792289,
+        "radar": 0.0,
+        "camera": 0.207711
+      },
+      "inference_ms": 22.778,
+      "event_id": "live-000014",
+      "sequence": 14,
+      "source_mode": "live_esp32",
+      "ground_truth": null,
+      "event_timestamp_utc": "2026-08-19T18:19:47.401111+00:00",
+      "window_diagnostics": {
+        "window_start_monotonic_ns": 655170147250665,
+        "window_end_monotonic_ns": 655172147250665,
+        "imu": {
+          "valid": true,
+          "coverage": 1.0,
+          "health": 1.0,
+          "clipping_ratio": 0.0,
+          "max_sampling_skew_ms": 7.2,
+          "source_samples": 100,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 0,
+          "unit_validation": {
+            "valid": true,
+            "samples": 100,
+            "acceleration_norm_median_mps2": 9.73963,
+            "acceleration_norm_p95_mps2": 9.90602,
+            "finite": true,
+            "canonical_units": [
+              "m/s^2",
+              "m/s^2",
+              "m/s^2",
+              "deg/s",
+              "deg/s",
+              "deg/s"
+            ]
+          }
+        },
+        "camera": {
+          "valid": true,
+          "sampling_coverage": 1.0,
+          "pose_valid_ratio": 1.0,
+          "health": 0.5161,
+          "max_sampling_skew_ms": 32.713,
+          "source_frames": 20,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 1
+        }
+      },
+      "alert_state": "MONITORING"
+    },
+    {
+      "model": "FusionSense corrected masked IMU + camera fusion",
+      "checkpoint": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\checkpoints\\cmhad_step7_bimodal_dropout_fixed",
+      "window_start": 655171.227730665,
+      "window_seconds": 2.0,
+      "recording_id": "live_20260819T181919Z",
+      "subject_id": "live_esp32",
+      "input": {
+        "imu_shape": [
+          100,
+          6
+        ],
+        "imu_units": [
+          "m/s^2",
+          "m/s^2",
+          "m/s^2",
+          "deg/s",
+          "deg/s",
+          "deg/s"
+        ],
+        "vision_shape": [
+          20,
+          99
+        ],
+        "radar_shape": [
+          40,
+          8
+        ],
+        "valid_modalities": {
+          "imu": true,
+          "radar": false,
+          "camera_pose": true
+        },
+        "health": {
+          "imu": 1.0,
+          "radar": 0.0,
+          "camera": 0.4491
+        },
+        "normalization": "training-subject per-channel mean/std"
+      },
+      "fall_threshold": 0.6,
+      "fusion_policy": "require_valid_imu_and_camera_pose",
+      "status": "monitoring",
+      "alert": false,
+      "predicted_label": "stand_to_lie",
+      "predicted_class_id": 5,
+      "confidence": 0.736903,
+      "fall_probability": 0.001683,
+      "class_probabilities": {
+        "stand_to_sit": 0.001327,
+        "sit_to_stand": 0.009056,
+        "sit_to_lie": 0.014245,
+        "lie_to_sit": 0.019326,
+        "lie_to_stand": 0.217459,
+        "stand_to_lie": 0.736903,
+        "stand_to_fall": 0.001683
+      },
+      "sensor_trust": {
+        "imu": 0.801488,
+        "radar": 0.0,
+        "camera": 0.198512
+      },
+      "inference_ms": 19.084,
+      "event_id": "live-000015",
+      "sequence": 15,
+      "source_mode": "live_esp32",
+      "ground_truth": null,
+      "event_timestamp_utc": "2026-08-19T18:19:48.481591+00:00",
+      "window_diagnostics": {
+        "window_start_monotonic_ns": 655171227730665,
+        "window_end_monotonic_ns": 655173227730665,
+        "imu": {
+          "valid": true,
+          "coverage": 1.0,
+          "health": 1.0,
+          "clipping_ratio": 0.0,
+          "max_sampling_skew_ms": 7.68,
+          "source_samples": 100,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 0,
+          "unit_validation": {
+            "valid": true,
+            "samples": 100,
+            "acceleration_norm_median_mps2": 9.77693,
+            "acceleration_norm_p95_mps2": 11.93978,
+            "finite": true,
+            "canonical_units": [
+              "m/s^2",
+              "m/s^2",
+              "m/s^2",
+              "deg/s",
+              "deg/s",
+              "deg/s"
+            ]
+          }
+        },
+        "camera": {
+          "valid": true,
+          "sampling_coverage": 1.0,
+          "pose_valid_ratio": 1.0,
+          "health": 0.4491,
+          "max_sampling_skew_ms": 24.157,
+          "source_frames": 20,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 1
+        }
+      },
+      "alert_state": "MONITORING"
+    },
+    {
+      "model": "FusionSense corrected masked IMU + camera fusion",
+      "checkpoint": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\checkpoints\\cmhad_step7_bimodal_dropout_fixed",
+      "window_start": 655172.236248665,
+      "window_seconds": 2.0,
+      "recording_id": "live_20260819T181919Z",
+      "subject_id": "live_esp32",
+      "input": {
+        "imu_shape": [
+          100,
+          6
+        ],
+        "imu_units": [
+          "m/s^2",
+          "m/s^2",
+          "m/s^2",
+          "deg/s",
+          "deg/s",
+          "deg/s"
+        ],
+        "vision_shape": [
+          20,
+          99
+        ],
+        "radar_shape": [
+          40,
+          8
+        ],
+        "valid_modalities": {
+          "imu": true,
+          "radar": false,
+          "camera_pose": true
+        },
+        "health": {
+          "imu": 1.0,
+          "radar": 0.0,
+          "camera": 0.4466
+        },
+        "normalization": "training-subject per-channel mean/std"
+      },
+      "fall_threshold": 0.6,
+      "fusion_policy": "require_valid_imu_and_camera_pose",
+      "status": "monitoring",
+      "alert": false,
+      "predicted_label": "stand_to_lie",
+      "predicted_class_id": 5,
+      "confidence": 0.943648,
+      "fall_probability": 0.001435,
+      "class_probabilities": {
+        "stand_to_sit": 0.000965,
+        "sit_to_stand": 0.003151,
+        "sit_to_lie": 0.011217,
+        "lie_to_sit": 0.01124,
+        "lie_to_stand": 0.028344,
+        "stand_to_lie": 0.943648,
+        "stand_to_fall": 0.001435
+      },
+      "sensor_trust": {
+        "imu": 0.824981,
+        "radar": 0.0,
+        "camera": 0.175019
+      },
+      "inference_ms": 14.83,
+      "event_id": "live-000016",
+      "sequence": 16,
+      "source_mode": "live_esp32",
+      "ground_truth": null,
+      "event_timestamp_utc": "2026-08-19T18:19:49.490109+00:00",
+      "window_diagnostics": {
+        "window_start_monotonic_ns": 655172236248665,
+        "window_end_monotonic_ns": 655174236248665,
+        "imu": {
+          "valid": true,
+          "coverage": 1.0,
+          "health": 1.0,
+          "clipping_ratio": 0.0,
+          "max_sampling_skew_ms": 3.805,
+          "source_samples": 100,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 0,
+          "unit_validation": {
+            "valid": true,
+            "samples": 100,
+            "acceleration_norm_median_mps2": 9.78263,
+            "acceleration_norm_p95_mps2": 11.96341,
+            "finite": true,
+            "canonical_units": [
+              "m/s^2",
+              "m/s^2",
+              "m/s^2",
+              "deg/s",
+              "deg/s",
+              "deg/s"
+            ]
+          }
+        },
+        "camera": {
+          "valid": true,
+          "sampling_coverage": 1.0,
+          "pose_valid_ratio": 0.5,
+          "health": 0.4466,
+          "max_sampling_skew_ms": 32.675,
+          "source_frames": 20,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 1
+        }
+      },
+      "alert_state": "MONITORING"
+    },
+    {
+      "model": "FusionSense corrected masked IMU + camera fusion",
+      "checkpoint": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\checkpoints\\cmhad_step7_bimodal_dropout_fixed",
+      "window_start": 655173.244750665,
+      "window_seconds": 2.0,
+      "recording_id": "live_20260819T181919Z",
+      "subject_id": "live_esp32",
+      "input": {
+        "imu_shape": [
+          100,
+          6
+        ],
+        "imu_units": [
+          "m/s^2",
+          "m/s^2",
+          "m/s^2",
+          "deg/s",
+          "deg/s",
+          "deg/s"
+        ],
+        "vision_shape": [
+          20,
+          99
+        ],
+        "radar_shape": [
+          40,
+          8
+        ],
+        "valid_modalities": {
+          "imu": true,
+          "radar": false,
+          "camera_pose": false
+        },
+        "health": {
+          "imu": 1.0,
+          "radar": 0.0,
+          "camera": 0.4888
+        },
+        "normalization": "training-subject per-channel mean/std"
+      },
+      "fall_threshold": 0.6,
+      "fusion_policy": "require_valid_imu_and_camera_pose",
+      "status": "degraded",
+      "alert": false,
+      "reason": "Bimodal inference requires valid IMU and camera pose, with radar disabled",
+      "predicted_label": null,
+      "confidence": 0.0,
+      "fall_probability": 0.0,
+      "class_probabilities": {},
+      "sensor_trust": {
+        "imu": 0.0,
+        "radar": 0.0,
+        "camera": 0.0
+      },
+      "event_id": "live-000017",
+      "sequence": 17,
+      "source_mode": "live_esp32",
+      "ground_truth": null,
+      "event_timestamp_utc": "2026-08-19T18:19:50.498611+00:00",
+      "window_diagnostics": {
+        "window_start_monotonic_ns": 655173244750665,
+        "window_end_monotonic_ns": 655175244750665,
+        "imu": {
+          "valid": true,
+          "coverage": 1.0,
+          "health": 1.0,
+          "clipping_ratio": 0.0,
+          "max_sampling_skew_ms": 4.7,
+          "source_samples": 100,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 0,
+          "unit_validation": {
+            "valid": true,
+            "samples": 100,
+            "acceleration_norm_median_mps2": 9.72189,
+            "acceleration_norm_p95_mps2": 9.97031,
+            "finite": true,
+            "canonical_units": [
+              "m/s^2",
+              "m/s^2",
+              "m/s^2",
+              "deg/s",
+              "deg/s",
+              "deg/s"
+            ]
+          }
+        },
+        "camera": {
+          "valid": false,
+          "sampling_coverage": 1.0,
+          "pose_valid_ratio": 0.0,
+          "health": 0.4888,
+          "max_sampling_skew_ms": 28.875,
+          "source_frames": 20,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 1
+        }
+      },
+      "alert_state": "DEGRADED"
+    },
+    {
+      "model": "FusionSense corrected masked IMU + camera fusion",
+      "checkpoint": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\checkpoints\\cmhad_step7_bimodal_dropout_fixed",
+      "window_start": 655174.325286665,
+      "window_seconds": 2.0,
+      "recording_id": "live_20260819T181919Z",
+      "subject_id": "live_esp32",
+      "input": {
+        "imu_shape": [
+          100,
+          6
+        ],
+        "imu_units": [
+          "m/s^2",
+          "m/s^2",
+          "m/s^2",
+          "deg/s",
+          "deg/s",
+          "deg/s"
+        ],
+        "vision_shape": [
+          20,
+          99
+        ],
+        "radar_shape": [
+          40,
+          8
+        ],
+        "valid_modalities": {
+          "imu": true,
+          "radar": false,
+          "camera_pose": false
+        },
+        "health": {
+          "imu": 1.0,
+          "radar": 0.0,
+          "camera": 0.4841
+        },
+        "normalization": "training-subject per-channel mean/std"
+      },
+      "fall_threshold": 0.6,
+      "fusion_policy": "require_valid_imu_and_camera_pose",
+      "status": "degraded",
+      "alert": false,
+      "reason": "Bimodal inference requires valid IMU and camera pose, with radar disabled",
+      "predicted_label": null,
+      "confidence": 0.0,
+      "fall_probability": 0.0,
+      "class_probabilities": {},
+      "sensor_trust": {
+        "imu": 0.0,
+        "radar": 0.0,
+        "camera": 0.0
+      },
+      "event_id": "live-000018",
+      "sequence": 18,
+      "source_mode": "live_esp32",
+      "ground_truth": null,
+      "event_timestamp_utc": "2026-08-19T18:19:51.579147+00:00",
+      "window_diagnostics": {
+        "window_start_monotonic_ns": 655174325286665,
+        "window_end_monotonic_ns": 655176325286665,
+        "imu": {
+          "valid": true,
+          "coverage": 1.0,
+          "health": 1.0,
+          "clipping_ratio": 0.0,
+          "max_sampling_skew_ms": 5.236,
+          "source_samples": 100,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 0,
+          "unit_validation": {
+            "valid": true,
+            "samples": 100,
+            "acceleration_norm_median_mps2": 9.70582,
+            "acceleration_norm_p95_mps2": 9.8839,
+            "finite": true,
+            "canonical_units": [
+              "m/s^2",
+              "m/s^2",
+              "m/s^2",
+              "deg/s",
+              "deg/s",
+              "deg/s"
+            ]
+          }
+        },
+        "camera": {
+          "valid": false,
+          "sampling_coverage": 1.0,
+          "pose_valid_ratio": 0.0,
+          "health": 0.4841,
+          "max_sampling_skew_ms": 23.701,
+          "source_frames": 20,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 1
+        }
+      },
+      "alert_state": "DEGRADED"
+    },
+    {
+      "model": "FusionSense corrected masked IMU + camera fusion",
+      "checkpoint": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\checkpoints\\cmhad_step7_bimodal_dropout_fixed",
+      "window_start": 655175.333768665,
+      "window_seconds": 2.0,
+      "recording_id": "live_20260819T181919Z",
+      "subject_id": "live_esp32",
+      "input": {
+        "imu_shape": [
+          100,
+          6
+        ],
+        "imu_units": [
+          "m/s^2",
+          "m/s^2",
+          "m/s^2",
+          "deg/s",
+          "deg/s",
+          "deg/s"
+        ],
+        "vision_shape": [
+          20,
+          99
+        ],
+        "radar_shape": [
+          40,
+          8
+        ],
+        "valid_modalities": {
+          "imu": true,
+          "radar": false,
+          "camera_pose": false
+        },
+        "health": {
+          "imu": 1.0,
+          "radar": 0.0,
+          "camera": 0.4383
+        },
+        "normalization": "training-subject per-channel mean/std"
+      },
+      "fall_threshold": 0.6,
+      "fusion_policy": "require_valid_imu_and_camera_pose",
+      "status": "degraded",
+      "alert": false,
+      "reason": "Bimodal inference requires valid IMU and camera pose, with radar disabled",
+      "predicted_label": null,
+      "confidence": 0.0,
+      "fall_probability": 0.0,
+      "class_probabilities": {},
+      "sensor_trust": {
+        "imu": 0.0,
+        "radar": 0.0,
+        "camera": 0.0
+      },
+      "event_id": "live-000019",
+      "sequence": 19,
+      "source_mode": "live_esp32",
+      "ground_truth": null,
+      "event_timestamp_utc": "2026-08-19T18:19:52.587629+00:00",
+      "window_diagnostics": {
+        "window_start_monotonic_ns": 655175333768665,
+        "window_end_monotonic_ns": 655177333768665,
+        "imu": {
+          "valid": true,
+          "coverage": 1.0,
+          "health": 1.0,
+          "clipping_ratio": 0.0,
+          "max_sampling_skew_ms": 6.285,
+          "source_samples": 100,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 0,
+          "unit_validation": {
+            "valid": true,
+            "samples": 100,
+            "acceleration_norm_median_mps2": 9.66194,
+            "acceleration_norm_p95_mps2": 10.28228,
+            "finite": true,
+            "canonical_units": [
+              "m/s^2",
+              "m/s^2",
+              "m/s^2",
+              "deg/s",
+              "deg/s",
+              "deg/s"
+            ]
+          }
+        },
+        "camera": {
+          "valid": false,
+          "sampling_coverage": 1.0,
+          "pose_valid_ratio": 0.3,
+          "health": 0.4383,
+          "max_sampling_skew_ms": 24.156,
+          "source_frames": 20,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 1
+        }
+      },
+      "alert_state": "DEGRADED"
+    },
+    {
+      "model": "FusionSense corrected masked IMU + camera fusion",
+      "checkpoint": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\checkpoints\\cmhad_step7_bimodal_dropout_fixed",
+      "window_start": 655176.342350665,
+      "window_seconds": 2.0,
+      "recording_id": "live_20260819T181919Z",
+      "subject_id": "live_esp32",
+      "input": {
+        "imu_shape": [
+          100,
+          6
+        ],
+        "imu_units": [
+          "m/s^2",
+          "m/s^2",
+          "m/s^2",
+          "deg/s",
+          "deg/s",
+          "deg/s"
+        ],
+        "vision_shape": [
+          20,
+          99
+        ],
+        "radar_shape": [
+          40,
+          8
+        ],
+        "valid_modalities": {
+          "imu": true,
+          "radar": false,
+          "camera_pose": true
+        },
+        "health": {
+          "imu": 1.0,
+          "radar": 0.0,
+          "camera": 0.4427
+        },
+        "normalization": "training-subject per-channel mean/std"
+      },
+      "fall_threshold": 0.6,
+      "fusion_policy": "require_valid_imu_and_camera_pose",
+      "status": "monitoring",
+      "alert": false,
+      "predicted_label": "lie_to_stand",
+      "predicted_class_id": 4,
+      "confidence": 0.654101,
+      "fall_probability": 0.000663,
+      "class_probabilities": {
+        "stand_to_sit": 0.003583,
+        "sit_to_stand": 0.291426,
+        "sit_to_lie": 0.003983,
+        "lie_to_sit": 0.023475,
+        "lie_to_stand": 0.654101,
+        "stand_to_lie": 0.022767,
+        "stand_to_fall": 0.000663
+      },
+      "sensor_trust": {
+        "imu": 0.68072,
+        "radar": 0.0,
+        "camera": 0.31928
+      },
+      "inference_ms": 38.667,
+      "event_id": "live-000020",
+      "sequence": 20,
+      "source_mode": "live_esp32",
+      "ground_truth": null,
+      "event_timestamp_utc": "2026-08-19T18:19:53.596211+00:00",
+      "window_diagnostics": {
+        "window_start_monotonic_ns": 655176342350665,
+        "window_end_monotonic_ns": 655178342350665,
+        "imu": {
+          "valid": true,
+          "coverage": 1.0,
+          "health": 1.0,
+          "clipping_ratio": 0.0,
+          "max_sampling_skew_ms": 2.3,
+          "source_samples": 100,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 0,
+          "unit_validation": {
+            "valid": true,
+            "samples": 100,
+            "acceleration_norm_median_mps2": 9.74689,
+            "acceleration_norm_p95_mps2": 10.94086,
+            "finite": true,
+            "canonical_units": [
+              "m/s^2",
+              "m/s^2",
+              "m/s^2",
+              "deg/s",
+              "deg/s",
+              "deg/s"
+            ]
+          }
+        },
+        "camera": {
+          "valid": true,
+          "sampling_coverage": 1.0,
+          "pose_valid_ratio": 0.8,
+          "health": 0.4427,
+          "max_sampling_skew_ms": 32.738,
+          "source_frames": 20,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 1
+        }
+      },
+      "alert_state": "MONITORING"
+    },
+    {
+      "model": "FusionSense corrected masked IMU + camera fusion",
+      "checkpoint": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\checkpoints\\cmhad_step7_bimodal_dropout_fixed",
+      "window_start": 655177.422820665,
+      "window_seconds": 2.0,
+      "recording_id": "live_20260819T181919Z",
+      "subject_id": "live_esp32",
+      "input": {
+        "imu_shape": [
+          100,
+          6
+        ],
+        "imu_units": [
+          "m/s^2",
+          "m/s^2",
+          "m/s^2",
+          "deg/s",
+          "deg/s",
+          "deg/s"
+        ],
+        "vision_shape": [
+          20,
+          99
+        ],
+        "radar_shape": [
+          40,
+          8
+        ],
+        "valid_modalities": {
+          "imu": true,
+          "radar": false,
+          "camera_pose": true
+        },
+        "health": {
+          "imu": 1.0,
+          "radar": 0.0,
+          "camera": 0.4512
+        },
+        "normalization": "training-subject per-channel mean/std"
+      },
+      "fall_threshold": 0.6,
+      "fusion_policy": "require_valid_imu_and_camera_pose",
+      "status": "monitoring",
+      "alert": false,
+      "predicted_label": "lie_to_stand",
+      "predicted_class_id": 4,
+      "confidence": 0.743361,
+      "fall_probability": 0.000549,
+      "class_probabilities": {
+        "stand_to_sit": 0.003437,
+        "sit_to_stand": 0.21478,
+        "sit_to_lie": 0.003445,
+        "lie_to_sit": 0.019668,
+        "lie_to_stand": 0.743361,
+        "stand_to_lie": 0.014759,
+        "stand_to_fall": 0.000549
+      },
+      "sensor_trust": {
+        "imu": 0.680335,
+        "radar": 0.0,
+        "camera": 0.319665
+      },
+      "inference_ms": 15.248,
+      "event_id": "live-000021",
+      "sequence": 21,
+      "source_mode": "live_esp32",
+      "ground_truth": null,
+      "event_timestamp_utc": "2026-08-19T18:19:54.676681+00:00",
+      "window_diagnostics": {
+        "window_start_monotonic_ns": 655177422820665,
+        "window_end_monotonic_ns": 655179422820665,
+        "imu": {
+          "valid": true,
+          "coverage": 1.0,
+          "health": 1.0,
+          "clipping_ratio": 0.0,
+          "max_sampling_skew_ms": 2.77,
+          "source_samples": 100,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 0,
+          "unit_validation": {
+            "valid": true,
+            "samples": 100,
+            "acceleration_norm_median_mps2": 9.77348,
+            "acceleration_norm_p95_mps2": 10.77175,
+            "finite": true,
+            "canonical_units": [
+              "m/s^2",
+              "m/s^2",
+              "m/s^2",
+              "deg/s",
+              "deg/s",
+              "deg/s"
+            ]
+          }
+        },
+        "camera": {
+          "valid": true,
+          "sampling_coverage": 1.0,
+          "pose_valid_ratio": 1.0,
+          "health": 0.4512,
+          "max_sampling_skew_ms": 23.328,
+          "source_frames": 20,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 1
+        }
+      },
+      "alert_state": "MONITORING"
+    },
+    {
+      "model": "FusionSense corrected masked IMU + camera fusion",
+      "checkpoint": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\checkpoints\\cmhad_step7_bimodal_dropout_fixed",
+      "window_start": 655178.431408665,
+      "window_seconds": 2.0,
+      "recording_id": "live_20260819T181919Z",
+      "subject_id": "live_esp32",
+      "input": {
+        "imu_shape": [
+          100,
+          6
+        ],
+        "imu_units": [
+          "m/s^2",
+          "m/s^2",
+          "m/s^2",
+          "deg/s",
+          "deg/s",
+          "deg/s"
+        ],
+        "vision_shape": [
+          20,
+          99
+        ],
+        "radar_shape": [
+          40,
+          8
+        ],
+        "valid_modalities": {
+          "imu": true,
+          "radar": false,
+          "camera_pose": true
+        },
+        "health": {
+          "imu": 1.0,
+          "radar": 0.0,
+          "camera": 0.4315
+        },
+        "normalization": "training-subject per-channel mean/std"
+      },
+      "fall_threshold": 0.6,
+      "fusion_policy": "require_valid_imu_and_camera_pose",
+      "status": "monitoring",
+      "alert": false,
+      "predicted_label": "lie_to_stand",
+      "predicted_class_id": 4,
+      "confidence": 0.634159,
+      "fall_probability": 0.00064,
+      "class_probabilities": {
+        "stand_to_sit": 0.003443,
+        "sit_to_stand": 0.315626,
+        "sit_to_lie": 0.00445,
+        "lie_to_sit": 0.022309,
+        "lie_to_stand": 0.634159,
+        "stand_to_lie": 0.019373,
+        "stand_to_fall": 0.00064
+      },
+      "sensor_trust": {
+        "imu": 0.654491,
+        "radar": 0.0,
+        "camera": 0.345509
+      },
+      "inference_ms": 13.828,
+      "event_id": "live-000022",
+      "sequence": 22,
+      "source_mode": "live_esp32",
+      "ground_truth": null,
+      "event_timestamp_utc": "2026-08-19T18:19:55.685269+00:00",
+      "window_diagnostics": {
+        "window_start_monotonic_ns": 655178431408665,
+        "window_end_monotonic_ns": 655180431408665,
+        "imu": {
+          "valid": true,
+          "coverage": 1.0,
+          "health": 1.0,
+          "clipping_ratio": 0.0,
+          "max_sampling_skew_ms": 8.645,
+          "source_samples": 100,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 0,
+          "unit_validation": {
+            "valid": true,
+            "samples": 100,
+            "acceleration_norm_median_mps2": 9.74414,
+            "acceleration_norm_p95_mps2": 10.08161,
+            "finite": true,
+            "canonical_units": [
+              "m/s^2",
+              "m/s^2",
+              "m/s^2",
+              "deg/s",
+              "deg/s",
+              "deg/s"
+            ]
+          }
+        },
+        "camera": {
+          "valid": true,
+          "sampling_coverage": 1.0,
+          "pose_valid_ratio": 1.0,
+          "health": 0.4315,
+          "max_sampling_skew_ms": 24.692,
+          "source_frames": 20,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 1
+        }
+      },
+      "alert_state": "MONITORING"
+    },
+    {
+      "model": "FusionSense corrected masked IMU + camera fusion",
+      "checkpoint": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\checkpoints\\cmhad_step7_bimodal_dropout_fixed",
+      "window_start": 655179.439831665,
+      "window_seconds": 2.0,
+      "recording_id": "live_20260819T181919Z",
+      "subject_id": "live_esp32",
+      "input": {
+        "imu_shape": [
+          100,
+          6
+        ],
+        "imu_units": [
+          "m/s^2",
+          "m/s^2",
+          "m/s^2",
+          "deg/s",
+          "deg/s",
+          "deg/s"
+        ],
+        "vision_shape": [
+          20,
+          99
+        ],
+        "radar_shape": [
+          40,
+          8
+        ],
+        "valid_modalities": {
+          "imu": true,
+          "radar": false,
+          "camera_pose": true
+        },
+        "health": {
+          "imu": 1.0,
+          "radar": 0.0,
+          "camera": 0.4883
+        },
+        "normalization": "training-subject per-channel mean/std"
+      },
+      "fall_threshold": 0.6,
+      "fusion_policy": "require_valid_imu_and_camera_pose",
+      "status": "monitoring",
+      "alert": false,
+      "predicted_label": "lie_to_stand",
+      "predicted_class_id": 4,
+      "confidence": 0.797903,
+      "fall_probability": 0.000381,
+      "class_probabilities": {
+        "stand_to_sit": 0.00278,
+        "sit_to_stand": 0.16521,
+        "sit_to_lie": 0.002907,
+        "lie_to_sit": 0.021626,
+        "lie_to_stand": 0.797903,
+        "stand_to_lie": 0.009193,
+        "stand_to_fall": 0.000381
+      },
+      "sensor_trust": {
+        "imu": 0.666606,
+        "radar": 0.0,
+        "camera": 0.333394
+      },
+      "inference_ms": 28.942,
+      "event_id": "live-000023",
+      "sequence": 23,
+      "source_mode": "live_esp32",
+      "ground_truth": null,
+      "event_timestamp_utc": "2026-08-19T18:19:56.693692+00:00",
+      "window_diagnostics": {
+        "window_start_monotonic_ns": 655179439831665,
+        "window_end_monotonic_ns": 655181439831665,
+        "imu": {
+          "valid": true,
+          "coverage": 1.0,
+          "health": 1.0,
+          "clipping_ratio": 0.0,
+          "max_sampling_skew_ms": 0.222,
+          "source_samples": 100,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 0,
+          "unit_validation": {
+            "valid": true,
+            "samples": 100,
+            "acceleration_norm_median_mps2": 9.75759,
+            "acceleration_norm_p95_mps2": 10.48242,
+            "finite": true,
+            "canonical_units": [
+              "m/s^2",
+              "m/s^2",
+              "m/s^2",
+              "deg/s",
+              "deg/s",
+              "deg/s"
+            ]
+          }
+        },
+        "camera": {
+          "valid": true,
+          "sampling_coverage": 1.0,
+          "pose_valid_ratio": 1.0,
+          "health": 0.4883,
+          "max_sampling_skew_ms": 28.873,
+          "source_frames": 20,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 1
+        }
+      },
+      "alert_state": "MONITORING"
+    },
+    {
+      "model": "FusionSense corrected masked IMU + camera fusion",
+      "checkpoint": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\checkpoints\\cmhad_step7_bimodal_dropout_fixed",
+      "window_start": 655180.448403665,
+      "window_seconds": 2.0,
+      "recording_id": "live_20260819T181919Z",
+      "subject_id": "live_esp32",
+      "input": {
+        "imu_shape": [
+          100,
+          6
+        ],
+        "imu_units": [
+          "m/s^2",
+          "m/s^2",
+          "m/s^2",
+          "deg/s",
+          "deg/s",
+          "deg/s"
+        ],
+        "vision_shape": [
+          20,
+          99
+        ],
+        "radar_shape": [
+          40,
+          8
+        ],
+        "valid_modalities": {
+          "imu": true,
+          "radar": false,
+          "camera_pose": true
+        },
+        "health": {
+          "imu": 1.0,
+          "radar": 0.0,
+          "camera": 0.5696
+        },
+        "normalization": "training-subject per-channel mean/std"
+      },
+      "fall_threshold": 0.6,
+      "fusion_policy": "require_valid_imu_and_camera_pose",
+      "status": "monitoring",
+      "alert": false,
+      "predicted_label": "sit_to_stand",
+      "predicted_class_id": 1,
+      "confidence": 0.55513,
+      "fall_probability": 0.000416,
+      "class_probabilities": {
+        "stand_to_sit": 0.004389,
+        "sit_to_stand": 0.55513,
+        "sit_to_lie": 0.003771,
+        "lie_to_sit": 0.01592,
+        "lie_to_stand": 0.409609,
+        "stand_to_lie": 0.010765,
+        "stand_to_fall": 0.000416
+      },
+      "sensor_trust": {
+        "imu": 0.559061,
+        "radar": 0.0,
+        "camera": 0.440939
+      },
+      "inference_ms": 21.874,
+      "event_id": "live-000024",
+      "sequence": 24,
+      "source_mode": "live_esp32",
+      "ground_truth": null,
+      "event_timestamp_utc": "2026-08-19T18:19:57.702264+00:00",
+      "window_diagnostics": {
+        "window_start_monotonic_ns": 655180448403665,
+        "window_end_monotonic_ns": 655182448403665,
+        "imu": {
+          "valid": true,
+          "coverage": 1.0,
+          "health": 1.0,
+          "clipping_ratio": 0.0,
+          "max_sampling_skew_ms": 8.353,
+          "source_samples": 100,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 0,
+          "unit_validation": {
+            "valid": true,
+            "samples": 100,
+            "acceleration_norm_median_mps2": 9.88268,
+            "acceleration_norm_p95_mps2": 10.97619,
+            "finite": true,
+            "canonical_units": [
+              "m/s^2",
+              "m/s^2",
+              "m/s^2",
+              "deg/s",
+              "deg/s",
+              "deg/s"
+            ]
+          }
+        },
+        "camera": {
+          "valid": true,
+          "sampling_coverage": 1.0,
+          "pose_valid_ratio": 1.0,
+          "health": 0.5696,
+          "max_sampling_skew_ms": 36.91,
+          "source_frames": 20,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 1
+        }
+      },
+      "alert_state": "MONITORING"
+    },
+    {
+      "model": "FusionSense corrected masked IMU + camera fusion",
+      "checkpoint": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\checkpoints\\cmhad_step7_bimodal_dropout_fixed",
+      "window_start": 655181.528886665,
+      "window_seconds": 2.0,
+      "recording_id": "live_20260819T181919Z",
+      "subject_id": "live_esp32",
+      "input": {
+        "imu_shape": [
+          100,
+          6
+        ],
+        "imu_units": [
+          "m/s^2",
+          "m/s^2",
+          "m/s^2",
+          "deg/s",
+          "deg/s",
+          "deg/s"
+        ],
+        "vision_shape": [
+          20,
+          99
+        ],
+        "radar_shape": [
+          40,
+          8
+        ],
+        "valid_modalities": {
+          "imu": true,
+          "radar": false,
+          "camera_pose": true
+        },
+        "health": {
+          "imu": 1.0,
+          "radar": 0.0,
+          "camera": 0.5828
+        },
+        "normalization": "training-subject per-channel mean/std"
+      },
+      "fall_threshold": 0.6,
+      "fusion_policy": "require_valid_imu_and_camera_pose",
+      "status": "monitoring",
+      "alert": false,
+      "predicted_label": "lie_to_stand",
+      "predicted_class_id": 4,
+      "confidence": 0.535986,
+      "fall_probability": 0.000975,
+      "class_probabilities": {
+        "stand_to_sit": 0.002136,
+        "sit_to_stand": 0.028168,
+        "sit_to_lie": 0.011532,
+        "lie_to_sit": 0.031431,
+        "lie_to_stand": 0.535986,
+        "stand_to_lie": 0.389772,
+        "stand_to_fall": 0.000975
+      },
+      "sensor_trust": {
+        "imu": 0.770892,
+        "radar": 0.0,
+        "camera": 0.229108
+      },
+      "inference_ms": 28.865,
+      "event_id": "live-000025",
+      "sequence": 25,
+      "source_mode": "live_esp32",
+      "ground_truth": null,
+      "event_timestamp_utc": "2026-08-19T18:19:58.782747+00:00",
+      "window_diagnostics": {
+        "window_start_monotonic_ns": 655181528886665,
+        "window_end_monotonic_ns": 655183528886665,
+        "imu": {
+          "valid": true,
+          "coverage": 1.0,
+          "health": 1.0,
+          "clipping_ratio": 0.0,
+          "max_sampling_skew_ms": 8.836,
+          "source_samples": 100,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 0,
+          "unit_validation": {
+            "valid": true,
+            "samples": 100,
+            "acceleration_norm_median_mps2": 9.75894,
+            "acceleration_norm_p95_mps2": 11.3589,
+            "finite": true,
+            "canonical_units": [
+              "m/s^2",
+              "m/s^2",
+              "m/s^2",
+              "deg/s",
+              "deg/s",
+              "deg/s"
+            ]
+          }
+        },
+        "camera": {
+          "valid": true,
+          "sampling_coverage": 1.0,
+          "pose_valid_ratio": 0.95,
+          "health": 0.5828,
+          "max_sampling_skew_ms": 27.483,
+          "source_frames": 20,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 1
+        }
+      },
+      "alert_state": "MONITORING"
+    },
+    {
+      "model": "FusionSense corrected masked IMU + camera fusion",
+      "checkpoint": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\checkpoints\\cmhad_step7_bimodal_dropout_fixed",
+      "window_start": 655182.537392665,
+      "window_seconds": 2.0,
+      "recording_id": "live_20260819T181919Z",
+      "subject_id": "live_esp32",
+      "input": {
+        "imu_shape": [
+          100,
+          6
+        ],
+        "imu_units": [
+          "m/s^2",
+          "m/s^2",
+          "m/s^2",
+          "deg/s",
+          "deg/s",
+          "deg/s"
+        ],
+        "vision_shape": [
+          20,
+          99
+        ],
+        "radar_shape": [
+          40,
+          8
+        ],
+        "valid_modalities": {
+          "imu": true,
+          "radar": false,
+          "camera_pose": true
+        },
+        "health": {
+          "imu": 1.0,
+          "radar": 0.0,
+          "camera": 0.5357
+        },
+        "normalization": "training-subject per-channel mean/std"
+      },
+      "fall_threshold": 0.6,
+      "fusion_policy": "require_valid_imu_and_camera_pose",
+      "status": "monitoring",
+      "alert": false,
+      "predicted_label": "lie_to_stand",
+      "predicted_class_id": 4,
+      "confidence": 0.931676,
+      "fall_probability": 0.000499,
+      "class_probabilities": {
+        "stand_to_sit": 0.0007,
+        "sit_to_stand": 0.011053,
+        "sit_to_lie": 0.004228,
+        "lie_to_sit": 0.031985,
+        "lie_to_stand": 0.931676,
+        "stand_to_lie": 0.01986,
+        "stand_to_fall": 0.000499
+      },
+      "sensor_trust": {
+        "imu": 0.782098,
+        "radar": 0.0,
+        "camera": 0.217902
+      },
+      "inference_ms": 24.755,
+      "event_id": "live-000026",
+      "sequence": 26,
+      "source_mode": "live_esp32",
+      "ground_truth": null,
+      "event_timestamp_utc": "2026-08-19T18:19:59.791253+00:00",
+      "window_diagnostics": {
+        "window_start_monotonic_ns": 655182537392665,
+        "window_end_monotonic_ns": 655184537392665,
+        "imu": {
+          "valid": true,
+          "coverage": 1.0,
+          "health": 1.0,
+          "clipping_ratio": 0.0,
+          "max_sampling_skew_ms": 2.661,
+          "source_samples": 100,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 0,
+          "unit_validation": {
+            "valid": true,
+            "samples": 100,
+            "acceleration_norm_median_mps2": 9.42373,
+            "acceleration_norm_p95_mps2": 11.56772,
+            "finite": true,
+            "canonical_units": [
+              "m/s^2",
+              "m/s^2",
+              "m/s^2",
+              "deg/s",
+              "deg/s",
+              "deg/s"
+            ]
+          }
+        },
+        "camera": {
+          "valid": true,
+          "sampling_coverage": 1.0,
+          "pose_valid_ratio": 0.95,
+          "health": 0.5357,
+          "max_sampling_skew_ms": 20.836,
+          "source_frames": 20,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 1
+        }
+      },
+      "alert_state": "MONITORING"
+    },
+    {
+      "model": "FusionSense corrected masked IMU + camera fusion",
+      "checkpoint": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\checkpoints\\cmhad_step7_bimodal_dropout_fixed",
+      "window_start": 655183.545879665,
+      "window_seconds": 2.0,
+      "recording_id": "live_20260819T181919Z",
+      "subject_id": "live_esp32",
+      "input": {
+        "imu_shape": [
+          100,
+          6
+        ],
+        "imu_units": [
+          "m/s^2",
+          "m/s^2",
+          "m/s^2",
+          "deg/s",
+          "deg/s",
+          "deg/s"
+        ],
+        "vision_shape": [
+          20,
+          99
+        ],
+        "radar_shape": [
+          40,
+          8
+        ],
+        "valid_modalities": {
+          "imu": true,
+          "radar": false,
+          "camera_pose": true
+        },
+        "health": {
+          "imu": 1.0,
+          "radar": 0.0,
+          "camera": 0.5115
+        },
+        "normalization": "training-subject per-channel mean/std"
+      },
+      "fall_threshold": 0.6,
+      "fusion_policy": "require_valid_imu_and_camera_pose",
+      "status": "monitoring",
+      "alert": false,
+      "predicted_label": "lie_to_stand",
+      "predicted_class_id": 4,
+      "confidence": 0.740442,
+      "fall_probability": 0.00096,
+      "class_probabilities": {
+        "stand_to_sit": 0.001448,
+        "sit_to_stand": 0.015369,
+        "sit_to_lie": 0.009575,
+        "lie_to_sit": 0.043022,
+        "lie_to_stand": 0.740442,
+        "stand_to_lie": 0.189184,
+        "stand_to_fall": 0.00096
+      },
+      "sensor_trust": {
+        "imu": 0.808138,
+        "radar": 0.0,
+        "camera": 0.191862
+      },
+      "inference_ms": 9.602,
+      "event_id": "live-000027",
+      "sequence": 27,
+      "source_mode": "live_esp32",
+      "ground_truth": null,
+      "event_timestamp_utc": "2026-08-19T18:20:00.799740+00:00",
+      "window_diagnostics": {
+        "window_start_monotonic_ns": 655183545879665,
+        "window_end_monotonic_ns": 655185545879665,
+        "imu": {
+          "valid": true,
+          "coverage": 1.0,
+          "health": 1.0,
+          "clipping_ratio": 0.0,
+          "max_sampling_skew_ms": 5.829,
+          "source_samples": 100,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 0,
+          "unit_validation": {
+            "valid": true,
+            "samples": 100,
+            "acceleration_norm_median_mps2": 9.55828,
+            "acceleration_norm_p95_mps2": 11.28501,
+            "finite": true,
+            "canonical_units": [
+              "m/s^2",
+              "m/s^2",
+              "m/s^2",
+              "deg/s",
+              "deg/s",
+              "deg/s"
+            ]
+          }
+        },
+        "camera": {
+          "valid": true,
+          "sampling_coverage": 1.0,
+          "pose_valid_ratio": 1.0,
+          "health": 0.5115,
+          "max_sampling_skew_ms": 28.861,
+          "source_frames": 20,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 1
+        }
+      },
+      "alert_state": "MONITORING"
+    },
+    {
+      "model": "FusionSense corrected masked IMU + camera fusion",
+      "checkpoint": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\checkpoints\\cmhad_step7_bimodal_dropout_fixed",
+      "window_start": 655184.626418665,
+      "window_seconds": 2.0,
+      "recording_id": "live_20260819T181919Z",
+      "subject_id": "live_esp32",
+      "input": {
+        "imu_shape": [
+          100,
+          6
+        ],
+        "imu_units": [
+          "m/s^2",
+          "m/s^2",
+          "m/s^2",
+          "deg/s",
+          "deg/s",
+          "deg/s"
+        ],
+        "vision_shape": [
+          20,
+          99
+        ],
+        "radar_shape": [
+          40,
+          8
+        ],
+        "valid_modalities": {
+          "imu": true,
+          "radar": false,
+          "camera_pose": true
+        },
+        "health": {
+          "imu": 0.97,
+          "radar": 0.0,
+          "camera": 0.4838
+        },
+        "normalization": "training-subject per-channel mean/std"
+      },
+      "fall_threshold": 0.6,
+      "fusion_policy": "require_valid_imu_and_camera_pose",
+      "status": "monitoring",
+      "alert": false,
+      "predicted_label": "stand_to_lie",
+      "predicted_class_id": 5,
+      "confidence": 0.972992,
+      "fall_probability": 0.002095,
+      "class_probabilities": {
+        "stand_to_sit": 0.000652,
+        "sit_to_stand": 0.001231,
+        "sit_to_lie": 0.011864,
+        "lie_to_sit": 0.003334,
+        "lie_to_stand": 0.007831,
+        "stand_to_lie": 0.972992,
+        "stand_to_fall": 0.002095
+      },
+      "sensor_trust": {
+        "imu": 0.779362,
+        "radar": 0.0,
+        "camera": 0.220638
+      },
+      "inference_ms": 29.435,
+      "event_id": "live-000028",
+      "sequence": 28,
+      "source_mode": "live_esp32",
+      "ground_truth": null,
+      "event_timestamp_utc": "2026-08-19T18:20:01.880279+00:00",
+      "window_diagnostics": {
+        "window_start_monotonic_ns": 655184626418665,
+        "window_end_monotonic_ns": 655186626418665,
+        "imu": {
+          "valid": true,
+          "coverage": 1.0,
+          "health": 0.97,
+          "clipping_ratio": 0.03,
+          "max_sampling_skew_ms": 6.368,
+          "source_samples": 100,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 0,
+          "unit_validation": {
+            "valid": true,
+            "samples": 100,
+            "acceleration_norm_median_mps2": 9.67905,
+            "acceleration_norm_p95_mps2": 12.42585,
+            "finite": true,
+            "canonical_units": [
+              "m/s^2",
+              "m/s^2",
+              "m/s^2",
+              "deg/s",
+              "deg/s",
+              "deg/s"
+            ]
+          }
+        },
+        "camera": {
+          "valid": true,
+          "sampling_coverage": 1.0,
+          "pose_valid_ratio": 1.0,
+          "health": 0.4838,
+          "max_sampling_skew_ms": 23.256,
+          "source_frames": 20,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 0
+        }
+      },
+      "alert_state": "MONITORING"
+    },
+    {
+      "model": "FusionSense corrected masked IMU + camera fusion",
+      "checkpoint": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\checkpoints\\cmhad_step7_bimodal_dropout_fixed",
+      "window_start": 655185.634930665,
+      "window_seconds": 2.0,
+      "recording_id": "live_20260819T181919Z",
+      "subject_id": "live_esp32",
+      "input": {
+        "imu_shape": [
+          100,
+          6
+        ],
+        "imu_units": [
+          "m/s^2",
+          "m/s^2",
+          "m/s^2",
+          "deg/s",
+          "deg/s",
+          "deg/s"
+        ],
+        "vision_shape": [
+          20,
+          99
+        ],
+        "radar_shape": [
+          40,
+          8
+        ],
+        "valid_modalities": {
+          "imu": true,
+          "radar": false,
+          "camera_pose": true
+        },
+        "health": {
+          "imu": 0.85,
+          "radar": 0.0,
+          "camera": 0.5187
+        },
+        "normalization": "training-subject per-channel mean/std"
+      },
+      "fall_threshold": 0.6,
+      "fusion_policy": "require_valid_imu_and_camera_pose",
+      "status": "monitoring",
+      "alert": false,
+      "predicted_label": "lie_to_stand",
+      "predicted_class_id": 4,
+      "confidence": 0.655393,
+      "fall_probability": 0.000656,
+      "class_probabilities": {
+        "stand_to_sit": 0.002217,
+        "sit_to_stand": 0.024675,
+        "sit_to_lie": 0.014921,
+        "lie_to_sit": 0.034351,
+        "lie_to_stand": 0.655393,
+        "stand_to_lie": 0.267788,
+        "stand_to_fall": 0.000656
+      },
+      "sensor_trust": {
+        "imu": 0.808551,
+        "radar": 0.0,
+        "camera": 0.191449
+      },
+      "inference_ms": 12.979,
+      "event_id": "live-000029",
+      "sequence": 29,
+      "source_mode": "live_esp32",
+      "ground_truth": null,
+      "event_timestamp_utc": "2026-08-19T18:20:02.888791+00:00",
+      "window_diagnostics": {
+        "window_start_monotonic_ns": 655185634930665,
+        "window_end_monotonic_ns": 655187634930665,
+        "imu": {
+          "valid": true,
+          "coverage": 1.0,
+          "health": 0.85,
+          "clipping_ratio": 0.15,
+          "max_sampling_skew_ms": 5.123,
+          "source_samples": 100,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 0,
+          "unit_validation": {
+            "valid": true,
+            "samples": 100,
+            "acceleration_norm_median_mps2": 9.75156,
+            "acceleration_norm_p95_mps2": 13.09193,
+            "finite": true,
+            "canonical_units": [
+              "m/s^2",
+              "m/s^2",
+              "m/s^2",
+              "deg/s",
+              "deg/s",
+              "deg/s"
+            ]
+          }
+        },
+        "camera": {
+          "valid": true,
+          "sampling_coverage": 1.0,
+          "pose_valid_ratio": 1.0,
+          "health": 0.5187,
+          "max_sampling_skew_ms": 20.826,
+          "source_frames": 20,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 0
+        }
+      },
+      "alert_state": "MONITORING"
+    },
+    {
+      "model": "FusionSense corrected masked IMU + camera fusion",
+      "checkpoint": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\checkpoints\\cmhad_step7_bimodal_dropout_fixed",
+      "window_start": 655186.643432665,
+      "window_seconds": 2.0,
+      "recording_id": "live_20260819T181919Z",
+      "subject_id": "live_esp32",
+      "input": {
+        "imu_shape": [
+          100,
+          6
+        ],
+        "imu_units": [
+          "m/s^2",
+          "m/s^2",
+          "m/s^2",
+          "deg/s",
+          "deg/s",
+          "deg/s"
+        ],
+        "vision_shape": [
+          20,
+          99
+        ],
+        "radar_shape": [
+          40,
+          8
+        ],
+        "valid_modalities": {
+          "imu": true,
+          "radar": false,
+          "camera_pose": true
+        },
+        "health": {
+          "imu": 0.82,
+          "radar": 0.0,
+          "camera": 0.5645
+        },
+        "normalization": "training-subject per-channel mean/std"
+      },
+      "fall_threshold": 0.6,
+      "fusion_policy": "require_valid_imu_and_camera_pose",
+      "status": "monitoring",
+      "alert": false,
+      "predicted_label": "lie_to_stand",
+      "predicted_class_id": 4,
+      "confidence": 0.834731,
+      "fall_probability": 0.000299,
+      "class_probabilities": {
+        "stand_to_sit": 0.001858,
+        "sit_to_stand": 0.025588,
+        "sit_to_lie": 0.013998,
+        "lie_to_sit": 0.026904,
+        "lie_to_stand": 0.834731,
+        "stand_to_lie": 0.096623,
+        "stand_to_fall": 0.000299
+      },
+      "sensor_trust": {
+        "imu": 0.737159,
+        "radar": 0.0,
+        "camera": 0.262841
+      },
+      "inference_ms": 12.587,
+      "event_id": "live-000030",
+      "sequence": 30,
+      "source_mode": "live_esp32",
+      "ground_truth": null,
+      "event_timestamp_utc": "2026-08-19T18:20:03.897293+00:00",
+      "window_diagnostics": {
+        "window_start_monotonic_ns": 655186643432665,
+        "window_end_monotonic_ns": 655188643432665,
+        "imu": {
+          "valid": true,
+          "coverage": 1.0,
+          "health": 0.82,
+          "clipping_ratio": 0.18,
+          "max_sampling_skew_ms": 3.382,
+          "source_samples": 100,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 0,
+          "unit_validation": {
+            "valid": true,
+            "samples": 100,
+            "acceleration_norm_median_mps2": 10.34166,
+            "acceleration_norm_p95_mps2": 15.04828,
+            "finite": true,
+            "canonical_units": [
+              "m/s^2",
+              "m/s^2",
+              "m/s^2",
+              "deg/s",
+              "deg/s",
+              "deg/s"
+            ]
+          }
+        },
+        "camera": {
+          "valid": true,
+          "sampling_coverage": 1.0,
+          "pose_valid_ratio": 0.7,
+          "health": 0.5645,
+          "max_sampling_skew_ms": 28.409,
+          "source_frames": 20,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 0
+        }
+      },
+      "alert_state": "MONITORING"
+    },
+    {
+      "model": "FusionSense corrected masked IMU + camera fusion",
+      "checkpoint": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\checkpoints\\cmhad_step7_bimodal_dropout_fixed",
+      "window_start": 655187.723962665,
+      "window_seconds": 2.0,
+      "recording_id": "live_20260819T181919Z",
+      "subject_id": "live_esp32",
+      "input": {
+        "imu_shape": [
+          100,
+          6
+        ],
+        "imu_units": [
+          "m/s^2",
+          "m/s^2",
+          "m/s^2",
+          "deg/s",
+          "deg/s",
+          "deg/s"
+        ],
+        "vision_shape": [
+          20,
+          99
+        ],
+        "radar_shape": [
+          40,
+          8
+        ],
+        "valid_modalities": {
+          "imu": true,
+          "radar": false,
+          "camera_pose": false
+        },
+        "health": {
+          "imu": 0.91,
+          "radar": 0.0,
+          "camera": 0.5427
+        },
+        "normalization": "training-subject per-channel mean/std"
+      },
+      "fall_threshold": 0.6,
+      "fusion_policy": "require_valid_imu_and_camera_pose",
+      "status": "degraded",
+      "alert": false,
+      "reason": "Bimodal inference requires valid IMU and camera pose, with radar disabled",
+      "predicted_label": null,
+      "confidence": 0.0,
+      "fall_probability": 0.0,
+      "class_probabilities": {},
+      "sensor_trust": {
+        "imu": 0.0,
+        "radar": 0.0,
+        "camera": 0.0
+      },
+      "event_id": "live-000031",
+      "sequence": 31,
+      "source_mode": "live_esp32",
+      "ground_truth": null,
+      "event_timestamp_utc": "2026-08-19T18:20:04.977823+00:00",
+      "window_diagnostics": {
+        "window_start_monotonic_ns": 655187723962665,
+        "window_end_monotonic_ns": 655189723962665,
+        "imu": {
+          "valid": true,
+          "coverage": 1.0,
+          "health": 0.91,
+          "clipping_ratio": 0.09,
+          "max_sampling_skew_ms": 3.912,
+          "source_samples": 100,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 0,
+          "unit_validation": {
+            "valid": true,
+            "samples": 100,
+            "acceleration_norm_median_mps2": 9.9787,
+            "acceleration_norm_p95_mps2": 13.86751,
+            "finite": true,
+            "canonical_units": [
+              "m/s^2",
+              "m/s^2",
+              "m/s^2",
+              "deg/s",
+              "deg/s",
+              "deg/s"
+            ]
+          }
+        },
+        "camera": {
+          "valid": false,
+          "sampling_coverage": 1.0,
+          "pose_valid_ratio": 0.45,
+          "health": 0.5427,
+          "max_sampling_skew_ms": 23.72,
+          "source_frames": 20,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 0
+        }
+      },
+      "alert_state": "DEGRADED"
+    },
+    {
+      "model": "FusionSense corrected masked IMU + camera fusion",
+      "checkpoint": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\checkpoints\\cmhad_step7_bimodal_dropout_fixed",
+      "window_start": 655188.732508665,
+      "window_seconds": 2.0,
+      "recording_id": "live_20260819T181919Z",
+      "subject_id": "live_esp32",
+      "input": {
+        "imu_shape": [
+          100,
+          6
+        ],
+        "imu_units": [
+          "m/s^2",
+          "m/s^2",
+          "m/s^2",
+          "deg/s",
+          "deg/s",
+          "deg/s"
+        ],
+        "vision_shape": [
+          20,
+          99
+        ],
+        "radar_shape": [
+          40,
+          8
+        ],
+        "valid_modalities": {
+          "imu": true,
+          "radar": false,
+          "camera_pose": true
+        },
+        "health": {
+          "imu": 0.97,
+          "radar": 0.0,
+          "camera": 0.4919
+        },
+        "normalization": "training-subject per-channel mean/std"
+      },
+      "fall_threshold": 0.6,
+      "fusion_policy": "require_valid_imu_and_camera_pose",
+      "status": "monitoring",
+      "alert": false,
+      "predicted_label": "stand_to_lie",
+      "predicted_class_id": 5,
+      "confidence": 0.923752,
+      "fall_probability": 0.001926,
+      "class_probabilities": {
+        "stand_to_sit": 0.001031,
+        "sit_to_stand": 0.005285,
+        "sit_to_lie": 0.01219,
+        "lie_to_sit": 0.004587,
+        "lie_to_stand": 0.051229,
+        "stand_to_lie": 0.923752,
+        "stand_to_fall": 0.001926
+      },
+      "sensor_trust": {
+        "imu": 0.687676,
+        "radar": 0.0,
+        "camera": 0.312324
+      },
+      "inference_ms": 27.729,
+      "event_id": "live-000032",
+      "sequence": 32,
+      "source_mode": "live_esp32",
+      "ground_truth": null,
+      "event_timestamp_utc": "2026-08-19T18:20:05.986369+00:00",
+      "window_diagnostics": {
+        "window_start_monotonic_ns": 655188732508665,
+        "window_end_monotonic_ns": 655190732508665,
+        "imu": {
+          "valid": true,
+          "coverage": 1.0,
+          "health": 0.97,
+          "clipping_ratio": 0.03,
+          "max_sampling_skew_ms": 7.545,
+          "source_samples": 100,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 0,
+          "unit_validation": {
+            "valid": true,
+            "samples": 100,
+            "acceleration_norm_median_mps2": 9.73512,
+            "acceleration_norm_p95_mps2": 10.71424,
+            "finite": true,
+            "canonical_units": [
+              "m/s^2",
+              "m/s^2",
+              "m/s^2",
+              "deg/s",
+              "deg/s",
+              "deg/s"
+            ]
+          }
+        },
+        "camera": {
+          "valid": true,
+          "sampling_coverage": 1.0,
+          "pose_valid_ratio": 0.75,
+          "health": 0.4919,
+          "max_sampling_skew_ms": 16.592,
+          "source_frames": 20,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 0
+        }
+      },
+      "alert_state": "MONITORING"
+    },
+    {
+      "model": "FusionSense corrected masked IMU + camera fusion",
+      "checkpoint": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\checkpoints\\cmhad_step7_bimodal_dropout_fixed",
+      "window_start": 655189.813004665,
+      "window_seconds": 2.0,
+      "recording_id": "live_20260819T181919Z",
+      "subject_id": "live_esp32",
+      "input": {
+        "imu_shape": [
+          100,
+          6
+        ],
+        "imu_units": [
+          "m/s^2",
+          "m/s^2",
+          "m/s^2",
+          "deg/s",
+          "deg/s",
+          "deg/s"
+        ],
+        "vision_shape": [
+          20,
+          99
+        ],
+        "radar_shape": [
+          40,
+          8
+        ],
+        "valid_modalities": {
+          "imu": true,
+          "radar": false,
+          "camera_pose": true
+        },
+        "health": {
+          "imu": 1.0,
+          "radar": 0.0,
+          "camera": 0.4341
+        },
+        "normalization": "training-subject per-channel mean/std"
+      },
+      "fall_threshold": 0.6,
+      "fusion_policy": "require_valid_imu_and_camera_pose",
+      "status": "monitoring",
+      "alert": false,
+      "predicted_label": "stand_to_lie",
+      "predicted_class_id": 5,
+      "confidence": 0.983202,
+      "fall_probability": 0.002376,
+      "class_probabilities": {
+        "stand_to_sit": 0.000743,
+        "sit_to_stand": 0.000978,
+        "sit_to_lie": 0.008647,
+        "lie_to_sit": 0.001852,
+        "lie_to_stand": 0.002202,
+        "stand_to_lie": 0.983202,
+        "stand_to_fall": 0.002376
+      },
+      "sensor_trust": {
+        "imu": 0.751956,
+        "radar": 0.0,
+        "camera": 0.248044
+      },
+      "inference_ms": 15.659,
+      "event_id": "live-000033",
+      "sequence": 33,
+      "source_mode": "live_esp32",
+      "ground_truth": null,
+      "event_timestamp_utc": "2026-08-19T18:20:07.066865+00:00",
+      "window_diagnostics": {
+        "window_start_monotonic_ns": 655189813004665,
+        "window_end_monotonic_ns": 655191813004665,
+        "imu": {
+          "valid": true,
+          "coverage": 1.0,
+          "health": 1.0,
+          "clipping_ratio": 0.0,
+          "max_sampling_skew_ms": 7.049,
+          "source_samples": 100,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 0,
+          "unit_validation": {
+            "valid": true,
+            "samples": 100,
+            "acceleration_norm_median_mps2": 9.72988,
+            "acceleration_norm_p95_mps2": 9.75729,
+            "finite": true,
+            "canonical_units": [
+              "m/s^2",
+              "m/s^2",
+              "m/s^2",
+              "deg/s",
+              "deg/s",
+              "deg/s"
+            ]
+          }
+        },
+        "camera": {
+          "valid": true,
+          "sampling_coverage": 1.0,
+          "pose_valid_ratio": 0.65,
+          "health": 0.4341,
+          "max_sampling_skew_ms": 35.17,
+          "source_frames": 20,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 0
+        }
+      },
+      "alert_state": "MONITORING"
+    },
+    {
+      "model": "FusionSense corrected masked IMU + camera fusion",
+      "checkpoint": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\checkpoints\\cmhad_step7_bimodal_dropout_fixed",
+      "window_start": 655190.821516665,
+      "window_seconds": 2.0,
+      "recording_id": "live_20260819T181919Z",
+      "subject_id": "live_esp32",
+      "input": {
+        "imu_shape": [
+          100,
+          6
+        ],
+        "imu_units": [
+          "m/s^2",
+          "m/s^2",
+          "m/s^2",
+          "deg/s",
+          "deg/s",
+          "deg/s"
+        ],
+        "vision_shape": [
+          20,
+          99
+        ],
+        "radar_shape": [
+          40,
+          8
+        ],
+        "valid_modalities": {
+          "imu": true,
+          "radar": false,
+          "camera_pose": false
+        },
+        "health": {
+          "imu": 1.0,
+          "radar": 0.0,
+          "camera": 0.4632
+        },
+        "normalization": "training-subject per-channel mean/std"
+      },
+      "fall_threshold": 0.6,
+      "fusion_policy": "require_valid_imu_and_camera_pose",
+      "status": "degraded",
+      "alert": false,
+      "reason": "Bimodal inference requires valid IMU and camera pose, with radar disabled",
+      "predicted_label": null,
+      "confidence": 0.0,
+      "fall_probability": 0.0,
+      "class_probabilities": {},
+      "sensor_trust": {
+        "imu": 0.0,
+        "radar": 0.0,
+        "camera": 0.0
+      },
+      "event_id": "live-000034",
+      "sequence": 34,
+      "source_mode": "live_esp32",
+      "ground_truth": null,
+      "event_timestamp_utc": "2026-08-19T18:20:08.075377+00:00",
+      "window_diagnostics": {
+        "window_start_monotonic_ns": 655190821516665,
+        "window_end_monotonic_ns": 655192821516665,
+        "imu": {
+          "valid": true,
+          "coverage": 1.0,
+          "health": 1.0,
+          "clipping_ratio": 0.0,
+          "max_sampling_skew_ms": 1.466,
+          "source_samples": 100,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 0,
+          "unit_validation": {
+            "valid": true,
+            "samples": 100,
+            "acceleration_norm_median_mps2": 9.72528,
+            "acceleration_norm_p95_mps2": 9.76744,
+            "finite": true,
+            "canonical_units": [
+              "m/s^2",
+              "m/s^2",
+              "m/s^2",
+              "deg/s",
+              "deg/s",
+              "deg/s"
+            ]
+          }
+        },
+        "camera": {
+          "valid": false,
+          "sampling_coverage": 1.0,
+          "pose_valid_ratio": 0.15,
+          "health": 0.4632,
+          "max_sampling_skew_ms": 19.957,
+          "source_frames": 20,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 0
+        }
+      },
+      "alert_state": "DEGRADED"
+    },
+    {
+      "model": "FusionSense corrected masked IMU + camera fusion",
+      "checkpoint": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\checkpoints\\cmhad_step7_bimodal_dropout_fixed",
+      "window_start": 655191.830018665,
+      "window_seconds": 2.0,
+      "recording_id": "live_20260819T181919Z",
+      "subject_id": "live_esp32",
+      "input": {
+        "imu_shape": [
+          100,
+          6
+        ],
+        "imu_units": [
+          "m/s^2",
+          "m/s^2",
+          "m/s^2",
+          "deg/s",
+          "deg/s",
+          "deg/s"
+        ],
+        "vision_shape": [
+          20,
+          99
+        ],
+        "radar_shape": [
+          40,
+          8
+        ],
+        "valid_modalities": {
+          "imu": true,
+          "radar": false,
+          "camera_pose": false
+        },
+        "health": {
+          "imu": 1.0,
+          "radar": 0.0,
+          "camera": 0.5498
+        },
+        "normalization": "training-subject per-channel mean/std"
+      },
+      "fall_threshold": 0.6,
+      "fusion_policy": "require_valid_imu_and_camera_pose",
+      "status": "degraded",
+      "alert": false,
+      "reason": "Bimodal inference requires valid IMU and camera pose, with radar disabled",
+      "predicted_label": null,
+      "confidence": 0.0,
+      "fall_probability": 0.0,
+      "class_probabilities": {},
+      "sensor_trust": {
+        "imu": 0.0,
+        "radar": 0.0,
+        "camera": 0.0
+      },
+      "event_id": "live-000035",
+      "sequence": 35,
+      "source_mode": "live_esp32",
+      "ground_truth": null,
+      "event_timestamp_utc": "2026-08-19T18:20:09.083879+00:00",
+      "window_diagnostics": {
+        "window_start_monotonic_ns": 655191830018665,
+        "window_end_monotonic_ns": 655193830018665,
+        "imu": {
+          "valid": true,
+          "coverage": 1.0,
+          "health": 1.0,
+          "clipping_ratio": 0.0,
+          "max_sampling_skew_ms": 9.968,
+          "source_samples": 100,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 0,
+          "unit_validation": {
+            "valid": true,
+            "samples": 100,
+            "acceleration_norm_median_mps2": 9.72387,
+            "acceleration_norm_p95_mps2": 9.761,
+            "finite": true,
+            "canonical_units": [
+              "m/s^2",
+              "m/s^2",
+              "m/s^2",
+              "deg/s",
+              "deg/s",
+              "deg/s"
+            ]
+          }
+        },
+        "camera": {
+          "valid": false,
+          "sampling_coverage": 1.0,
+          "pose_valid_ratio": 0.25,
+          "health": 0.5498,
+          "max_sampling_skew_ms": 20.826,
+          "source_frames": 20,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 0
+        }
+      },
+      "alert_state": "DEGRADED"
+    },
+    {
+      "model": "FusionSense corrected masked IMU + camera fusion",
+      "checkpoint": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\checkpoints\\cmhad_step7_bimodal_dropout_fixed",
+      "window_start": 655192.838556665,
+      "window_seconds": 2.0,
+      "recording_id": "live_20260819T181919Z",
+      "subject_id": "live_esp32",
+      "input": {
+        "imu_shape": [
+          100,
+          6
+        ],
+        "imu_units": [
+          "m/s^2",
+          "m/s^2",
+          "m/s^2",
+          "deg/s",
+          "deg/s",
+          "deg/s"
+        ],
+        "vision_shape": [
+          20,
+          99
+        ],
+        "radar_shape": [
+          40,
+          8
+        ],
+        "valid_modalities": {
+          "imu": true,
+          "radar": false,
+          "camera_pose": true
+        },
+        "health": {
+          "imu": 1.0,
+          "radar": 0.0,
+          "camera": 0.5716
+        },
+        "normalization": "training-subject per-channel mean/std"
+      },
+      "fall_threshold": 0.6,
+      "fusion_policy": "require_valid_imu_and_camera_pose",
+      "status": "monitoring",
+      "alert": false,
+      "predicted_label": "lie_to_stand",
+      "predicted_class_id": 4,
+      "confidence": 0.62201,
+      "fall_probability": 0.00561,
+      "class_probabilities": {
+        "stand_to_sit": 0.005774,
+        "sit_to_stand": 0.212158,
+        "sit_to_lie": 0.00283,
+        "lie_to_sit": 0.125952,
+        "lie_to_stand": 0.62201,
+        "stand_to_lie": 0.025665,
+        "stand_to_fall": 0.00561
+      },
+      "sensor_trust": {
+        "imu": 0.68688,
+        "radar": 0.0,
+        "camera": 0.31312
+      },
+      "inference_ms": 14.982,
+      "event_id": "live-000036",
+      "sequence": 36,
+      "source_mode": "live_esp32",
+      "ground_truth": null,
+      "event_timestamp_utc": "2026-08-19T18:20:10.092417+00:00",
+      "window_diagnostics": {
+        "window_start_monotonic_ns": 655192838556665,
+        "window_end_monotonic_ns": 655194838556665,
+        "imu": {
+          "valid": true,
+          "coverage": 1.0,
+          "health": 1.0,
+          "clipping_ratio": 0.0,
+          "max_sampling_skew_ms": 1.497,
+          "source_samples": 100,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 0,
+          "unit_validation": {
+            "valid": true,
+            "samples": 100,
+            "acceleration_norm_median_mps2": 9.73258,
+            "acceleration_norm_p95_mps2": 9.8154,
+            "finite": true,
+            "canonical_units": [
+              "m/s^2",
+              "m/s^2",
+              "m/s^2",
+              "deg/s",
+              "deg/s",
+              "deg/s"
+            ]
+          }
+        },
+        "camera": {
+          "valid": true,
+          "sampling_coverage": 1.0,
+          "pose_valid_ratio": 0.75,
+          "health": 0.5716,
+          "max_sampling_skew_ms": 24.648,
+          "source_frames": 20,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 0
+        }
+      },
+      "alert_state": "MONITORING"
+    },
+    {
+      "model": "FusionSense corrected masked IMU + camera fusion",
+      "checkpoint": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\checkpoints\\cmhad_step7_bimodal_dropout_fixed",
+      "window_start": 655193.919050665,
+      "window_seconds": 2.0,
+      "recording_id": "live_20260819T181919Z",
+      "subject_id": "live_esp32",
+      "input": {
+        "imu_shape": [
+          100,
+          6
+        ],
+        "imu_units": [
+          "m/s^2",
+          "m/s^2",
+          "m/s^2",
+          "deg/s",
+          "deg/s",
+          "deg/s"
+        ],
+        "vision_shape": [
+          20,
+          99
+        ],
+        "radar_shape": [
+          40,
+          8
+        ],
+        "valid_modalities": {
+          "imu": true,
+          "radar": false,
+          "camera_pose": true
+        },
+        "health": {
+          "imu": 1.0,
+          "radar": 0.0,
+          "camera": 0.4552
+        },
+        "normalization": "training-subject per-channel mean/std"
+      },
+      "fall_threshold": 0.6,
+      "fusion_policy": "require_valid_imu_and_camera_pose",
+      "status": "monitoring",
+      "alert": false,
+      "predicted_label": "stand_to_lie",
+      "predicted_class_id": 5,
+      "confidence": 0.983857,
+      "fall_probability": 0.0025,
+      "class_probabilities": {
+        "stand_to_sit": 0.000714,
+        "sit_to_stand": 0.001048,
+        "sit_to_lie": 0.007575,
+        "lie_to_sit": 0.001799,
+        "lie_to_stand": 0.002507,
+        "stand_to_lie": 0.983857,
+        "stand_to_fall": 0.0025
+      },
+      "sensor_trust": {
+        "imu": 0.748157,
+        "radar": 0.0,
+        "camera": 0.251843
+      },
+      "inference_ms": 18.456,
+      "event_id": "live-000037",
+      "sequence": 37,
+      "source_mode": "live_esp32",
+      "ground_truth": null,
+      "event_timestamp_utc": "2026-08-19T18:20:11.172911+00:00",
+      "window_diagnostics": {
+        "window_start_monotonic_ns": 655193919050665,
+        "window_end_monotonic_ns": 655195919050665,
+        "imu": {
+          "valid": true,
+          "coverage": 1.0,
+          "health": 1.0,
+          "clipping_ratio": 0.0,
+          "max_sampling_skew_ms": 1.003,
+          "source_samples": 100,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 0,
+          "unit_validation": {
+            "valid": true,
+            "samples": 100,
+            "acceleration_norm_median_mps2": 9.74221,
+            "acceleration_norm_p95_mps2": 9.83566,
+            "finite": true,
+            "canonical_units": [
+              "m/s^2",
+              "m/s^2",
+              "m/s^2",
+              "deg/s",
+              "deg/s",
+              "deg/s"
+            ]
+          }
+        },
+        "camera": {
+          "valid": true,
+          "sampling_coverage": 1.0,
+          "pose_valid_ratio": 0.8,
+          "health": 0.4552,
+          "max_sampling_skew_ms": 27.593,
+          "source_frames": 20,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 0
+        }
+      },
+      "alert_state": "MONITORING"
+    },
+    {
+      "model": "FusionSense corrected masked IMU + camera fusion",
+      "checkpoint": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\checkpoints\\cmhad_step7_bimodal_dropout_fixed",
+      "window_start": 655194.927553665,
+      "window_seconds": 2.0,
+      "recording_id": "live_20260819T181919Z",
+      "subject_id": "live_esp32",
+      "input": {
+        "imu_shape": [
+          100,
+          6
+        ],
+        "imu_units": [
+          "m/s^2",
+          "m/s^2",
+          "m/s^2",
+          "deg/s",
+          "deg/s",
+          "deg/s"
+        ],
+        "vision_shape": [
+          20,
+          99
+        ],
+        "radar_shape": [
+          40,
+          8
+        ],
+        "valid_modalities": {
+          "imu": true,
+          "radar": false,
+          "camera_pose": false
+        },
+        "health": {
+          "imu": 1.0,
+          "radar": 0.0,
+          "camera": 0.3992
+        },
+        "normalization": "training-subject per-channel mean/std"
+      },
+      "fall_threshold": 0.6,
+      "fusion_policy": "require_valid_imu_and_camera_pose",
+      "status": "degraded",
+      "alert": false,
+      "reason": "Bimodal inference requires valid IMU and camera pose, with radar disabled",
+      "predicted_label": null,
+      "confidence": 0.0,
+      "fall_probability": 0.0,
+      "class_probabilities": {},
+      "sensor_trust": {
+        "imu": 0.0,
+        "radar": 0.0,
+        "camera": 0.0
+      },
+      "event_id": "live-000038",
+      "sequence": 38,
+      "source_mode": "live_esp32",
+      "ground_truth": null,
+      "event_timestamp_utc": "2026-08-19T18:20:12.181414+00:00",
+      "window_diagnostics": {
+        "window_start_monotonic_ns": 655194927553665,
+        "window_end_monotonic_ns": 655196927553665,
+        "imu": {
+          "valid": true,
+          "coverage": 1.0,
+          "health": 1.0,
+          "clipping_ratio": 0.0,
+          "max_sampling_skew_ms": 7.503,
+          "source_samples": 100,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 0,
+          "unit_validation": {
+            "valid": true,
+            "samples": 100,
+            "acceleration_norm_median_mps2": 9.73207,
+            "acceleration_norm_p95_mps2": 9.78889,
+            "finite": true,
+            "canonical_units": [
+              "m/s^2",
+              "m/s^2",
+              "m/s^2",
+              "deg/s",
+              "deg/s",
+              "deg/s"
+            ]
+          }
+        },
+        "camera": {
+          "valid": false,
+          "sampling_coverage": 1.0,
+          "pose_valid_ratio": 0.3,
+          "health": 0.3992,
+          "max_sampling_skew_ms": 28.422,
+          "source_frames": 20,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 0
+        }
+      },
+      "alert_state": "DEGRADED"
+    },
+    {
+      "model": "FusionSense corrected masked IMU + camera fusion",
+      "checkpoint": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\checkpoints\\cmhad_step7_bimodal_dropout_fixed",
+      "window_start": 655196.008092665,
+      "window_seconds": 2.0,
+      "recording_id": "live_20260819T181919Z",
+      "subject_id": "live_esp32",
+      "input": {
+        "imu_shape": [
+          100,
+          6
+        ],
+        "imu_units": [
+          "m/s^2",
+          "m/s^2",
+          "m/s^2",
+          "deg/s",
+          "deg/s",
+          "deg/s"
+        ],
+        "vision_shape": [
+          20,
+          99
+        ],
+        "radar_shape": [
+          40,
+          8
+        ],
+        "valid_modalities": {
+          "imu": true,
+          "radar": false,
+          "camera_pose": true
+        },
+        "health": {
+          "imu": 1.0,
+          "radar": 0.0,
+          "camera": 0.4207
+        },
+        "normalization": "training-subject per-channel mean/std"
+      },
+      "fall_threshold": 0.6,
+      "fusion_policy": "require_valid_imu_and_camera_pose",
+      "status": "monitoring",
+      "alert": false,
+      "predicted_label": "stand_to_lie",
+      "predicted_class_id": 5,
+      "confidence": 0.958757,
+      "fall_probability": 0.00258,
+      "class_probabilities": {
+        "stand_to_sit": 0.000556,
+        "sit_to_stand": 0.001576,
+        "sit_to_lie": 0.016242,
+        "lie_to_sit": 0.003977,
+        "lie_to_stand": 0.016312,
+        "stand_to_lie": 0.958757,
+        "stand_to_fall": 0.00258
+      },
+      "sensor_trust": {
+        "imu": 0.770948,
+        "radar": 0.0,
+        "camera": 0.229052
+      },
+      "inference_ms": 13.952,
+      "event_id": "live-000039",
+      "sequence": 39,
+      "source_mode": "live_esp32",
+      "ground_truth": null,
+      "event_timestamp_utc": "2026-08-19T18:20:13.261953+00:00",
+      "window_diagnostics": {
+        "window_start_monotonic_ns": 655196008092665,
+        "window_end_monotonic_ns": 655198008092665,
+        "imu": {
+          "valid": true,
+          "coverage": 1.0,
+          "health": 1.0,
+          "clipping_ratio": 0.0,
+          "max_sampling_skew_ms": 8.042,
+          "source_samples": 100,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 0,
+          "unit_validation": {
+            "valid": true,
+            "samples": 100,
+            "acceleration_norm_median_mps2": 9.72711,
+            "acceleration_norm_p95_mps2": 9.76611,
+            "finite": true,
+            "canonical_units": [
+              "m/s^2",
+              "m/s^2",
+              "m/s^2",
+              "deg/s",
+              "deg/s",
+              "deg/s"
+            ]
+          }
+        },
+        "camera": {
+          "valid": true,
+          "sampling_coverage": 1.0,
+          "pose_valid_ratio": 0.5,
+          "health": 0.4207,
+          "max_sampling_skew_ms": 23.807,
+          "source_frames": 20,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 0
+        }
+      },
+      "alert_state": "MONITORING"
+    },
+    {
+      "model": "FusionSense corrected masked IMU + camera fusion",
+      "checkpoint": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\checkpoints\\cmhad_step7_bimodal_dropout_fixed",
+      "window_start": 655197.016601665,
+      "window_seconds": 2.0,
+      "recording_id": "live_20260819T181919Z",
+      "subject_id": "live_esp32",
+      "input": {
+        "imu_shape": [
+          100,
+          6
+        ],
+        "imu_units": [
+          "m/s^2",
+          "m/s^2",
+          "m/s^2",
+          "deg/s",
+          "deg/s",
+          "deg/s"
+        ],
+        "vision_shape": [
+          20,
+          99
+        ],
+        "radar_shape": [
+          40,
+          8
+        ],
+        "valid_modalities": {
+          "imu": true,
+          "radar": false,
+          "camera_pose": true
+        },
+        "health": {
+          "imu": 1.0,
+          "radar": 0.0,
+          "camera": 0.3879
+        },
+        "normalization": "training-subject per-channel mean/std"
+      },
+      "fall_threshold": 0.6,
+      "fusion_policy": "require_valid_imu_and_camera_pose",
+      "status": "monitoring",
+      "alert": false,
+      "predicted_label": "stand_to_lie",
+      "predicted_class_id": 5,
+      "confidence": 0.965153,
+      "fall_probability": 0.002489,
+      "class_probabilities": {
+        "stand_to_sit": 0.000581,
+        "sit_to_stand": 0.001605,
+        "sit_to_lie": 0.013848,
+        "lie_to_sit": 0.00316,
+        "lie_to_stand": 0.013163,
+        "stand_to_lie": 0.965153,
+        "stand_to_fall": 0.002489
+      },
+      "sensor_trust": {
+        "imu": 0.764437,
+        "radar": 0.0,
+        "camera": 0.235563
+      },
+      "inference_ms": 15.007,
+      "event_id": "live-000040",
+      "sequence": 40,
+      "source_mode": "live_esp32",
+      "ground_truth": null,
+      "event_timestamp_utc": "2026-08-19T18:20:14.270462+00:00",
+      "window_diagnostics": {
+        "window_start_monotonic_ns": 655197016601665,
+        "window_end_monotonic_ns": 655199016601665,
+        "imu": {
+          "valid": true,
+          "coverage": 1.0,
+          "health": 1.0,
+          "clipping_ratio": 0.0,
+          "max_sampling_skew_ms": 3.452,
+          "source_samples": 100,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 0,
+          "unit_validation": {
+            "valid": true,
+            "samples": 100,
+            "acceleration_norm_median_mps2": 9.72281,
+            "acceleration_norm_p95_mps2": 9.76008,
+            "finite": true,
+            "canonical_units": [
+              "m/s^2",
+              "m/s^2",
+              "m/s^2",
+              "deg/s",
+              "deg/s",
+              "deg/s"
+            ]
+          }
+        },
+        "camera": {
+          "valid": true,
+          "sampling_coverage": 1.0,
+          "pose_valid_ratio": 1.0,
+          "health": 0.3879,
+          "max_sampling_skew_ms": 20.37,
+          "source_frames": 20,
+          "sequence_gaps": 0,
+          "duplicate_timestamps_discarded": 0
+        }
+      },
+      "alert_state": "MONITORING"
+    }
+  ],
+  "current_event": {
+    "model": "FusionSense corrected masked IMU + camera fusion",
+    "checkpoint": "C:\\Users\\SHIRDITHAN\\OneDrive\\Desktop\\fusionsense\\Fusion-Sense-fork\\checkpoints\\cmhad_step7_bimodal_dropout_fixed",
+    "window_start": 655197.016601665,
+    "window_seconds": 2.0,
+    "recording_id": "live_20260819T181919Z",
+    "subject_id": "live_esp32",
+    "input": {
+      "imu_shape": [
+        100,
+        6
+      ],
+      "imu_units": [
+        "m/s^2",
+        "m/s^2",
+        "m/s^2",
+        "deg/s",
+        "deg/s",
+        "deg/s"
+      ],
+      "vision_shape": [
+        20,
+        99
+      ],
+      "radar_shape": [
+        40,
+        8
+      ],
+      "valid_modalities": {
+        "imu": true,
+        "radar": false,
+        "camera_pose": true
+      },
+      "health": {
+        "imu": 1.0,
+        "radar": 0.0,
+        "camera": 0.3879
+      },
+      "normalization": "training-subject per-channel mean/std"
+    },
+    "fall_threshold": 0.6,
+    "fusion_policy": "require_valid_imu_and_camera_pose",
+    "status": "monitoring",
+    "alert": false,
+    "predicted_label": "stand_to_lie",
+    "predicted_class_id": 5,
+    "confidence": 0.965153,
+    "fall_probability": 0.002489,
+    "class_probabilities": {
+      "stand_to_sit": 0.000581,
+      "sit_to_stand": 0.001605,
+      "sit_to_lie": 0.013848,
+      "lie_to_sit": 0.00316,
+      "lie_to_stand": 0.013163,
+      "stand_to_lie": 0.965153,
+      "stand_to_fall": 0.002489
+    },
+    "sensor_trust": {
+      "imu": 0.764437,
+      "radar": 0.0,
+      "camera": 0.235563
+    },
+    "inference_ms": 15.007,
+    "event_id": "live-000040",
+    "sequence": 40,
+    "source_mode": "live_esp32",
+    "ground_truth": null,
+    "event_timestamp_utc": "2026-08-19T18:20:14.270462+00:00",
+    "window_diagnostics": {
+      "window_start_monotonic_ns": 655197016601665,
+      "window_end_monotonic_ns": 655199016601665,
+      "imu": {
+        "valid": true,
+        "coverage": 1.0,
+        "health": 1.0,
+        "clipping_ratio": 0.0,
+        "max_sampling_skew_ms": 3.452,
+        "source_samples": 100,
+        "sequence_gaps": 0,
+        "duplicate_timestamps_discarded": 0,
+        "unit_validation": {
+          "valid": true,
+          "samples": 100,
+          "acceleration_norm_median_mps2": 9.72281,
+          "acceleration_norm_p95_mps2": 9.76008,
+          "finite": true,
+          "canonical_units": [
+            "m/s^2",
+            "m/s^2",
+            "m/s^2",
+            "deg/s",
+            "deg/s",
+            "deg/s"
+          ]
+        }
+      },
+      "camera": {
+        "valid": true,
+        "sampling_coverage": 1.0,
+        "pose_valid_ratio": 1.0,
+        "health": 0.3879,
+        "max_sampling_skew_ms": 20.37,
+        "source_frames": 20,
+        "sequence_gaps": 0,
+        "duplicate_timestamps_discarded": 0
+      }
+    },
+    "alert_state": "MONITORING"
+  }
+}

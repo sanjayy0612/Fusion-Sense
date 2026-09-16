@@ -7,6 +7,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
+import sys
+import types
 
 import numpy as np
 
@@ -38,6 +40,26 @@ def _lazy_imports():
         import mediapipe as mp
         return cv2, mp
     except Exception as exc:
+        # MediaPipe imports its drawing helpers eagerly, and those helpers
+        # import Matplotlib even though FusionSense never draws through them.
+        # A broken/absent optional Matplotlib must not disable pose inference.
+        if "matplotlib" in str(exc).lower():
+            for name in list(sys.modules):
+                if name == "mediapipe" or name.startswith("mediapipe."):
+                    sys.modules.pop(name, None)
+                if name == "matplotlib" or name.startswith("matplotlib."):
+                    sys.modules.pop(name, None)
+            matplotlib = types.ModuleType("matplotlib")
+            pyplot = types.ModuleType("matplotlib.pyplot")
+            matplotlib.pyplot = pyplot
+            sys.modules["matplotlib"] = matplotlib
+            sys.modules["matplotlib.pyplot"] = pyplot
+            try:
+                import cv2
+                import mediapipe as mp
+                return cv2, mp
+            except Exception as retry_exc:
+                exc = retry_exc
         raise ImportError(
             "Camera pose extraction needs MediaPipe and OpenCV. Install: "
             "python -m pip install mediapipe opencv-python"

@@ -23,9 +23,13 @@ class FusionDataset(Dataset):
 
     def __getitem__(self, i):
         w = self.windows[i]
-        imu = torch.from_numpy(w.imu).float()
-        radar = torch.from_numpy(w.radar).float()
-        vision = torch.from_numpy(w.vision).float()
+        # ``torch.from_numpy`` shares storage with the FusionWindow arrays.
+        # Training-time modality dropout mutates tensors in place, so clone the
+        # sensor values before augmentation.  Without the clone, repeated
+        # epochs progressively erase the source dataset itself.
+        imu = torch.from_numpy(w.imu).float().clone()
+        radar = torch.from_numpy(w.radar).float().clone()
+        vision = torch.from_numpy(w.vision).float().clone()
         valid = torch.from_numpy(w.valid_vector())
         health = torch.from_numpy(w.health_vector())
 
@@ -41,9 +45,9 @@ class FusionDataset(Dataset):
         return imu, radar, vision, valid, health, label
 
 
-def make_loaders(train_windows, val_windows, batch_size=64):
+def make_loaders(train_windows, val_windows, batch_size=64, dropout_p=None):
     from torch.utils.data import DataLoader
-    tr = FusionDataset(train_windows, train=True)
+    tr = FusionDataset(train_windows, train=True, dropout_p=dropout_p)
     va = FusionDataset(val_windows, train=False, dropout_p=0.0)
     return (
         DataLoader(tr, batch_size=batch_size, shuffle=True, drop_last=False),

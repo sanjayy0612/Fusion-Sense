@@ -1,0 +1,53 @@
+{
+  "frames_directory": "frames",
+  "frames_saved": 581,
+  "host_elapsed_s": 60.156,
+  "manifest": "camera_manifest.csv",
+  "requested_duration_s": 60.0,
+  "schema_version": 1,
+  "session_started_utc": "2026-08-17T17:23:24.508813+00:00",
+  "source": "http://192.168.1.8:81/stream",
+  "validation": {
+    "capture_interval_ms": {
+      "max": 1188.79,
+      "mean": 103.5828,
+      "p95": 179.929
+    },
+    "checks": {
+      "camera_capture_errors_zero": true,
+      "device_fps_8_5_to_11_5": true,
+      "enough_frames": true,
+      "monotonic_capture_timestamps": true,
+      "monotonic_sequence": true,
+      "no_sequence_gaps": true,
+      "qvga_320_by_240": true
+    },
+    "device_elapsed_s": 60.078,
+    "device_fps": 9.6541,
+    "device_timestamp_us": {
+      "first": 1975134242,
+      "last": 2035212292
+    },
+    "dimensions": [
+      [
+        320,
+        240
+      ]
+    ],
+    "dropped_frames": 0,
+    "frames": 581,
+    "health": {
+      "capture_errors": 0,
+      "frames": 866,
+      "status": "ok",
+      "stream_disconnects": 2,
+      "target_fps": 10,
+      "uptime_us": 2035360142
+    },
+    "result": "PASS",
+    "sequence": {
+      "first": 285,
+      "last": 865
+    }
+  }
+}
